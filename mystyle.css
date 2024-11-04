@@ -1,7 +1,9 @@
+/* Opća postavka za pozadinsku sliku */
 body {
     background-image: url('images/background.jpg');
     background-size: cover;
     background-attachment: fixed;
+    background-position: center center;
     margin: 0;
     font-family: Arial, sans-serif;
 }
@@ -11,12 +13,7 @@ h1 {
     text-align: center;
     padding: 40px 20px;
     margin: 0;
-    position: relative;
-
-    /* Kombinacija transparentnog crnog okvira i ponavljajuće slike */
-    background: rgba(0, 0, 0, 0.7) repeat center;
-
-    
+    background: rgba(0, 0, 0, 0.7);
 }
 
 .content {
@@ -80,4 +77,13 @@ h1 {
     width: calc(100% - 20px);
     box-sizing: border-box;
     text-align: center;
+}
+
+/* Prilagodba za mobilne uređaje */
+@media (max-width: 768px) {
+    body {
+        background-size: contain; /* Omogućava da cijela slika stane u vidljivi dio zaslona */
+        background-attachment: scroll; /* Uklanja fiksni efekt na mobilnim uređajima */
+        background-position: center top; /* Pozicionira sliku od vrha za bolji prikaz */
+    }
 }
