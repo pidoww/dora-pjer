@@ -3,10 +3,15 @@
 
     const ASSET = "images/slike%20update%20stranica/";
     const SHINY_CHANCE = 1 / 64;
-    const onIndex = location.pathname === "/" || location.pathname.endsWith("/index.html") || location.pathname.endsWith("index.html");
-    const onChypsiPage = location.pathname.endsWith("/chipsy.html") || location.pathname.endsWith("chipsy.html");
-    const onSnakePage = location.pathname.endsWith("/snake.html") || location.pathname.endsWith("snake.html");
-    const onHikesPage = location.pathname.endsWith("/hikes.html") || location.pathname.endsWith("hikes.html");
+
+    const path = location.pathname.toLowerCase();
+    const onIndex = path === "/" || path.endsWith("/index.html") || path.endsWith("index.html");
+    const onChypsiPage = path.endsWith("/chipsy.html") || path.endsWith("chipsy.html");
+    const onSnakePage = path.endsWith("/snake.html") || path.endsWith("snake.html");
+    const onHikesPage = path.endsWith("/hikes.html") || path.endsWith("hikes.html");
+    const onYoutubePage = path.endsWith("/youtube.html") || path.endsWith("youtube.html");
+    const onProjectsPage = path.endsWith("/projects.html") || path.endsWith("projects.html");
+    const onPhysicsPage = path.endsWith("/physics.html") || path.endsWith("physics.html");
 
     const crazyImages = [
         `${ASSET}crazy%201.jpeg`,
@@ -30,6 +35,39 @@
         "Pjer je imao previše vremena"
     ];
 
+    const titleCodes = [
+        {
+            text: ".--. ... - .-. . .- -- ... / ..-. --- .-. . ...- . .-.",
+            label: "morse?",
+            href: "https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/video/#wiki_.25B7_p-stream_forks"
+        },
+        {
+            text: "gur synt vf abg gur frperg",
+            label: "ROT13",
+            href: "https://en.wikipedia.org/wiki/ROT13"
+        },
+        {
+            text: "01100100 01101111 01110010 01100001",
+            label: "binary",
+            href: "https://en.wikipedia.org/wiki/Binary_number"
+        },
+        {
+            text: "63 68 79 70 73 69",
+            label: "hex",
+            href: "https://en.wikipedia.org/wiki/Hexadecimal"
+        },
+        {
+            text: "?ereh gnikool uoy era yhw",
+            label: "ovo je samo naopačke",
+            href: "https://xkcd.com/"
+        },
+        {
+            text: "01000100 01010110 01000100",
+            label: "stari internet problemi",
+            href: "https://en.wikipedia.org/wiki/DVD_screensaver"
+        }
+    ];
+
     const chypsiAnger = [
         "Chypsi te je primijetio.",
         "Chypsi: ...",
@@ -43,16 +81,14 @@
 
     let titleClicks = 0;
     let hikingClicks = 0;
-    let friendClicks = 0;
     let ankleClicks = 0;
     let footerClicks = 0;
-    let iciciStep = 0;
     let chypsiStep = 0;
+    let projectsStep = 0;
     let typed = "";
     let lastMemeImage = "";
     let konamiIndex = 0;
 
-    const clickTimers = new WeakMap();
     const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
 
     function random(array) {
@@ -86,12 +122,21 @@
                 <button id="close-meme" type="button" aria-label="zatvori">x</button>
                 <img id="meme-image" class="no-lightbox" src="" alt="random cursed slika">
                 <p id="meme-text"></p>
+                <a id="meme-link" class="meme-code-link hidden" href="#" target="_blank" rel="noopener noreferrer"></a>
             `;
             document.body.appendChild(popup);
         }
 
-        const close = popup.querySelector("#close-meme");
+        if (!popup.querySelector("#meme-link")) {
+            const link = document.createElement("a");
+            link.id = "meme-link";
+            link.className = "meme-code-link hidden";
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            popup.appendChild(link);
+        }
 
+        const close = popup.querySelector("#close-meme");
         if (close && !close.dataset.ready) {
             close.dataset.ready = "1";
             close.addEventListener("click", () => popup.classList.add("hidden"));
@@ -104,18 +149,29 @@
         document.getElementById("meme-popup")?.classList.add("hidden");
     }
 
-    function showMeme(customText = null, imageOverride = null) {
+    function showMeme(customText = null, imageOverride = null, code = null) {
         const popup = ensurePopup();
         const image = popup.querySelector("#meme-image");
         const text = popup.querySelector("#meme-text");
+        const link = popup.querySelector("#meme-link");
 
-        if (!image || !text) return;
+        if (!image || !text || !link) return;
 
         const nextImage = imageOverride || randomDifferent(crazyImages, lastMemeImage);
         lastMemeImage = nextImage;
 
         image.src = nextImage;
-        text.textContent = customText || random(memeTexts);
+        text.textContent = code?.text || customText || random(memeTexts);
+
+        if (code?.href) {
+            link.href = code.href;
+            link.textContent = code.label || "otvori";
+            link.classList.remove("hidden");
+        } else {
+            link.href = "#";
+            link.textContent = "";
+            link.classList.add("hidden");
+        }
 
         popup.classList.remove("hidden");
         popup.classList.remove("meme-shake");
@@ -130,7 +186,6 @@
 
     function ensureLightbox() {
         let lightbox = document.getElementById("image-lightbox");
-
         if (lightbox) return lightbox;
 
         lightbox = document.createElement("div");
@@ -144,21 +199,23 @@
                 <p class="image-lightbox-hint" id="image-lightbox-hint">zatvara se samo na X</p>
             </div>
         `;
-
         document.body.appendChild(lightbox);
 
         lightbox.querySelector(".image-lightbox-close")?.addEventListener("click", () => {
             lightbox.classList.add("hidden");
             chypsiStep = 0;
+            projectsStep = 0;
         });
 
         const largeImage = lightbox.querySelector("#image-lightbox-image");
-
         largeImage?.addEventListener("click", event => {
             event.stopPropagation();
+            const action = largeImage.dataset.action || "";
 
-            if ((largeImage.dataset.action || "") === "chypsi") {
+            if (action === "chypsi") {
                 advanceChypsi();
+            } else if (action === "projects") {
+                advanceProjects();
             }
         });
 
@@ -175,10 +232,16 @@
 
         image.src = src;
         image.dataset.action = action;
+        image.classList.remove("chypsi-angry");
         captionElement.textContent = caption;
-        hint.textContent = action === "chypsi"
-            ? "klikni Chypsija još koji put · zatvara se samo na X"
-            : "zatvara se samo na X";
+
+        if (action === "chypsi") {
+            hint.textContent = "klikni Chypsija još koji put · zatvara se samo na X";
+        } else if (action === "projects") {
+            hint.textContent = "ova slika skriva još nešto · zatvara se samo na X";
+        } else {
+            hint.textContent = "zatvara se samo na X";
+        }
 
         lightbox.classList.remove("hidden");
     }
@@ -187,14 +250,12 @@
         const lightbox = ensureLightbox();
         const caption = lightbox.querySelector("#image-lightbox-caption");
         const hintElement = lightbox.querySelector("#image-lightbox-hint");
-
         if (caption) caption.textContent = text;
         if (hint !== null && hintElement) hintElement.textContent = hint;
     }
 
     function ensureChipLayer() {
         let layer = document.getElementById("chip-layer");
-
         if (!layer) {
             layer = document.createElement("div");
             layer.id = "chip-layer";
@@ -202,7 +263,6 @@
             layer.setAttribute("aria-hidden", "true");
             document.body.appendChild(layer);
         }
-
         return layer;
     }
 
@@ -218,13 +278,40 @@
             can.style.animationDuration = `${1.15 + Math.random() * 0.75}s`;
             can.style.transform = `rotate(${Math.random() * 50 - 25}deg)`;
             layer.appendChild(can);
-            window.setTimeout(() => can.remove(), 2600);
+            window.setTimeout(() => can.remove(), 2800);
+        }
+    }
+
+    function ensureLegLayer() {
+        let layer = document.getElementById("leg-layer");
+        if (!layer) {
+            layer = document.createElement("div");
+            layer.id = "leg-layer";
+            layer.className = "leg-layer";
+            layer.setAttribute("aria-hidden", "true");
+            document.body.appendChild(layer);
+        }
+        return layer;
+    }
+
+    function spawnLegs(amount = 6) {
+        const layer = ensureLegLayer();
+        const choices = ["🦵", "🥾", "🩹"];
+
+        for (let i = 0; i < amount; i += 1) {
+            const leg = document.createElement("div");
+            leg.className = "falling-leg";
+            leg.textContent = random(choices);
+            leg.style.left = `${5 + Math.random() * 88}vw`;
+            leg.style.animationDelay = `${Math.random() * 0.35}s`;
+            leg.style.animationDuration = `${1.1 + Math.random() * 1.1}s`;
+            layer.appendChild(leg);
+            window.setTimeout(() => leg.remove(), 2800);
         }
     }
 
     function ensureGameShortcut() {
-        if (document.querySelector(".game-shortcut")) return;
-        if (onSnakePage) return;
+        if (document.querySelector(".game-shortcut") || onSnakePage) return;
 
         const link = document.createElement("a");
         link.className = "game-shortcut";
@@ -239,6 +326,7 @@
 
         return (
             image.id === "chipsy-lab-image" ||
+            image.classList.contains("chypsi-photo") ||
             image.classList.contains("chipsy-photo") ||
             src.includes("chipsi slika") ||
             src.endsWith("img2.jpg") ||
@@ -250,7 +338,6 @@
 
     function openChypsi(image) {
         if (onChypsiPage) return;
-
         chypsiStep = 1;
         openImage(image.src, chypsiAnger[0], "chypsi");
     }
@@ -261,18 +348,16 @@
         chypsiStep += 1;
         const lightbox = ensureLightbox();
         const image = lightbox.querySelector("#image-lightbox-image");
-
         if (!image) return;
 
         if (chypsiStep === 2) {
             image.src = `${ASSET}chipsi%20slika.jpeg`;
             spawnChipCan(4);
-            setLightboxText(chypsiAnger[1], "sad je to baš Chypsi. možda ga nemoj opet kliknuti.");
+            setLightboxText("Chypsi: ...", "sad je to baš Chypsi. možda ga nemoj opet kliknuti.");
             return;
         }
 
-        spawnChipCan(Math.min(3 + chypsiStep, 12));
-
+        spawnChipCan(Math.min(3 + chypsiStep, 13));
         const angerText = chypsiAnger[Math.min(chypsiStep - 1, chypsiAnger.length - 1)];
         setLightboxText(angerText, "svaki klik ga još malo živcira · samo X zatvara");
 
@@ -285,7 +370,7 @@
         }
 
         if (chypsiStep >= 8) {
-            setLightboxText("oke. naljutio si Chypsija.", "prekasno za X.");
+            setLightboxText("oke. naljutio si Chypsija.", "sad je prekasno.");
             spawnChipCan(24);
             window.setTimeout(() => {
                 location.href = "chipsy.html";
@@ -293,41 +378,46 @@
         }
     }
 
-    function scheduleSingleClick(image, callback) {
-        const oldTimer = clickTimers.get(image);
-        if (oldTimer) window.clearTimeout(oldTimer);
-
-        const timer = window.setTimeout(() => {
-            clickTimers.delete(image);
-            callback();
-        }, 270);
-
-        clickTimers.set(image, timer);
+    function openProjects(image) {
+        if (onProjectsPage) return;
+        projectsStep = 1;
+        openImage(image.src, "hmm. Pjer je opet završio na slici.", "projects");
     }
 
-    function cancelSingleClick(image) {
-        const timer = clickTimers.get(image);
-        if (timer) {
-            window.clearTimeout(timer);
-            clickTimers.delete(image);
+    function advanceProjects() {
+        if (onProjectsPage || projectsStep < 1) return;
+        projectsStep += 1;
+
+        const messages = [
+            "ništa posebno.",
+            "oke ipak možda nešto skriva.",
+            "još jedan klik?",
+            "ovo više nije slučajno.",
+            "dobro, evo projekata."
+        ];
+
+        setLightboxText(messages[Math.min(projectsStep - 2, messages.length - 1)], "samo X zatvara");
+
+        if (projectsStep >= 5) {
+            window.setTimeout(() => {
+                location.href = "projects.html";
+            }, 450);
         }
     }
 
     function glitchText(element, original) {
         if (!element) return;
 
-        const junk = ["#", "%", "?", "!", "*", "7", "X"];
+        const junk = ["#", "%", "?", "!", "*", "7", "X", "0", "∆"];
         let frames = 0;
         const timer = window.setInterval(() => {
-            const chars = original.split("").map(char => {
+            element.textContent = original.split("").map(char => {
                 if (char === " ") return " ";
                 return Math.random() < 0.28 ? random(junk) : char;
-            });
+            }).join("");
 
-            element.textContent = chars.join("");
             frames += 1;
-
-            if (frames >= 5) {
+            if (frames >= 6) {
                 window.clearInterval(timer);
                 element.textContent = original;
             }
@@ -338,7 +428,6 @@
         if (!onIndex) return;
 
         document.body.classList.add("konami-mode");
-
         const banner = document.createElement("div");
         banner.className = "konami-banner";
         banner.textContent = "↑ ↑ ↓ ↓ ← → ← → B A";
@@ -351,14 +440,51 @@
             document.body.classList.remove("konami-mode");
             banner.remove();
             if (title) title.textContent = "Zašto je Dora najbolja cura?";
-        }, 5200);
+        }, 4200);
+    }
+
+    function triggerDvd() {
+        if (document.querySelector(".dvd-bouncer")) return;
+
+        const dvd = document.createElement("div");
+        dvd.className = "dvd-bouncer";
+        dvd.textContent = "DVD";
+        document.body.appendChild(dvd);
+
+        let x = 30;
+        let y = 60;
+        let vx = 2.8;
+        let vy = 2.2;
+        const started = performance.now();
+
+        function frame(now) {
+            const maxX = window.innerWidth - dvd.offsetWidth;
+            const maxY = window.innerHeight - dvd.offsetHeight;
+
+            x += vx;
+            y += vy;
+
+            if (x <= 0 || x >= maxX) vx *= -1;
+            if (y <= 0 || y >= maxY) vy *= -1;
+
+            x = Math.max(0, Math.min(maxX, x));
+            y = Math.max(0, Math.min(maxY, y));
+            dvd.style.transform = `translate(${x}px, ${y}px)`;
+
+            if (now - started < 8000) {
+                requestAnimationFrame(frame);
+            } else {
+                dvd.remove();
+            }
+        }
+
+        requestAnimationFrame(frame);
     }
 
     const title = document.getElementById("secret-title");
-
     title?.addEventListener("click", () => {
         titleClicks += 1;
-        showMeme(`naslov click #${titleClicks}`);
+        showMeme(null, null, random(titleCodes));
 
         if (titleClicks === 2) {
             glitchText(title, "Zašto je Dora najbolja cura?");
@@ -382,163 +508,135 @@
     document.querySelectorAll("img:not(.no-lightbox)").forEach(image => {
         if (image.id === "meme-image") return;
 
-        if (isChypsiImage(image) && !onChypsiPage) {
-            image.addEventListener("click", event => {
-                event.preventDefault();
-                event.stopPropagation();
-                openChypsi(image);
-            });
-            return;
-        }
-
-        image.addEventListener("dblclick", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            cancelSingleClick(image);
-            openImage(image.src, image.alt || "slika");
-        });
-
         image.addEventListener("click", event => {
-            if (!onIndex && !onHikesPage) return;
-
-            if (image.id === "icici-photo") {
-                event.preventDefault();
-                event.stopPropagation();
-
-                scheduleSingleClick(image, () => {
-                    const caption = document.getElementById("icici-caption");
-
-                    if (iciciStep === 0) {
-                        image.src = `${ASSET}funny%20slika%20na%20plazi.jpeg`;
-                        image.alt = "Ičići ljetovanje nastavak";
-                        if (caption) caption.textContent = "Ičići arhiva 2/2 · klikni još jednom → vlogovi";
-                        iciciStep = 1;
-                    } else {
-                        location.href = "youtube.html";
-                    }
-                });
-                return;
-            }
-
             if (image.closest("#hiking-secret")) {
                 event.preventDefault();
                 event.stopPropagation();
+                hikingClicks += 1;
 
-                scheduleSingleClick(image, () => {
-                    hikingClicks += 1;
-                    const caption = document.getElementById("hiking-caption");
+                const caption = document.getElementById("hiking-caption");
+                if (hikingClicks === 1 && caption) caption.textContent = "Dora s lepršavom kosom...";
+                if (hikingClicks === 2 && caption) caption.textContent = "čekaj. ovo vodi nekamo.";
 
-                    if (hikingClicks === 1 && caption) caption.textContent = "Dora s lepršavom kosom... hmm";
-                    if (hikingClicks === 2 && caption) caption.textContent = "još jedan klik i ideš negdje";
-                    if (hikingClicks >= 3) location.href = "hikes.html";
-                });
+                if (hikingClicks >= 3) {
+                    if (caption) caption.textContent = "oke našao si hike.";
+                    window.setTimeout(() => {
+                        location.href = "hikes.html";
+                    }, 260);
+                }
                 return;
             }
 
-            if (image.closest("#friend-secret")) {
-                scheduleSingleClick(image, () => {
-                    friendClicks += 1;
-                    if (friendClicks >= 3) {
-                        showMeme("Konrad + Maja + Lea + Pjer + Dora (MLMZ)", `${ASSET}slika%20konrad%20i%20maja%20lea.jpeg`);
-                        friendClicks = 0;
-                    }
-                });
-                return;
-            }
-
-            const ankle = image.closest("#ankle-photo");
-            if (ankle) {
+            if (isChypsiImage(image) && !onChypsiPage) {
                 event.preventDefault();
                 event.stopPropagation();
-
-                scheduleSingleClick(image, () => {
-                    ankleClicks += 1;
-                    const caption = ankle.querySelector("figcaption");
-
-                    if (ankleClicks === 1 && caption) caption.textContent = "ništa se još nije dogodilo";
-                    if (ankleClicks === 2 && caption) caption.textContent = "ovo izgleda nestabilno";
-
-                    if (ankleClicks >= 3) {
-                        ankle.classList.remove("ankle-fall");
-                        void ankle.offsetWidth;
-                        ankle.classList.add("ankle-fall");
-                        if (caption) caption.textContent = "oke sad je pala i sama slika";
-
-                        window.setTimeout(() => {
-                            ankle.classList.remove("ankle-fall");
-                            if (caption) caption.textContent = "par trenutaka prije neočekivanog završetka hika";
-                        }, 2200);
-
-                        ankleClicks = 0;
-                    }
-                });
+                openChypsi(image);
+                return;
             }
+
+            if (image.classList.contains("pjer-secret") && !onProjectsPage) {
+                event.preventDefault();
+                event.stopPropagation();
+                openProjects(image);
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            openImage(image.src, image.alt || "slika");
         });
     });
 
-    const question = document.getElementById("definitely-not-secret");
+    const anklePhoto = document.getElementById("ankle-photo");
+    anklePhoto?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
 
+        ankleClicks += 1;
+        const caption = document.getElementById("ankle-caption") || anklePhoto.querySelector("figcaption");
+
+        if (ankleClicks === 1) {
+            spawnLegs(5);
+            if (caption) caption.textContent = "nešto s gravitacijom ovdje nije dobro";
+        } else if (ankleClicks === 2) {
+            spawnLegs(9);
+            if (caption) caption.textContent = "🦵 noge su počele padati. odličan znak.";
+        } else if (ankleClicks === 3) {
+            spawnLegs(14);
+            if (caption) caption.textContent = "zadnja šansa da prestaneš klikati";
+            anklePhoto.classList.add("ankle-wobble");
+        } else {
+            spawnLegs(22);
+            anklePhoto.classList.remove("ankle-wobble");
+            anklePhoto.classList.add("ankle-fall-off");
+            if (caption) caption.textContent = "gravitacija 1 : Dora 0";
+
+            window.setTimeout(() => {
+                anklePhoto.classList.remove("ankle-fall-off");
+                if (caption) caption.textContent = "par trenutaka prije neočekivanog završetka hika";
+                ankleClicks = 0;
+            }, 3600);
+        }
+    });
+
+    const question = document.getElementById("definitely-not-secret");
     question?.addEventListener("click", event => {
         event.preventDefault();
         showMeme("ovo je doslovno samo upitnik. ili možda nije.");
     });
 
-    if (onIndex) {
-        const footerSecret = document.querySelector(".footer-secret");
-
-        footerSecret?.addEventListener("click", () => {
-            footerClicks += 1;
-
-            if (footerClicks >= 6) {
-                showMeme("webmaster trenutno nije dostupan", `${ASSET}slika%20dok%20spavam%20u%20busu.jpeg`);
-                footerClicks = 0;
-            }
-        });
-    }
+    const footerSecret = document.querySelector(".footer-secret");
+    footerSecret?.addEventListener("click", () => {
+        footerClicks += 1;
+        if (footerClicks >= 6) {
+            showMeme("webmaster trenutno nije dostupan", `${ASSET}slika%20dok%20spavam%20u%20busu.jpeg`);
+            footerClicks = 0;
+        }
+    });
 
     document.addEventListener("keydown", event => {
-        if (onIndex) {
-            const expected = KONAMI[konamiIndex];
-            const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-            const expectedKey = expected.length === 1 ? expected.toLowerCase() : expected;
+        const normalized = event.key.length === 1 ? event.key.toLowerCase() : event.key;
 
-            if (key === expectedKey) {
-                konamiIndex += 1;
-                if (konamiIndex === KONAMI.length) {
-                    konamiIndex = 0;
-                    triggerKonami();
-                }
-            } else if (key === (KONAMI[0].length === 1 ? KONAMI[0].toLowerCase() : KONAMI[0])) {
-                konamiIndex = 1;
-            } else {
+        if (normalized === KONAMI[konamiIndex]) {
+            konamiIndex += 1;
+            if (konamiIndex === KONAMI.length) {
+                triggerKonami();
                 konamiIndex = 0;
             }
+        } else {
+            konamiIndex = normalized === KONAMI[0] ? 1 : 0;
         }
 
-        if (!onIndex || event.key.length !== 1) return;
+        if (event.key.length !== 1) return;
 
         typed += event.key.toLowerCase();
-        typed = typed.slice(-12);
+        typed = typed.slice(-18);
 
-        if (typed.endsWith("dora")) {
+        if (typed.endsWith("dora") && onIndex) {
             showMeme("tajni kod DORA prihvaćen");
             typed = "";
         }
 
-        if (typed.endsWith("chypsi")) {
-            spawnChipCan(12);
-            showMeme("CHYPSI MODE", `${ASSET}chipsi%20slika.jpeg`);
+        if (typed.endsWith("dvd") && (onIndex || onYoutubePage)) {
+            triggerDvd();
             typed = "";
         }
     });
 
+    document.querySelectorAll("[data-current-year]").forEach(element => {
+        element.textContent = String(new Date().getFullYear());
+    });
+
     ensureGameShortcut();
 
-    if (!onSnakePage && !onChypsiPage && !onHikesPage && Math.random() < SHINY_CHANCE) {
+    if ((onIndex || onYoutubePage) && Math.random() < SHINY_CHANCE) {
         document.body.classList.add("shiny-event");
         window.setTimeout(() => {
-            showMeme("✨ SHINY PAGE! šansa: 1/64. ništa korisno nisi dobio.");
-        }, 650);
+            showMemeTimed("✨ SHINY PAGE! 1/64.", null, 2100);
+        }, 250);
+        window.setTimeout(() => {
+            document.body.classList.remove("shiny-event");
+        }, 3000);
     }
 
     window.doraSite = {
@@ -547,6 +645,7 @@
         closeMeme,
         openImage,
         spawnChipCan,
+        spawnLegs,
         crazyImages
     };
 })();
