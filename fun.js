@@ -11,7 +11,9 @@
     const onHikesPage = path.endsWith("/hikes.html") || path.endsWith("hikes.html");
     const onYoutubePage = path.endsWith("/youtube.html") || path.endsWith("youtube.html");
     const onProjectsPage = path.endsWith("/projects.html") || path.endsWith("projects.html");
-    const onPhysicsPage = path.endsWith("/physics.html") || path.endsWith("physics.html");
+
+    const FMHY_URL = "https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/video/#wiki_.25B7_p-stream_forks";
+    const FMHY_MORSE = ".... - - .--. ... ---... -..-. -..-. .-- .-- .-- .-.-.- .-. . -.. -.. .. - .-.-.- -.-. --- -- -..-. .-. -..-. ..-. .-. . . -- . -.. .. .- .... . -.-. -.- -.-- . .- .... -..-. .-- .. -.- .. -..-. ...- .. -.. . --- -..-. # .-- .. -.- .. ..--.- .-.-.- ..--- ..... -... --... ..--.- .--. -....- ... - .-. . .- -- ..--.- ..-. --- .-. -.- ...";
 
     const crazyImages = [
         `${ASSET}crazy%201.jpeg`,
@@ -37,9 +39,14 @@
 
     const titleCodes = [
         {
-            text: ".--. ... - .-. . .- -- ... / ..-. --- .-. . ...- . .-.",
-            label: "morse?",
-            href: "https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/video/#wiki_.25B7_p-stream_forks"
+            text: FMHY_MORSE,
+            label: "Morse URL → FMHY video megathread (# ostaje literalno jer nema standardni međunarodni Morse znak)",
+            href: FMHY_URL
+        },
+        {
+            text: "Qapla'!  ·  nuqneH  ·  tej",
+            label: "tlhIngan Hol: Qapla' = success · nuqneH = what do you want? · tej = scientist",
+            href: "https://www.kli.org/duolingo/express-an-action/"
         },
         {
             text: "gur synt vf abg gur frperg",
@@ -48,7 +55,7 @@
         },
         {
             text: "01100100 01101111 01110010 01100001",
-            label: "binary",
+            label: "binary = dora",
             href: "https://en.wikipedia.org/wiki/Binary_number"
         },
         {
@@ -216,6 +223,15 @@
                 advanceChypsi();
             } else if (action === "projects") {
                 advanceProjects();
+            } else if (action === "pjer-random") {
+                const target = Math.random() < 0.5 ? "projects.html" : "youtube.html";
+                const caption = target === "projects.html"
+                    ? "random izbor: Pjerovi projekti"
+                    : "random izbor: Dora Pjer Vlogs";
+                setLightboxText(caption, "ideš dalje...");
+                window.setTimeout(() => {
+                    location.href = target;
+                }, 420);
             }
         });
 
@@ -239,6 +255,8 @@
             hint.textContent = "klikni Chypsija još koji put · zatvara se samo na X";
         } else if (action === "projects") {
             hint.textContent = "ova slika skriva još nešto · zatvara se samo na X";
+        } else if (action === "pjer-random") {
+            hint.textContent = "klikni povećanu sliku: 50/50 projekti ili vlogovi · samo X zatvara";
         } else {
             hint.textContent = "zatvara se samo na X";
         }
@@ -481,6 +499,27 @@
         requestAnimationFrame(frame);
     }
 
+    function triggerMarqueeChaos(marquee) {
+        if (marquee.classList.contains("marquee-chaos")) return;
+
+        const span = marquee.querySelector("span");
+        if (!span) return;
+
+        const original = span.textContent;
+        marquee.classList.add("marquee-chaos");
+        span.setAttribute("aria-label", original);
+        span.innerHTML = [...original].map((char, index) => {
+            const safe = char === " " ? "&nbsp;" : char.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return `<b style="--letter:${index}">${safe}</b>`;
+        }).join("");
+
+        window.setTimeout(() => {
+            span.textContent = original;
+            span.removeAttribute("aria-label");
+            marquee.classList.remove("marquee-chaos");
+        }, 4200);
+    }
+
     const title = document.getElementById("secret-title");
     title?.addEventListener("click", () => {
         titleClicks += 1;
@@ -503,6 +542,26 @@
             title.textContent = "Zašto je Dora najbolja cura?";
             titleClicks = 0;
         }
+    });
+
+    document.querySelectorAll(".marquee-ish").forEach(marquee => {
+        marquee.dataset.marqueeClicks = "0";
+        marquee.style.cursor = "pointer";
+
+        marquee.addEventListener("click", () => {
+            const next = Number(marquee.dataset.marqueeClicks || "0") + 1;
+            marquee.dataset.marqueeClicks = String(next);
+
+            if (next === 2) {
+                const span = marquee.querySelector("span");
+                if (span) glitchText(span, span.textContent || "");
+            }
+
+            if (next >= 4) {
+                triggerMarqueeChaos(marquee);
+                marquee.dataset.marqueeClicks = "0";
+            }
+        });
     });
 
     document.querySelectorAll("img:not(.no-lightbox)").forEach(image => {
@@ -531,6 +590,13 @@
                 event.preventDefault();
                 event.stopPropagation();
                 openChypsi(image);
+                return;
+            }
+
+            if (image.classList.contains("pjer-random-destination")) {
+                event.preventDefault();
+                event.stopPropagation();
+                openImage(image.src, image.alt || "Ičići", "pjer-random");
                 return;
             }
 
