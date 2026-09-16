@@ -4,64 +4,102 @@
   const CONFIG = {
     endpoint:
       "https://kkvdaedxequoqfyyhavp.supabase.co/functions/v1/track-visit",
-    heartbeatMs: 30000,
+
+    heartbeatMs:
+      30000,
   };
 
+  let sessionId =
+    createSessionId();
+
   let maxScroll = 0;
+
   let heartbeat = null;
 
-  // =========================================================
-  // GENERAL SITE FUNCTIONS
-  // =========================================================
+  let visitStarted = false;
+
+  let visitStarting = false;
+
+  let endSent = false;
+
+  /* =========================================================
+     GENERAL SITE FUNCTIONS
+     ========================================================= */
 
   function setupExternalLinks() {
     document
-      .querySelectorAll('a[href^="http"]')
-      .forEach((link) => {
-        try {
-          const url = new URL(
-            link.href,
-            location.href
-          );
+      .querySelectorAll(
+        'a[href^="http"]',
+      )
+      .forEach(
+        (link) => {
+          try {
+            const url =
+              new URL(
+                link.href,
+                location.href,
+              );
 
-          if (
-            url.hostname !==
-            location.hostname
-          ) {
-            link.rel =
-              "noopener noreferrer";
+            if (
+              url.hostname !==
+              location.hostname
+            ) {
+              link.rel =
+                "noopener noreferrer";
+            }
+          } catch {
+            // Ignore invalid URLs.
           }
-        } catch {}
-      });
+        },
+      );
   }
 
   function setupLazyImages() {
     document
       .querySelectorAll(
-        "img:not([loading])"
+        "img:not([loading])",
       )
-      .forEach((img) => {
-        img.loading = "lazy";
-        img.decoding = "async";
-      });
+      .forEach(
+        (img) => {
+          img.loading =
+            "lazy";
+
+          img.decoding =
+            "async";
+        },
+      );
   }
 
   function setupSmoothScroll() {
     const reducedMotion =
       window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
+        "(prefers-reduced-motion: reduce)",
       ).matches;
 
-    if (reducedMotion) {
+    if (
+      reducedMotion
+    ) {
       return;
     }
 
     document.addEventListener(
       "click",
       (event) => {
+        const target =
+          event.target;
+
+        if (
+          !(
+            target instanceof
+            Element
+          )
+        ) {
+          return;
+        }
+
         const link =
-          event.target.closest(
-            'a[href^="#"]'
+          target.closest(
+            'a[href^="#"]',
           );
 
         if (!link) {
@@ -69,7 +107,9 @@
         }
 
         const selector =
-          link.getAttribute("href");
+          link.getAttribute(
+            "href",
+          );
 
         if (
           !selector ||
@@ -78,95 +118,249 @@
           return;
         }
 
-        const target =
-          document.querySelector(
-            selector
-          );
+        let destination = null;
 
-        if (!target) {
+        try {
+          destination =
+            document.querySelector(
+              selector,
+            );
+        } catch {
+          return;
+        }
+
+        if (
+          !destination
+        ) {
           return;
         }
 
         event.preventDefault();
 
-        target.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
+        destination
+          .scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "start",
+          });
+      },
     );
   }
 
   function setupCurrentYear() {
     const year =
       String(
-        new Date().getFullYear()
+        new Date()
+          .getFullYear(),
       );
 
     document
       .querySelectorAll(
-        "[data-current-year]"
+        "[data-current-year]",
       )
-      .forEach((element) => {
-        element.textContent = year;
-      });
+      .forEach(
+        (element) => {
+          element.textContent =
+            year;
+        },
+      );
   }
 
-  // =========================================================
-  // SESSION
-  // =========================================================
+  /* =========================================================
+     SESSION
+     ========================================================= */
 
-  function getSessionId() {
-    let id =
-      sessionStorage.getItem(
-        "dp_session_id"
-      );
-
-    if (!id) {
-      id = crypto.randomUUID();
-
-      sessionStorage.setItem(
-        "dp_session_id",
-        id
-      );
+  function createSessionId() {
+    if (
+      typeof crypto !==
+        "undefined" &&
+      typeof crypto.randomUUID ===
+        "function"
+    ) {
+      return crypto.randomUUID();
     }
 
-    return id;
+    const bytes =
+      new Uint8Array(16);
+
+    crypto.getRandomValues(
+      bytes,
+    );
+
+    /*
+     * UUID v4
+     */
+    bytes[6] =
+      (
+        bytes[6] &
+        0x0f
+      ) |
+      0x40;
+
+    bytes[8] =
+      (
+        bytes[8] &
+        0x3f
+      ) |
+      0x80;
+
+    const hex =
+      Array.from(
+        bytes,
+      )
+        .map(
+          (byte) =>
+            byte
+              .toString(16)
+              .padStart(
+                2,
+                "0",
+              ),
+        );
+
+    return [
+      hex
+        .slice(
+          0,
+          4,
+        )
+        .join(""),
+
+      hex
+        .slice(
+          4,
+          6,
+        )
+        .join(""),
+
+      hex
+        .slice(
+          6,
+          8,
+        )
+        .join(""),
+
+      hex
+        .slice(
+          8,
+          10,
+        )
+        .join(""),
+
+      hex
+        .slice(
+          10,
+          16,
+        )
+        .join(""),
+    ].join("-");
   }
 
-  // =========================================================
-  // CLIENT INFORMATION
-  // =========================================================
+  function resetSession() {
+    stopHeartbeat();
+
+    sessionId =
+      createSessionId();
+
+    maxScroll = 0;
+
+    visitStarted =
+      false;
+
+    visitStarting =
+      false;
+
+    endSent =
+      false;
+  }
+
+  /* =========================================================
+     DEVICE / BROWSER INFORMATION
+     ========================================================= */
 
   function detectBrowser() {
     const ua =
-      navigator.userAgent || "";
+      navigator.userAgent ||
+      "";
 
-    if (ua.includes("Edg/")) {
+    const brands =
+      navigator
+        .userAgentData
+        ?.brands;
+
+    if (
+      Array.isArray(
+        brands,
+      )
+    ) {
+      const names =
+        brands.map(
+          (item) =>
+            String(
+              item.brand ||
+                "",
+            ).toLowerCase(),
+        );
+
+      if (
+        names.some(
+          (name) =>
+            name.includes(
+              "brave",
+            ),
+        )
+      ) {
+        return "Brave";
+      }
+    }
+
+    if (
+      ua.includes(
+        "Edg/",
+      )
+    ) {
       return "Microsoft Edge";
     }
 
     if (
-      ua.includes("OPR/") ||
-      ua.includes("Opera")
+      ua.includes(
+        "OPR/",
+      ) ||
+      ua.includes(
+        "Opera",
+      )
     ) {
       return "Opera";
     }
 
-    if (ua.includes("Firefox/")) {
+    if (
+      ua.includes(
+        "Firefox/",
+      )
+    ) {
       return "Firefox";
     }
 
     if (
-      ua.includes("Chrome/") &&
-      !ua.includes("Edg/")
+      ua.includes(
+        "Chrome/",
+      ) &&
+      !ua.includes(
+        "Edg/",
+      )
     ) {
       return "Chrome";
     }
 
     if (
-      ua.includes("Safari/") &&
-      !ua.includes("Chrome/")
+      ua.includes(
+        "Safari/",
+      ) &&
+      !ua.includes(
+        "Chrome/",
+      )
     ) {
       return "Safari";
     }
@@ -176,37 +370,55 @@
 
   function detectOS() {
     const ua =
-      navigator.userAgent || "";
+      navigator.userAgent ||
+      "";
 
     const platform =
-      navigator.platform || "";
+      navigator.platform ||
+      "";
 
-    if (/Windows/i.test(ua)) {
+    if (
+      /Windows/i.test(
+        ua,
+      )
+    ) {
       return "Windows";
     }
 
-    if (/Android/i.test(ua)) {
+    if (
+      /Android/i.test(
+        ua,
+      )
+    ) {
       return "Android";
     }
 
     if (
       /iPhone|iPad|iPod/i.test(
-        ua
+        ua,
       )
     ) {
       return "iOS";
     }
 
     if (
-      /Mac/i.test(platform) ||
-      /Mac OS/i.test(ua)
+      /Mac/i.test(
+        platform,
+      ) ||
+      /Mac OS/i.test(
+        ua,
+      )
     ) {
       return "macOS";
     }
 
     if (
-      /Linux/i.test(platform) ||
-      /Linux/i.test(ua)
+      /Linux/i.test(
+        platform,
+      ) ||
+      /Linux/i.test(
+        ua,
+      )
     ) {
       return "Linux";
     }
@@ -216,7 +428,8 @@
 
   function detectMobile() {
     const uaData =
-      navigator.userAgentData;
+      navigator
+        .userAgentData;
 
     if (
       uaData &&
@@ -226,17 +439,20 @@
       return uaData.mobile;
     }
 
-    return /Android|iPhone|iPad|iPod|Mobile/i.test(
-      navigator.userAgent
-    );
+    return /Android|iPhone|iPad|iPod|Mobile/i
+      .test(
+        navigator.userAgent,
+      );
   }
 
   function getTimezone() {
     try {
       return (
-        Intl.DateTimeFormat()
+        Intl
+          .DateTimeFormat()
           .resolvedOptions()
-          .timeZone || null
+          .timeZone ||
+        null
       );
     } catch {
       return null;
@@ -246,7 +462,9 @@
   function getOrientation() {
     try {
       return (
-        screen.orientation?.type ||
+        screen
+          .orientation
+          ?.type ||
         null
       );
     } catch {
@@ -263,9 +481,9 @@
     );
   }
 
-  // =========================================================
-  // SCROLL
-  // =========================================================
+  /* =========================================================
+     SCROLL
+     ========================================================= */
 
   function updateScroll() {
     const root =
@@ -282,14 +500,22 @@
 
     const documentHeight =
       Math.max(
-        root.scrollHeight || 0,
-        body?.scrollHeight || 0,
-        root.offsetHeight || 0,
-        body?.offsetHeight || 0
+        root.scrollHeight ||
+          0,
+
+        body?.scrollHeight ||
+          0,
+
+        root.offsetHeight ||
+          0,
+
+        body?.offsetHeight ||
+          0,
       );
 
     const viewportHeight =
-      window.innerHeight || 0;
+      window.innerHeight ||
+      0;
 
     const scrollable =
       documentHeight -
@@ -297,9 +523,14 @@
 
     let percent = 100;
 
-    if (scrollable > 0) {
+    if (
+      scrollable > 0
+    ) {
       percent =
-        (scrollTop / scrollable) *
+        (
+          scrollTop /
+          scrollable
+        ) *
         100;
     }
 
@@ -308,38 +539,47 @@
         0,
         Math.min(
           100,
-          Math.round(percent)
-        )
+          Math.round(
+            percent,
+          ),
+        ),
       );
 
-    if (percent > maxScroll) {
-      maxScroll = percent;
+    if (
+      percent >
+      maxScroll
+    ) {
+      maxScroll =
+        percent;
     }
   }
 
-  // =========================================================
-  // INITIAL VISIT
-  // =========================================================
+  /* =========================================================
+     PAYLOADS
+     ========================================================= */
 
   function buildVisit() {
     const connection =
       getConnection();
 
     const uaData =
-      navigator.userAgentData ||
+      navigator
+        .userAgentData ||
       null;
 
     return {
-      event_type: "visit",
+      event_type:
+        "visit",
 
       session_id:
-        getSessionId(),
+        sessionId,
 
       page:
         location.href,
 
       page_title:
-        document.title || null,
+        document.title ||
+        null,
 
       hostname:
         location.hostname,
@@ -378,23 +618,24 @@
 
       hardware_concurrency:
         typeof navigator
-          .hardwareConcurrency ===
-        "number"
+            .hardwareConcurrency ===
+          "number"
           ? navigator
               .hardwareConcurrency
           : null,
 
       device_memory:
         typeof navigator
-          .deviceMemory ===
-        "number"
-          ? navigator.deviceMemory
+            .deviceMemory ===
+          "number"
+          ? navigator
+              .deviceMemory
           : null,
 
       max_touch_points:
         typeof navigator
-          .maxTouchPoints ===
-        "number"
+            .maxTouchPoints ===
+          "number"
           ? navigator
               .maxTouchPoints
           : 0,
@@ -402,31 +643,42 @@
       touch_support:
         (
           navigator
-            .maxTouchPoints > 0
+            .maxTouchPoints >
+          0
         ) ||
-        "ontouchstart" in window,
+        (
+          "ontouchstart" in
+          window
+        ),
 
       cookies_enabled:
-        navigator.cookieEnabled,
+        navigator
+          .cookieEnabled,
 
       do_not_track:
-        navigator.doNotTrack ||
+        navigator
+          .doNotTrack ||
         null,
 
       screen_width:
-        screen.width || null,
+        screen.width ||
+        null,
 
       screen_height:
-        screen.height || null,
+        screen.height ||
+        null,
 
       viewport_width:
-        innerWidth || null,
+        innerWidth ||
+        null,
 
       viewport_height:
-        innerHeight || null,
+        innerHeight ||
+        null,
 
       device_pixel_ratio:
-        devicePixelRatio || 1,
+        devicePixelRatio ||
+        1,
 
       color_depth:
         screen.colorDepth ||
@@ -447,39 +699,44 @@
         null,
 
       connection_effective_type:
-        connection?.effectiveType ||
+        connection
+          ?.effectiveType ||
         null,
 
       connection_downlink:
         typeof connection
-          ?.downlink ===
-        "number"
-          ? connection.downlink
+            ?.downlink ===
+          "number"
+          ? connection
+              .downlink
           : null,
 
       connection_rtt:
-        typeof connection?.rtt ===
-        "number"
+        typeof connection
+            ?.rtt ===
+          "number"
           ? connection.rtt
           : null,
 
       connection_save_data:
         typeof connection
-          ?.saveData ===
-        "boolean"
-          ? connection.saveData
+            ?.saveData ===
+          "boolean"
+          ? connection
+              .saveData
           : null,
 
       ua_brands:
         Array.isArray(
-          uaData?.brands
+          uaData?.brands,
         )
           ? uaData.brands
           : null,
 
       ua_mobile:
-        typeof uaData?.mobile ===
-        "boolean"
+        typeof uaData
+            ?.mobile ===
+          "boolean"
           ? uaData.mobile
           : null,
 
@@ -489,35 +746,50 @@
     };
   }
 
-  // =========================================================
-  // SESSION UPDATE
-  // =========================================================
-
   function buildUpdate() {
     updateScroll();
 
     return {
-      event_type: "update",
+      event_type:
+        "update",
 
       session_id:
-        getSessionId(),
+        sessionId,
 
       max_scroll_percent:
         maxScroll,
     };
   }
 
-  // =========================================================
-  // NETWORK
-  // =========================================================
+  function buildEnd() {
+    updateScroll();
 
-  async function send(data) {
+    return {
+      event_type:
+        "end",
+
+      session_id:
+        sessionId,
+
+      max_scroll_percent:
+        maxScroll,
+    };
+  }
+
+  /* =========================================================
+     NETWORK
+     ========================================================= */
+
+  async function send(
+    data,
+  ) {
     try {
       const response =
         await fetch(
           CONFIG.endpoint,
           {
-            method: "POST",
+            method:
+              "POST",
 
             headers: {
               "Content-Type":
@@ -525,17 +797,22 @@
             },
 
             body:
-              JSON.stringify(data),
+              JSON.stringify(
+                data,
+              ),
 
-            keepalive: true,
+            keepalive:
+              true,
 
-            credentials: "omit",
+            credentials:
+              "omit",
 
-            cache: "no-store",
+            cache:
+              "no-store",
 
             referrerPolicy:
               "no-referrer",
-          }
+          },
         );
 
       return response.ok;
@@ -544,72 +821,106 @@
     }
   }
 
-  function sendFinalUpdate() {
-    updateScroll();
-
+  function sendBeaconPayload(
+    data,
+  ) {
     const payload =
       JSON.stringify(
-        buildUpdate()
+        data,
       );
 
     if (
       typeof navigator
-        .sendBeacon ===
-      "function"
+          .sendBeacon ===
+        "function"
     ) {
       try {
         const blob =
           new Blob(
-            [payload],
+            [
+              payload,
+            ],
             {
               type:
                 "text/plain;charset=UTF-8",
-            }
+            },
           );
 
+        const accepted =
+          navigator
+            .sendBeacon(
+              CONFIG.endpoint,
+              blob,
+            );
+
         if (
-          navigator.sendBeacon(
-            CONFIG.endpoint,
-            blob
-          )
+          accepted
         ) {
-          return;
+          return true;
         }
-      } catch {}
+      } catch {
+        // Use fetch fallback.
+      }
     }
 
     try {
       fetch(
         CONFIG.endpoint,
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
               "text/plain;charset=UTF-8",
           },
 
-          body: payload,
+          body:
+            payload,
 
-          keepalive: true,
+          keepalive:
+            true,
 
-          credentials: "omit",
+          credentials:
+            "omit",
 
-          cache: "no-store",
+          cache:
+            "no-store",
 
           referrerPolicy:
             "no-referrer",
-        }
+        },
       );
-    } catch {}
+
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  // =========================================================
-  // HEARTBEAT
-  // =========================================================
+  /* =========================================================
+     HEARTBEAT
+     ========================================================= */
+
+  function stopHeartbeat() {
+    if (
+      heartbeat !==
+      null
+    ) {
+      window.clearInterval(
+        heartbeat,
+      );
+
+      heartbeat =
+        null;
+    }
+  }
 
   function startHeartbeat() {
-    if (heartbeat) {
+    if (
+      heartbeat !==
+      null
+    ) {
       return;
     }
 
@@ -617,78 +928,161 @@
       window.setInterval(
         () => {
           if (
+            !visitStarted ||
+            endSent
+          ) {
+            return;
+          }
+
+          if (
             document
-              .visibilityState ===
+              .visibilityState !==
             "visible"
           ) {
-            send(
-              buildUpdate()
-            );
+            return;
           }
-        },
 
-        CONFIG.heartbeatMs
+          void send(
+            buildUpdate(),
+          );
+        },
+        CONFIG.heartbeatMs,
       );
   }
 
-  // =========================================================
-  // INIT
-  // =========================================================
+  /* =========================================================
+     VISIT START
+     ========================================================= */
 
-  async function initMetrics() {
+  async function startVisit() {
+    if (
+      visitStarted ||
+      visitStarting ||
+      endSent
+    ) {
+      return;
+    }
+
+    visitStarting =
+      true;
+
     updateScroll();
 
-    const sent =
-      sessionStorage.getItem(
-        "dp_visit_sent"
+    const success =
+      await send(
+        buildVisit(),
       );
 
-    if (sent !== "1") {
-      const success =
-        await send(
-          buildVisit()
-        );
+    visitStarting =
+      false;
 
-      if (success) {
-        sessionStorage.setItem(
-          "dp_visit_sent",
-          "1"
-        );
-      }
+    if (
+      !success
+    ) {
+      return;
     }
+
+    visitStarted =
+      true;
 
     startHeartbeat();
   }
 
-  function init() {
-    setupExternalLinks();
-    setupLazyImages();
-    setupSmoothScroll();
-    setupCurrentYear();
+  /* =========================================================
+     VISIBILITY UPDATE
+     ========================================================= */
 
-    initMetrics();
+  function sendVisibilityUpdate() {
+    if (
+      !visitStarted ||
+      endSent
+    ) {
+      return;
+    }
+
+    sendBeaconPayload(
+      buildUpdate(),
+    );
   }
 
-  // =========================================================
-  // EVENTS
-  // =========================================================
+  /* =========================================================
+     VISIT END
+     ========================================================= */
+
+  function endVisit() {
+    if (
+      !visitStarted ||
+      endSent
+    ) {
+      return;
+    }
+
+    endSent =
+      true;
+
+    stopHeartbeat();
+
+    sendBeaconPayload(
+      buildEnd(),
+    );
+  }
+
+  /* =========================================================
+     INIT
+     ========================================================= */
+
+  function init() {
+    setupExternalLinks();
+
+    setupLazyImages();
+
+    setupSmoothScroll();
+
+    setupCurrentYear();
+
+    updateScroll();
+
+    void startVisit();
+  }
+
+  /* =========================================================
+     EVENT LISTENERS
+     ========================================================= */
 
   window.addEventListener(
     "scroll",
     updateScroll,
     {
-      passive: true,
-    }
+      passive:
+        true,
+    },
   );
 
   window.addEventListener(
     "resize",
     updateScroll,
     {
-      passive: true,
-    }
+      passive:
+        true,
+    },
   );
 
+  window.addEventListener(
+    "load",
+    updateScroll,
+    {
+      once:
+        true,
+    },
+  );
+
+  /*
+   * Kada korisnik samo prebaci tab,
+   * minimizira browser ili zaključa mobitel,
+   * NE završavamo session.
+   *
+   * Samo šaljemo zadnje stanje.
+   */
   document.addEventListener(
     "visibilitychange",
     () => {
@@ -697,14 +1091,40 @@
           .visibilityState ===
         "hidden"
       ) {
-        sendFinalUpdate();
+        sendVisibilityUpdate();
       }
-    }
+    },
   );
 
+  /*
+   * pagehide se koristi za stvarni odlazak
+   * sa stranice / zatvaranje / reload.
+   */
   window.addEventListener(
     "pagehide",
-    sendFinalUpdate
+    () => {
+      endVisit();
+    },
+  );
+
+  /*
+   * Ako browser vrati istu stranicu iz
+   * back-forward cachea, tretiramo povratak
+   * kao novi posjet.
+   */
+  window.addEventListener(
+    "pageshow",
+    (event) => {
+      if (
+        event.persisted
+      ) {
+        resetSession();
+
+        updateScroll();
+
+        void startVisit();
+      }
+    },
   );
 
   if (
@@ -715,8 +1135,9 @@
       "DOMContentLoaded",
       init,
       {
-        once: true,
-      }
+        once:
+          true,
+      },
     );
   } else {
     init();
