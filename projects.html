@@ -20,42 +20,169 @@
 
     <main>
         <section class="paper">
-            <h2>stvari koje sam stvarno radio umjesto da ostavim printer na miru</h2>
-            <p>3D print, robotika, elektronika, računala i projekti koji uglavnom počnu s „ovo bi bilo fora” pa završe s previše dijelova na stolu.</p>
+            <h2>stvari koje sam stvarno radio umjesto da ostavim hardver na miru</h2>
+            <p>3D print, Raspberry Pi, mreže, Linux, robotika, elektronika i projekti koji uglavnom počnu s „ovo bi bilo fora” pa završe s previše dijelova na stolu.</p>
+            <p class="small-text">klikni naslov projekta da se otvori cijeli tehnički rabbit hole. slike se normalno mogu povećati.</p>
         </section>
 
-        <section class="project-grid">
-            <article class="project-card">
-                <h3>Printables</h3>
-                <p>3D modeli pod profilom <strong>pidow widow @pidow_2327668</strong>. Ima svega od praktičnih nosača do stvari koje realno postoje samo zato što ih je moguće isprintati.</p>
-                <p class="source-row"><a class="ugly-button" href="https://www.printables.com/@pidow_2327668" target="_blank" rel="noopener noreferrer">Printables ↗</a></p>
-            </article>
-
-            <article class="project-card">
-                <h3>Thingiverse</h3>
-                <p>Još STL kaosa pod korisnikom <strong>pidow</strong>.</p>
-                <p class="source-row"><a class="ugly-button" href="https://www.thingiverse.com/pidow/designs" target="_blank" rel="noopener noreferrer">Thingiverse ↗</a></p>
-            </article>
-
-            <article class="project-card">
-                <h3>GitHub</h3>
-                <p>Kod, eksperimenti i stvari koje imaju nešto više tipkovnice, a nešto manje filamenta.</p>
-                <p class="source-row"><a class="ugly-button" href="https://github.com/pidoww" target="_blank" rel="noopener noreferrer">GitHub ↗</a></p>
-            </article>
+        <section class="project-links-strip">
+            <a class="ugly-button" href="https://www.printables.com/@pidow_2327668" target="_blank" rel="noopener noreferrer">Printables ↗</a>
+            <a class="ugly-button" href="https://www.thingiverse.com/pidow/designs" target="_blank" rel="noopener noreferrer">Thingiverse ↗</a>
+            <a class="ugly-button" href="https://github.com/pidoww" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
         </section>
+
+        <details class="project-deep" open>
+            <summary>🏠 Homelab / Raspberry Pi 5 / NAS / VPN</summary>
+            <div class="project-deep-body">
+                <p>Srce homelaba je <strong>Raspberry Pi 5 s 8 GB RAM-a</strong>. Na njemu je OpenMediaVault (OMV), koji daje web administraciju za storage, korisnike i servise, dok Samba služi kao SMB file-sharing sloj za Windows/Linux uređaje.</p>
+
+                <div class="project-facts">
+                    <div><strong>Pi:</strong> Raspberry Pi 5, 8 GB</div>
+                    <div><strong>NAS:</strong> OpenMediaVault + Samba</div>
+                    <div><strong>Diskovi:</strong> ~1.8 TB + ~916 GB</div>
+                    <div><strong>Shareovi:</strong> BLACK + BLUE</div>
+                    <div><strong>Remote:</strong> PiVPN / OpenVPN</div>
+                    <div><strong>Admin:</strong> OMV preko HTTPS-a unutar mreže/VPN-a</div>
+                </div>
+
+                <h3>kako ide promet kad nisi doma</h3>
+                <pre class="project-diagram">internet
+   │
+   ▼
+router / javna IP
+   │  samo VPN port forward
+   ▼
+Raspberry Pi 5 ── OpenVPN
+   │
+   ├── OMV admin (HTTPS)
+   ├── Samba / BLACK
+   └── Samba / BLUE</pre>
+
+                <p>Ideja nije javno izložiti Samba share ili OMV admin sučelje. Prvo se uspostavi VPN tunel do kućne mreže, a tek onda se ponašaš kao da si lokalno na LAN-u. Time je javno izložen VPN servis, a ne svaki pojedini servis iza njega.</p>
+
+                <h3>HTTPS vs VPN — nisu ista stvar</h3>
+                <p>HTTPS štiti konkretnu web vezu između browsera i OMV-a. VPN stvara šifrirani tunel za cijeli mrežni promet prema kućnoj mreži. Self-signed OMV certifikat i dalje šifrira promet, ali browser ne može sam potvrditi identitet servera preko javnog CA lanca pa zato prikazuje upozorenje. To nije isto što i „HTTPS ne radi”.</p>
+
+                <h3>što je zanimljivo ispod haube</h3>
+                <p>Samba prevodi lokalni Linux storage u SMB protokol koji Windows vidi kao mrežni share. OpenVPN stvara virtualni mrežni interfejs i rutira pakete između VPN subnet-a i LAN-a. Router radi NAT prema internetu, a port forwarding propušta samo promet namijenjen VPN-u prema Raspberry Piju.</p>
+            </div>
+        </details>
+
+        <details class="project-deep">
+            <summary>🎮 Retro konzola / Raspberry Pi + 3D print</summary>
+            <div class="project-deep-body">
+                <p>Retro konzola spaja dvije stvari koje se ovdje stalno ponavljaju: Raspberry Pi i 3D print. Pi glumi računalo za emulaciju, a kućište i mehanički dio nisu kupljeni kao gotov proizvod nego su napravljeni/printani za projekt.</p>
+
+                <div class="project-facts">
+                    <div><strong>compute:</strong> Raspberry Pi</div>
+                    <div><strong>mehanika:</strong> vlastito 3D printano kućište</div>
+                    <div><strong>tema:</strong> TMNT / retro konzola</div>
+                    <div><strong>ulaz:</strong> gamepad → emulator</div>
+                    <div><strong>izlaz:</strong> GPU/video → display</div>
+                </div>
+
+                <h3>što se događa kad stisneš tipku</h3>
+                <pre class="project-diagram">gamepad
+   │ USB / Bluetooth
+   ▼
+Linux input subsystem
+   │
+   ▼
+emulator
+   │ emulira CPU/GPU/zvuk stare konzole
+   ▼
+Raspberry Pi GPU/audio
+   │
+   └── HDMI / ekran + zvuk</pre>
+
+                <p>Emulator ne „pokreće stari ROM nativno”; on softverski oponaša originalni hardver dovoljno precizno da se originalni strojni kod ponaša kao da radi na konzoli za koju je napisan. Najveći kompromis je uvijek između preciznosti emulacije, latencije i računalne snage.</p>
+            </div>
+        </details>
+
+        <details class="project-deep">
+            <summary>🤖 Mecanum line follower / Arduino Mega</summary>
+            <div class="project-deep-body">
+                <p>Ovo je puno bliže pravom malom mobilnom robotu nego klasičnom „dva motora i senzor crte” projektu. Mecanum kotači omogućuju uzdužno gibanje, rotaciju i bočni strafe kombiniranjem smjerova/brzina sva četiri kotača.</p>
+
+                <div class="project-facts">
+                    <div><strong>MCU:</strong> Arduino Mega</div>
+                    <div><strong>motor driver:</strong> Hiwonder 4-Ch Encoder, I²C 0x34</div>
+                    <div><strong>line sensor:</strong> Hiwonder 8-Ch IR, I²C 0x5D</div>
+                    <div><strong>motori:</strong> JGB37-520, 12 V, 110 RPM, 1:90, Hall encoder</div>
+                    <div><strong>kotači:</strong> mecanum</div>
+                    <div><strong>display:</strong> LCD 20×4 I²C</div>
+                    <div><strong>napajanje:</strong> Einhell 18 V → buck 12 V</div>
+                </div>
+
+                <h3>PID</h3>
+                <p>Line follower grešku dobiva iz rasporeda IR senzora, a PID kontroler pretvara tu grešku u korekciju gibanja. Zadnje korištene vrijednosti bile su približno <strong>Kp 0.26, Ki 0.02, Kd 0.18</strong>. P dio reagira na trenutačnu pogrešku, I dio skuplja dugotrajni offset, a D dio reagira na brzinu promjene pogreške i prigušuje preagresivno skretanje.</p>
+
+                <h3>state machine</h3>
+                <pre class="project-diagram">FOLLOW_LINE
+   ├── TURN_L_90 / TURN_R_90
+   ├── SEARCH_LINE
+   ├── STRAFE
+   ├── FRONT_BUMP / BACK_BUMP
+   └── FULL_LINE_STOP</pre>
+
+                <p>Bitna stvar je da robot nije samo kontinuirani PID loop. Kad vidi specifične uzorke senzora ili prepreku, prelazi u drugo stanje s drukčijim pravilima. Za strafe su korišteni preload i ramp kako bi mecanum kotači stvarno ušli u bočno gibanje umjesto da robot prvo samo zakrene nos.</p>
+
+                <p class="small-text">projekt je usput dokazao i da motor driver može biti potrošni materijal ako ga dovoljno naljutiš.</p>
+            </div>
+        </details>
+
+        <details class="project-deep">
+            <summary>⚡ „ozonator” / HV eksperiment</summary>
+            <div class="project-deep-body">
+                <p>Ovaj projekt koristi mali impulsni visokonaponski modul koji se prodaje pod marketinškim oznakama tipa „400 kV”. Takve brojke na jeftinim modulima ne treba uzimati kao pouzdano izmjeren izlazni napon; stvarni napon ovisi o razmaku, opterećenju, geometriji elektroda i samom modulu.</p>
+
+                <div class="project-facts">
+                    <div><strong>izvor:</strong> 18650 Li-ion</div>
+                    <div><strong>zaštita/punjenje:</strong> 1S BMS + TP4056</div>
+                    <div><strong>HV modul:</strong> DC 3–6 V → impulsni visoki napon</div>
+                    <div><strong>konektori:</strong> XT30</div>
+                    <div><strong>elektrode:</strong> eksperimentalne HV elektrode / svjećice</div>
+                </div>
+
+                <h3>kako električno nastaje ozon</h3>
+                <p>Vrlo jako električno polje ubrzava slobodne elektrone. U plinu ti elektroni mogu sudarima pobuditi i ionizirati molekule te, između ostalog, disocirati kisik:</p>
+                <div class="physics-formula">e⁻ + O₂ → e⁻ + O + O</div>
+                <p>Slobodni atom kisika zatim se može spojiti s molekulom O₂. Za očuvanje energije i količine gibanja tipično sudjeluje i treće tijelo M (najčešće N₂ ili O₂ iz zraka):</p>
+                <div class="physics-formula">O + O₂ + M → O₃ + M</div>
+
+                <p>Za proizvodnju ozona često je važna <strong>korona / streamer discharge</strong> — djelomični proboj plina oko područja visokog polja. Veliki, vrući električni luk nije isto što i „više ozona”; on troši puno energije u grijanje i može dalje razgrađivati O₃. Zato sama činjenica da se vidi spektakularna iskra ne govori pouzdano koliko se ozona proizvodi.</p>
+
+                <h3>zašto vrh elektrode ima veze s poljem</h3>
+                <p>Na oštrom vodiču lokalna zakrivljenost može jako povećati površinsku gustoću naboja, pa je i lokalno električno polje veće. Zato korona često prvo kreće oko vrhova i tankih žica.</p>
+
+                <div class="project-warning">
+                    <strong>sigurnost:</strong> ovdje su istodobno prisutni visoki napon, Li-ion ćelija i ozon. Ozon je reaktivan plin i iritans za pluća; EPA izričito upozorava da se ozonski generatori ne koriste u prostorima u kojima borave ljudi. Ovaj dio stranice objašnjava fiziku projekta, ne preporučuje uporabu ozona za „čišćenje zraka”.
+                </div>
+
+                <p class="source-row"><a href="https://www.epa.gov/indoor-air-quality-iaq/ozone-generators-are-sold-air-cleaners" target="_blank" rel="noopener noreferrer">EPA: Ozone Generators that are Sold as Air Cleaners ↗</a></p>
+            </div>
+        </details>
+
+        <details class="project-deep">
+            <summary>🖨 3D print / Ender 3 S1 Pro</summary>
+            <div class="project-deep-body">
+                <p>Printer je <strong>Ender 3 S1 Pro</strong>. Većina praktičnih komada radi se iz PLA, a bilo je i eksperimentiranja s ABS+. Osim same retro konzole, među printovima su bili NAS nosači, Hoover mount i drugi funkcionalni komadi.</p>
+                <p>Najzanimljiviji dio funkcionalnog printa nije samo oblik nego tolerancija: komad koji na ekranu izgleda savršeno može biti beskoristan ako rupa, osovina, insert ili snap-fit nisu projektirani za stvarnu širinu ekstruzije, skupljanje materijala i točnost printera.</p>
+            </div>
+        </details>
 
         <section class="paper">
             <h2>WorldSkills / robotika</h2>
-            <p>Na izlučnom WorldSkills natjecanju u robotici u Zadru Pjer Flajhar i Vito Radman osvojili su <strong>1. mjesto</strong> i plasman na državno natjecanje. Na državnom WorldSkills Croatia 2026 osvojili su <strong>2. mjesto — srebrnu medalju</strong> u disciplini Robotika, uz mentora Marka Kovača.</p>
+            <p>Na izlučnom WorldSkills natjecanju u disciplini Robotika u Zadru <strong>Pjer Flajhar i Vito Radman osvojili su 1. mjesto</strong> i time izborili državno natjecanje. Na državnom <strong>WorldSkills Croatia 2026 osvojili su 2. mjesto — srebrnu medalju</strong>, uz mentora Marka Kovača.</p>
 
             <div class="project-grid">
                 <figure class="project-card">
-                    <img src="https://ss-elektrotehnicka-zg.skole.hr/wp-content/uploads/sites/1016/2026/03/WhatsApp-Image-2026-03-08-at-11.48.14-PM-980x735.jpeg" alt="Pjer i Vito na WorldSkills natjecanju">
-                    <figcaption class="source-row">WorldSkills robotika — izlučno natjecanje.</figcaption>
+                    <img class="project-zoom" src="https://ss-elektrotehnicka-zg.skole.hr/wp-content/uploads/sites/1016/2026/03/WhatsApp-Image-2026-03-08-at-11.48.14-PM-980x735.jpeg" alt="Pjer i Vito na WorldSkills natjecanju">
+                    <figcaption class="source-row">WorldSkills Robotika — izlučno natjecanje.</figcaption>
                 </figure>
 
                 <figure class="project-card">
-                    <img src="https://ss-elektrotehnicka-zg.skole.hr/wp-content/uploads/sites/1016/2026/03/WhatsApp-Image-2026-03-08-at-11.48.14-PM-1-edited.jpeg" alt="Robotički tim Elektrotehničke škole">
+                    <img class="project-zoom" src="https://ss-elektrotehnicka-zg.skole.hr/wp-content/uploads/sites/1016/2026/03/WhatsApp-Image-2026-03-08-at-11.48.14-PM-1-edited.jpeg" alt="Robotički tim Elektrotehničke škole">
                     <figcaption class="source-row">tim + robotika + dovoljno kablova.</figcaption>
                 </figure>
             </div>
@@ -66,36 +193,17 @@
             </div>
         </section>
 
-        <section class="paper">
-            <h2>još projekata koji pripadaju ovdje</h2>
-            <div class="project-grid">
-                <article class="project-card">
-                    <h3>mecanum line follower</h3>
-                    <p>Arduino Mega, encoder driveri, IR senzori, PID regulacija i mecanum kotači. Projekt koji je vrlo dobro objasnio zašto rezervni motor driver nije loša ideja.</p>
-                </article>
-
-                <article class="project-card">
-                    <h3>retro konzola</h3>
-                    <p>Raspberry Pi + vlastito 3D printano kućište. Jer kupiti gotovo kućište očito nije bilo dovoljno zanimljivo.</p>
-                </article>
-
-                <article class="project-card">
-                    <h3>kućni server</h3>
-                    <p>Raspberry Pi / OMV / Samba i kućni storage. Manje spektakularno od robota, ali puno korisnije kad treba naći file koji je nestao prije šest mjeseci.</p>
-                </article>
-            </div>
-        </section>
-
         <section class="paper center">
             <a class="ugly-button" href="index.html">← nazad na Doru</a>
         </section>
     </main>
 
     <footer>
-        <p>PROJECT DUMP · nema Easter eggova unutar Easter egga, obećano</p>
+        <p>PROJECT DUMP · klikneš, otvori se još teksta. odlično.</p>
         <p>© 2026 Dora &amp; Pjer</p>
     </footer>
 
     <script src="/main.js"></script>
+    <script src="/projects.js"></script>
 </body>
 </html>
