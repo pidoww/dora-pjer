@@ -4,22 +4,30 @@
   const CONFIG = {
     endpoint:
       "https://kkvdaedxequoqfyyhavp.supabase.co/functions/v1/track-visit",
+
+    heartbeatInterval:
+      5000,
+
+    sessionStorageKey:
+      "dora-pjer-session-id",
   };
 
+  const UUID_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
   let sessionId =
-    createSessionId();
+    getOrCreateSessionId();
 
   let maxScroll = 0;
 
   let visitStarted = false;
   let visitStarting = false;
 
-  /*
-   * True samo ako smo pokušali završiti session
-   * zbog stvarnog odlaska sa stranice.
-   */
-  let pendingEndSent = false;
+  let heartbeatTimer = null;
+  let heartbeatRunning = false;
 
+  let suspended = false;
+  let pageLeaveSent = false;
   let resumeRunning = false;
 
   /* =========================================================
@@ -127,13 +135,14 @@
 
         event.preventDefault();
 
-        destination.scrollIntoView({
-          behavior:
-            "smooth",
+        destination
+          .scrollIntoView({
+            behavior:
+              "smooth",
 
-          block:
-            "start",
-        });
+            block:
+              "start",
+          });
       },
     );
   }
@@ -156,7 +165,7 @@
   }
 
   /* =========================================================
-     SESSION
+     SESSION ID
      ========================================================= */
 
   function createSessionId() {
@@ -219,9 +228,66 @@
     ].join("-");
   }
 
-  function resetSession() {
+  function loadSessionId() {
+    try {
+      const stored =
+        sessionStorage
+          .getItem(
+            CONFIG.sessionStorageKey,
+          );
+
+      if (
+        stored &&
+        UUID_REGEX.test(
+          stored,
+        )
+      ) {
+        return stored;
+      }
+    } catch {}
+
+    return null;
+  }
+
+  function saveSessionId(
+    value,
+  ) {
+    try {
+      sessionStorage
+        .setItem(
+          CONFIG.sessionStorageKey,
+          value,
+        );
+    } catch {}
+  }
+
+  function getOrCreateSessionId() {
+    const stored =
+      loadSessionId();
+
+    if (stored) {
+      return stored;
+    }
+
+    const id =
+      createSessionId();
+
+    saveSessionId(
+      id,
+    );
+
+    return id;
+  }
+
+  function createNewSession() {
+    stopHeartbeat();
+
     sessionId =
       createSessionId();
+
+    saveSessionId(
+      sessionId,
+    );
 
     maxScroll = 0;
 
@@ -231,7 +297,13 @@
     visitStarting =
       false;
 
-    pendingEndSent =
+    heartbeatRunning =
+      false;
+
+    suspended =
+      false;
+
+    pageLeaveSent =
       false;
 
     resumeRunning =
@@ -712,7 +784,7 @@
   }
 
   /* =========================================================
-     SESSION PAYLOAD
+     SESSION STATE
      ========================================================= */
 
   function buildSessionState(
@@ -841,69 +913,16 @@
     };
   }
 
-  /* =========================================================
-     START VISIT
-     ========================================================= */
-
-  async function startVisit() {
-    if (
-      visitStarted ||
-      visitStarting
-    ) {
-      return;
-    }
-
-    visitStarting =
-      true;
-
-    updateScroll();
-
-    try {
-      const result =
-        await post(
-          buildVisit(),
-        );
-
-      if (
-        result.ok
-      ) {
-        visitStarted =
-          true;
-      }
-    } catch {
-      // Initial request failed.
-    } finally {
-      visitStarting =
-        false;
-    }
-  }
-
-  /* =========================================================
-     END / PAGE LEAVE
-     ========================================================= */
-
-  function sendPendingEndBeacon() {
-    if (
-      !visitStarted ||
-      pendingEndSent
-    ) {
-      return;
-    }
-
-    pendingEndSent =
-      true;
-
+  function sendBeaconEvent(
+    eventType,
+  ) {
     const payload =
       JSON.stringify(
         buildSessionState(
-          "pending_end",
+          eventType,
         ),
       );
 
-    /*
-     * sendBeacon je primarna metoda jer je dizajnirana
-     * za slanje podataka dok se dokument zatvara.
-     */
     if (
       typeof navigator
           .sendBeacon ===
@@ -911,28 +930,25 @@
     ) {
       try {
         const queued =
-          navigator.sendBeacon(
-            CONFIG.endpoint,
+          navigator
+            .sendBeacon(
+              CONFIG.endpoint,
 
-            new Blob(
-              [payload],
-              {
-                type:
-                  "text/plain;charset=UTF-8",
-              },
-            ),
-          );
+              new Blob(
+                [payload],
+                {
+                  type:
+                    "text/plain;charset=UTF-8",
+                },
+              ),
+            );
 
         if (queued) {
-          return;
+          return true;
         }
       } catch {}
     }
 
-    /*
-     * Fallback ako sendBeacon nije dostupan
-     * ili browser odbije queueati request.
-     */
     try {
       void fetch(
         CONFIG.endpoint,
@@ -962,17 +978,243 @@
         },
       );
     } catch {}
+
+    return false;
   }
 
   /* =========================================================
-     RESUME FROM BFCACHE
+     NEW VISIT / RELOAD
+     ========================================================= */
+
+  async function startVisit(
+    retryWithNewSession = true,
+  ) {
+    if (
+      visitStarted ||
+      visitStarting
+    ) {
+      return;
+    }
+
+    visitStarting =
+      true;
+
+    updateScroll();
+
+    try {
+      const result =
+        await post(
+          buildVisit(),
+        );
+
+      /*
+       * Session ID iz sessionStoragea postoji,
+       * ali backend kaže da je već završen.
+       *
+       * Napravi potpuno novi session.
+       */
+      if (
+        result.ok &&
+        result.data?.ended ===
+          true
+      ) {
+        visitStarting =
+          false;
+
+        if (
+          retryWithNewSession
+        ) {
+          createNewSession();
+
+          await startVisit(
+            false,
+          );
+        }
+
+        return;
+      }
+
+      if (
+        result.ok
+      ) {
+        visitStarted =
+          true;
+
+        suspended =
+          false;
+
+        pageLeaveSent =
+          false;
+
+        if (
+          document.visibilityState ===
+          "visible"
+        ) {
+          startHeartbeat();
+
+          /*
+           * Kod refresha stari dokument može malo kasnije
+           * dostaviti svoj pagehide beacon.
+           *
+           * Ovi RESUME zahtjevi poništavaju eventualni
+           * kasni pending_end dok je nova stranica aktivna.
+           */
+          scheduleActiveConfirmation();
+        } else {
+          suspendVisit();
+        }
+      }
+    } catch {
+      // Initial visit request failed.
+    } finally {
+      visitStarting =
+        false;
+    }
+  }
+
+  /* =========================================================
+     HEARTBEAT
+     ========================================================= */
+
+  function startHeartbeat() {
+    if (
+      heartbeatTimer !==
+      null
+    ) {
+      return;
+    }
+
+    if (
+      !visitStarted ||
+      suspended ||
+      pageLeaveSent ||
+      document.visibilityState !==
+        "visible"
+    ) {
+      return;
+    }
+
+    heartbeatTimer =
+      window.setInterval(
+        () => {
+          void sendHeartbeat();
+        },
+        CONFIG.heartbeatInterval,
+      );
+  }
+
+  function stopHeartbeat() {
+    if (
+      heartbeatTimer ===
+      null
+    ) {
+      return;
+    }
+
+    clearInterval(
+      heartbeatTimer,
+    );
+
+    heartbeatTimer =
+      null;
+  }
+
+  async function sendHeartbeat() {
+    if (
+      !visitStarted ||
+      heartbeatRunning ||
+      suspended ||
+      pageLeaveSent ||
+      document.visibilityState !==
+        "visible"
+    ) {
+      return;
+    }
+
+    heartbeatRunning =
+      true;
+
+    try {
+      const result =
+        await post(
+          buildSessionState(
+            "heartbeat",
+          ),
+        );
+
+      if (
+        result.ok &&
+        result.data?.ended ===
+          true
+      ) {
+        stopHeartbeat();
+
+        createNewSession();
+
+        await startVisit();
+
+        return;
+      }
+
+      if (
+        result.ok &&
+        result.data?.active ===
+          true
+      ) {
+        visitStarted =
+          true;
+      }
+    } catch {
+      /*
+       * Ne radimo ništa.
+       *
+       * Sljedeći interval će pokušati opet.
+       * Backend watchdog služi kao fallback ako
+       * browser potpuno nestane.
+       */
+    } finally {
+      heartbeatRunning =
+        false;
+    }
+  }
+
+  /* =========================================================
+     SUSPEND
+     ========================================================= */
+
+  function suspendVisit() {
+    if (
+      !visitStarted ||
+      suspended ||
+      pageLeaveSent
+    ) {
+      return;
+    }
+
+    suspended =
+      true;
+
+    stopHeartbeat();
+
+    /*
+     * Hidden tab NE znači END.
+     *
+     * SUSPEND samo gasi backend heartbeat watchdog.
+     */
+    sendBeaconEvent(
+      "suspend",
+    );
+  }
+
+  /* =========================================================
+     RESUME
      ========================================================= */
 
   async function resumeVisit() {
     if (
       !visitStarted ||
-      !pendingEndSent ||
-      resumeRunning
+      resumeRunning ||
+      pageLeaveSent
     ) {
       return;
     }
@@ -981,20 +1223,12 @@
       true;
 
     try {
-      /*
-       * Beacon nema Promise pa serveru damo malo vremena
-       * da zaprimi pending_end prije resumea.
-       */
-      await new Promise(
-        (resolve) =>
-          setTimeout(
-            resolve,
-            350,
-          ),
-      );
-
       let result = null;
 
+      /*
+       * Suspend beacon možda još putuje prema serveru,
+       * zato imamo nekoliko kratkih retry pokušaja.
+       */
       for (
         let attempt = 0;
         attempt < 3;
@@ -1019,24 +1253,9 @@
           (resolve) =>
             setTimeout(
               resolve,
-              350,
+              300,
             ),
         );
-      }
-
-      if (
-        result?.ok &&
-        result.data?.active ===
-          true
-      ) {
-        /*
-         * Vratili smo se unutar grace perioda.
-         * Session ostaje isti.
-         */
-        pendingEndSent =
-          false;
-
-        return;
       }
 
       if (
@@ -1044,18 +1263,138 @@
         result.data?.ended ===
           true
       ) {
-        /*
-         * Stari session je već završio.
-         * Povratak sada znači novi session.
-         */
-        resetSession();
+        createNewSession();
 
         await startVisit();
+
+        return;
+      }
+
+      if (
+        result?.ok &&
+        result.data?.active ===
+          true
+      ) {
+        suspended =
+          false;
+
+        pageLeaveSent =
+          false;
+
+        startHeartbeat();
       }
     } finally {
       resumeRunning =
         false;
     }
+  }
+
+  /* =========================================================
+     ACTIVE CONFIRMATION
+     ========================================================= */
+
+  function scheduleActiveConfirmation() {
+    /*
+     * Ovo prvenstveno rješava refresh race condition:
+     *
+     * stara stranica:
+     *   pagehide → pending_end
+     *
+     * nova stranica:
+     *   visit/resume → poništi pending_end
+     *
+     * Ako stari beacon kasni, dodatni RESUME ga ponovno
+     * poništi prije 15 s grace perioda.
+     */
+
+    window.setTimeout(
+      () => {
+        if (
+          visitStarted &&
+          !pageLeaveSent &&
+          document.visibilityState ===
+            "visible"
+        ) {
+          void confirmActive();
+        }
+      },
+      750,
+    );
+
+    window.setTimeout(
+      () => {
+        if (
+          visitStarted &&
+          !pageLeaveSent &&
+          document.visibilityState ===
+            "visible"
+        ) {
+          void confirmActive();
+        }
+      },
+      3000,
+    );
+  }
+
+  async function confirmActive() {
+    try {
+      const result =
+        await post(
+          buildSessionState(
+            "resume",
+          ),
+        );
+
+      if (
+        result.ok &&
+        result.data?.ended ===
+          true
+      ) {
+        createNewSession();
+
+        await startVisit();
+
+        return;
+      }
+
+      if (
+        result.ok &&
+        result.data?.active ===
+          true
+      ) {
+        suspended =
+          false;
+
+        startHeartbeat();
+      }
+    } catch {}
+  }
+
+  /* =========================================================
+     PAGE LEAVE
+     ========================================================= */
+
+  function leavePage() {
+    if (
+      !visitStarted ||
+      pageLeaveSent
+    ) {
+      return;
+    }
+
+    pageLeaveSent =
+      true;
+
+    stopHeartbeat();
+
+    /*
+     * Ovo je jedini event koji traži završetak sessiona.
+     *
+     * Backend još čeka 15 s prije stvarnog END-a.
+     */
+    sendBeaconEvent(
+      "pending_end",
+    );
   }
 
   /* =========================================================
@@ -1096,70 +1435,98 @@
   );
 
   /*
-   * VAŽNO:
+   * DRUGI TAB / MINIMIZE
    *
-   * visibilitychange više NE završava session.
+   * NE završava session.
    *
-   * Dakle:
-   *
-   * drugi tab
-   * minimize
-   * druga aplikacija
-   * screen lock
-   *
-   * ne šalju pending_end.
+   * Samo:
+   * heartbeat STOP
+   * SUSPEND backend watchdoga
    */
-
   document.addEventListener(
     "visibilitychange",
     () => {
       if (
         document.visibilityState ===
+        "hidden"
+      ) {
+        suspendVisit();
+
+        return;
+      }
+
+      if (
+        document.visibilityState ===
         "visible"
       ) {
-        /*
-         * Samo osvježi lokalni scroll state.
-         */
         updateScroll();
+
+        void resumeVisit();
       }
     },
   );
 
   /*
-   * Stvarni odlazak sa dokumenta.
+   * Stvarno napuštanje dokumenta.
    */
   window.addEventListener(
     "pagehide",
     () => {
-      sendPendingEndBeacon();
+      leavePage();
     },
   );
 
   /*
-   * Dodatni fallback za browsere kod kojih pagehide
-   * nije prvi lifecycle event pri odlasku.
+   * Fallback.
    *
-   * pendingEndSent sprječava dupli beacon.
+   * pageLeaveSent sprječava dupli request.
    */
   window.addEventListener(
     "beforeunload",
     () => {
-      sendPendingEndBeacon();
+      leavePage();
     },
   );
 
   /*
-   * Ako se stranica vrati iz Back/Forward Cachea,
-   * pokušaj poništiti pending_end.
+   * Back/Forward Cache.
+   *
+   * pagehide je možda poslao pending_end,
+   * pa ga po povratku poništavamo.
    */
   window.addEventListener(
     "pageshow",
     (event) => {
       if (
-        event.persisted &&
-        pendingEndSent
+        event.persisted
       ) {
+        pageLeaveSent =
+          false;
+
+        suspended =
+          true;
+
         void resumeVisit();
+
+        scheduleActiveConfirmation();
+      }
+    },
+  );
+
+  /*
+   * Ako se internet vrati dok je tab aktivan,
+   * odmah pokušaj potvrditi session.
+   */
+  window.addEventListener(
+    "online",
+    () => {
+      if (
+        document.visibilityState ===
+          "visible" &&
+        visitStarted &&
+        !pageLeaveSent
+      ) {
+        void confirmActive();
       }
     },
   );
