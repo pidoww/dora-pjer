@@ -4,43 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zašto je Dora najbolja cura?</title>
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico"> <!-- Dodano favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
 </head>
-
 <body>
-    <h1>Zašto je Dora najbolja cura?</h1>
+    <header class="top">
+        <h1 id="secret-title">Zašto je Dora najbolja cura?</h1>
+        <p class="tiny-warning">službena i potpuno objektivna stranica</p>
+        <nav>
+            <a href="index.html">početna</a>
+            <a href="youtube.html">vlogovi</a>
+            <a href="#" id="definitely-not-secret" aria-label="nešto sumnjivo">?</a>
+        </nav>
+    </header>
 
-    <div class="content">
-        <p>Dora je jednostavno nevjerojatna. Njena predivna crvena kosa i ljepota svaki me put ostave bez daha. Ali ono što me najviše oduševljava je njena brižnost, uvijek je tu za mene, spremna pružiti podršku i toplinu kad god mi je to potrebno.</p>
+    <main>
+        <section class="paper intro">
+            <p>Dora je jednostavno nevjerojatna. Njena predivna crvena kosa i ljepota svaki me put ostave bez daha. Ali ono što me najviše oduševljava je njena brižnost, uvijek je tu za mene, spremna pružiti podršku i toplinu kad god mi je to potrebno.</p>
 
-        <p>Obožavam njene sendviče i tortilje, nitko ih ne pravi kao ona! Još više me veseli što sa mnom ide na penjanje. Baš mi je drago što se počela penjati sa mnom, i već je postala prava majstorica u penjanju.</p>
+            <p>Obožavam njene sendviče i tortilje, nitko ih ne pravi kao ona! Još više me veseli što sa mnom ide na penjanje. Baš mi je drago što se počela penjati sa mnom, i već je postala prava majstorica u penjanju.</p>
 
-        <p>Jako mi nedostaje svaki put kada nismo zajedno. Dora je tako pametna i domišljata, uvijek me iznenađuje svojim idejama i načinom razmišljanja. Ne mogu zamisliti život bez nje, i neopisivo sam zahvalan što je dio mog života.</p>
+            <p>Jako mi nedostaje svaki put kada nismo zajedno. Dora je tako pametna i domišljata, uvijek me iznenađuje svojim idejama i načinom razmišljanja. Ne mogu zamisliti život bez nje, i neopisivo sam zahvalan što je dio mog života.</p>
+
+            <div class="random-note">update: još uvijek najbolja</div>
+        </section>
+
+        <h2 class="section-title">neki dokazi</h2>
+
+        <section class="photo-wall" aria-label="fotke">
+            <figure class="photo rotate-left">
+                <img src="images/img1.jpg" alt="Dora drži Sivku">
+                <figcaption>Dora drži Sivku</figcaption>
+            </figure>
+
+            <figure class="photo rotate-right">
+                <img src="images/img2.jpg" alt="Dora drži Chipsyja">
+                <figcaption>Dora drži Chipsyja</figcaption>
+            </figure>
+
+            <figure class="photo rotate-left clickable-secret" id="chipsy-secret" title="Chipsy izgleda sumnjivo klikabilno">
+                <img src="images/img3.jpg" alt="Chipsy sjedi na Dori">
+                <figcaption id="chipsy-caption">Chipsy sjedi na Dori <span class="small-text">(normalna slika, sigurno)</span></figcaption>
+            </figure>
+
+            <figure class="photo rotate-right clickable-secret" id="hiking-secret" title="vjetar u kosi">
+                <img src="images/img4.jpg" alt="Dora s lepršavom kosom">
+                <figcaption>Dora s lepršavom kosom</figcaption>
+            </figure>
+        </section>
+
+        <section class="paper friends-section">
+            <h2>ljudi koji su se nekako našli na ovoj stranici</h2>
+
+            <div class="friend-grid">
+                <figure class="photo friend-photo rotate-left" id="friend-secret">
+                    <img src="images/slike%20update%20stranica/slika%20konrad%20i%20maja%20lea.jpeg" alt="Konrad, Maja i Lea">
+                    <figcaption>Konrad, Maja i Lea</figcaption>
+                </figure>
+
+                <figure class="photo friend-photo rotate-right">
+                    <img src="images/slike%20update%20stranica/icici%20selfie%20ljetovanje.jpeg" alt="Selfie iz Ičića">
+                    <figcaption>Ičići arhiva</figcaption>
+                </figure>
+
+                <figure class="photo friend-photo hard-rotate">
+                    <img src="images/slike%20update%20stranica/funny%20slika%20na%20plazi.jpeg" alt="Smiješna slika na plaži">
+                    <figcaption>vrlo ozbiljno ljetovanje</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="youtube-box">
+            <span class="sticker">NOVO!!!*</span>
+            <h2>Dora Pjer Vlogs</h2>
+            <p>da, postoji i YouTube kanal jer očito ova stranica nije bila dovoljna</p>
+            <div class="button-row">
+                <a class="ugly-button" href="youtube.html">vlogovi na ovoj stranici →</a>
+                <a class="ugly-button secondary-button" href="https://www.youtube.com/@Dora_Pjer_Vlogs" target="_blank" rel="noopener noreferrer">otvori kanal ↗</a>
+            </div>
+            <small>* definicija riječi novo je dosta fleksibilna</small>
+        </section>
+
+        <section class="paper random-stuff">
+            <h2>ostalo</h2>
+            <p>Ova stranica možda sadrži stvari koje nisu baš odmah vidljive.</p>
+            <p>Nema posebnog razloga zašto ovo piše ovdje.</p>
+            <p class="suspicious">pogotovo nemoj previše puta kliknuti Chipsyja. ni naslov. ni onu sliku s kosom.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>napravljeno uz previše slobodnog vremena</p>
+        <p class="footer-secret">© <span data-current-year></span> Dora &amp; Pjer</p>
+    </footer>
+
+    <div id="meme-popup" class="meme-popup hidden" role="dialog" aria-modal="true" aria-label="beskoristan popup">
+        <button id="close-meme" type="button" aria-label="zatvori">x</button>
+        <img id="meme-image" src="" alt="random cursed slika">
+        <p id="meme-text">čestitam. našao si nešto potpuno beskorisno.</p>
     </div>
 
-    <div class="images">
-        <div class="image-container">
-            <img src="images/img1.jpg" alt="Slika 1">
-            <p class="caption">Dora drži Sivku</p>
-        </div>
-
-        <div class="image-container">
-            <img src="images/img2.jpg" alt="Slika 2">
-            <p class="caption">Dora drži Chipsyja</p>
-        </div>
-
-        <div class="image-container">
-            <img src="images/img3.jpg" alt="Slika 3">
-            <p class="caption">Chipsy sjedi na Dori</p>
-        </div>
-
-        <div class="image-container">
-            <img src="images/img4.jpg" alt="Slika 4">
-            <p class="caption">Dora s lepršavom kosom</p>
-        </div>
-    </div>
+    <div id="chip-layer" class="chip-layer" aria-hidden="true"></div>
 
     <script src="/main.js"></script>
+    <script src="/fun.js"></script>
 </body>
 </html>
