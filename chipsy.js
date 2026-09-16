@@ -2,7 +2,8 @@
     "use strict";
 
     const hammer = document.getElementById("schrodinger-hammer");
-    const box = document.getElementById("schrodinger-box");
+    const target = document.getElementById("schrodinger-target");
+    const photo = document.getElementById("schrodinger-photo");
     const message = document.getElementById("bonk-message");
     const countElement = document.getElementById("bonk-count");
     const bonkButton = document.getElementById("bonk-button");
@@ -17,7 +18,7 @@
         "Schrödinger nije ovo stavio u originalni eksperiment.",
         "BONK. valna funkcija se osjeća ugroženo.",
         "Chipsy odbija komentirati događaj.",
-        "kutija je sada 12% manje kvantna.",
+        "laboratorij je sada 12% manje kvantan.",
         "mjerenje je izvršeno vrlo neprofesionalno.",
         "peer review je upravo napustio chat.",
         "čips je opažen. eksperiment je kompromitiran.",
@@ -38,15 +39,15 @@
         hammer.classList.add("bonk");
     }
 
-    function shakeBox() {
-        if (!box) return;
+    function shakeTarget() {
+        if (!target) return;
 
-        box.animate(
+        target.animate(
             [
                 { transform: "translateX(0) rotate(3deg)" },
-                { transform: "translateX(-8px) rotate(-3deg)" },
-                { transform: "translateX(9px) rotate(5deg)" },
-                { transform: "translateX(-5px) rotate(0deg)" },
+                { transform: "translateX(-10px) rotate(-5deg)" },
+                { transform: "translateX(9px) rotate(7deg)" },
+                { transform: "translateX(-4px) rotate(0deg)" },
                 { transform: "translateX(0) rotate(3deg)" }
             ],
             {
@@ -54,6 +55,17 @@
                 easing: "linear"
             }
         );
+
+        if (photo) {
+            photo.animate(
+                [
+                    { filter: "contrast(1)", transform: "scale(1)" },
+                    { filter: "contrast(1.6)", transform: "scale(.96)" },
+                    { filter: "contrast(1)", transform: "scale(1)" }
+                ],
+                { duration: 330 }
+            );
+        }
     }
 
     function randomizeCat() {
@@ -72,7 +84,7 @@
         bonks += 1;
 
         animateHammer();
-        shakeBox();
+        shakeTarget();
         window.doraSite?.spawnChipCan(Math.min(2 + bonks, 12));
 
         if (countElement) countElement.textContent = String(bonks);
@@ -87,7 +99,7 @@
         }
 
         if (bonks === 15 && message) {
-            message.textContent = "15 BONKOVA. SCHRÖDINGER JE NAPUSTIO LABORATORIJ.";
+            message.textContent = "15 BONKOVA. LABORATORIJ JE PRESTAO GLUMITI DA JE OZBILJAN.";
             document.body.classList.add("trash-mode");
             window.doraSite?.spawnChipCan(30);
         }
