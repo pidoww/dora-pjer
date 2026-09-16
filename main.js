@@ -6,16 +6,28 @@
       "https://kkvdaedxequoqfyyhavp.supabase.co/functions/v1/track-visit",
   };
 
-  let sessionId =
-    createSessionId();
-
+  let sessionId = createSessionId();
   let maxScroll = 0;
 
   let visitStarted = false;
   let visitStarting = false;
 
+  /*
+   * Je li za trenutni session pokrenut pending_end.
+   *
+   * Ovo NE znači da je unload beacon već poslan.
+   */
   let pendingEndDispatched = false;
   let pendingEndPromise = null;
+
+  /*
+   * Posebno pratimo unload beacon.
+   *
+   * Ovo je bitno jer visibilitychange može prvo poslati
+   * obični fetch, ali pagehide i dalje mora imati pravo
+   * poslati svoj pouzdani beacon fallback.
+   */
+  let unloadBeaconSent = false;
 
   let resumeRunning = false;
 
@@ -25,9 +37,7 @@
 
   function setupExternalLinks() {
     document
-      .querySelectorAll(
-        'a[href^="http"]',
-      )
+      .querySelectorAll('a[href^="http"]')
       .forEach((link) => {
         try {
           const url =
@@ -53,11 +63,8 @@
         "img:not([loading])",
       )
       .forEach((img) => {
-        img.loading =
-          "lazy";
-
-        img.decoding =
-          "async";
+        img.loading = "lazy";
+        img.decoding = "async";
       });
   }
 
@@ -78,10 +85,7 @@
           event.target;
 
         if (
-          !(
-            target instanceof
-            Element
-          )
+          !(target instanceof Element)
         ) {
           return;
         }
@@ -124,14 +128,10 @@
 
         event.preventDefault();
 
-        destination
-          .scrollIntoView({
-            behavior:
-              "smooth",
-
-            block:
-              "start",
-          });
+        destination.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       },
     );
   }
@@ -139,20 +139,17 @@
   function setupCurrentYear() {
     const year =
       String(
-        new Date()
-          .getFullYear(),
+        new Date().getFullYear(),
       );
 
     document
       .querySelectorAll(
         "[data-current-year]",
       )
-      .forEach(
-        (element) => {
-          element.textContent =
-            year;
-        },
-      );
+      .forEach((element) => {
+        element.textContent =
+          year;
+      });
   }
 
   /* =========================================================
@@ -185,16 +182,15 @@
       0x80;
 
     const hex =
-      Array.from(bytes)
-        .map(
-          (byte) =>
-            byte
-              .toString(16)
-              .padStart(
-                2,
-                "0",
-              ),
-        );
+      Array.from(bytes).map(
+        (byte) =>
+          byte
+            .toString(16)
+            .padStart(
+              2,
+              "0",
+            ),
+      );
 
     return [
       hex
@@ -234,8 +230,13 @@
     pendingEndPromise =
       null;
 
+    unloadBeaconSent =
+      false;
+
     resumeRunning =
       false;
+
+    updateScroll();
   }
 
   /* =========================================================
@@ -253,18 +254,14 @@
         ?.brands;
 
     if (
-      Array.isArray(
-        brands,
-      )
+      Array.isArray(brands)
     ) {
       const names =
         brands.map(
           (item) =>
             String(
-              item.brand ||
-                "",
-            )
-              .toLowerCase(),
+              item.brand || "",
+            ).toLowerCase(),
         );
 
       if (
@@ -293,31 +290,21 @@
     }
 
     if (
-      ua.includes(
-        "Firefox/",
-      )
+      ua.includes("Firefox/")
     ) {
       return "Firefox";
     }
 
     if (
-      ua.includes(
-        "Chrome/",
-      ) &&
-      !ua.includes(
-        "Edg/",
-      )
+      ua.includes("Chrome/") &&
+      !ua.includes("Edg/")
     ) {
       return "Chrome";
     }
 
     if (
-      ua.includes(
-        "Safari/",
-      ) &&
-      !ua.includes(
-        "Chrome/",
-      )
+      ua.includes("Safari/") &&
+      !ua.includes("Chrome/")
     ) {
       return "Safari";
     }
@@ -335,17 +322,13 @@
       "";
 
     if (
-      /Windows/i.test(
-        ua,
-      )
+      /Windows/i.test(ua)
     ) {
       return "Windows";
     }
 
     if (
-      /Android/i.test(
-        ua,
-      )
+      /Android/i.test(ua)
     ) {
       return "Android";
     }
@@ -359,23 +342,15 @@
     }
 
     if (
-      /Mac/i.test(
-        platform,
-      ) ||
-      /Mac OS/i.test(
-        ua,
-      )
+      /Mac/i.test(platform) ||
+      /Mac OS/i.test(ua)
     ) {
       return "macOS";
     }
 
     if (
-      /Linux/i.test(
-        platform,
-      ) ||
-      /Linux/i.test(
-        ua,
-      )
+      /Linux/i.test(platform) ||
+      /Linux/i.test(ua)
     ) {
       return "Linux";
     }
@@ -385,8 +360,7 @@
 
   function detectMobile() {
     const uaData =
-      navigator
-        .userAgentData;
+      navigator.userAgentData;
 
     if (
       uaData &&
@@ -457,17 +431,10 @@
 
     const documentHeight =
       Math.max(
-        root.scrollHeight ||
-          0,
-
-        body?.scrollHeight ||
-          0,
-
-        root.offsetHeight ||
-          0,
-
-        body?.offsetHeight ||
-          0,
+        root.scrollHeight || 0,
+        body?.scrollHeight || 0,
+        root.offsetHeight || 0,
+        body?.offsetHeight || 0,
       );
 
     const viewportHeight =
@@ -512,7 +479,7 @@
   }
 
   /* =========================================================
-     PAYLOADS
+     VISIT PAYLOAD
      ========================================================= */
 
   function buildVisit() {
@@ -703,6 +670,10 @@
     };
   }
 
+  /* =========================================================
+     SESSION STATE PAYLOAD
+     ========================================================= */
+
   function buildSessionState(
     eventType,
   ) {
@@ -866,12 +837,17 @@
   }
 
   /* =========================================================
-     PENDING END
+     PENDING END - NORMAL FETCH
      ========================================================= */
 
   function sendPendingEnd() {
     if (
-      !visitStarted ||
+      !visitStarted
+    ) {
+      return Promise.resolve();
+    }
+
+    if (
       pendingEndDispatched
     ) {
       return (
@@ -883,6 +859,16 @@
     pendingEndDispatched =
       true;
 
+    /*
+     * Namjerno NE vraćamo pendingEndDispatched na false
+     * ako fetch baci error.
+     *
+     * Ako se korisnik vrati, želimo da RESUME svejedno
+     * ode serveru i poništi eventualni pending end.
+     *
+     * Ako korisnik stvarno zatvori tab, pagehide beacon
+     * će napraviti zaseban pokušaj.
+     */
     pendingEndPromise =
       post(
         buildSessionState(
@@ -891,14 +877,6 @@
         true,
       )
         .catch(() => {
-          /*
-           * Ako normalni fetch zakaže dok je
-           * dokument još živ, unload fallback
-           * i dalje smije pokušati.
-           */
-          pendingEndDispatched =
-            false;
-
           return null;
         });
 
@@ -906,16 +884,32 @@
   }
 
   /* =========================================================
-     UNLOAD FALLBACK
+     PENDING END - UNLOAD BEACON
      ========================================================= */
 
   function sendPendingEndBeacon() {
+    /*
+     * Ovdje namjerno NE provjeravamo:
+     *
+     * pendingEndDispatched
+     *
+     * jer je upravo to uzrokovalo prethodni bug.
+     *
+     * visibilitychange je možda pokušao poslati normalni
+     * fetch, ali taj request browser može ubiti tijekom
+     * zatvaranja taba.
+     *
+     * Zato stvarni unload uvijek dobiva jedan beacon pokušaj.
+     */
     if (
       !visitStarted ||
-      pendingEndDispatched
+      unloadBeaconSent
     ) {
       return;
     }
+
+    unloadBeaconSent =
+      true;
 
     pendingEndDispatched =
       true;
@@ -934,18 +928,17 @@
     ) {
       try {
         const queued =
-          navigator
-            .sendBeacon(
-              CONFIG.endpoint,
+          navigator.sendBeacon(
+            CONFIG.endpoint,
 
-              new Blob(
-                [payload],
-                {
-                  type:
-                    "text/plain;charset=UTF-8",
-                },
-              ),
-            );
+            new Blob(
+              [payload],
+              {
+                type:
+                  "text/plain;charset=UTF-8",
+              },
+            ),
+          );
 
         if (queued) {
           return;
@@ -953,6 +946,10 @@
       } catch {}
     }
 
+    /*
+     * Ako sendBeacon nije dostupan ili browser
+     * odbije queueati request, pokušaj keepalive fetch.
+     */
     try {
       void fetch(
         CONFIG.endpoint,
@@ -1002,12 +999,17 @@
 
     try {
       /*
-       * Ako je pending_end poslan normalnim fetchom,
-       * pričekaj da server prvo zaprimi njega.
+       * Ako je visibilitychange poslao normalni pending_end
+       * fetch, pričekamo ga.
        *
-       * Time izbjegavamo:
-       * resume -> pending_end
-       * race condition.
+       * Time sprječavamo race:
+       *
+       * resume
+       * ↓
+       * pending_end
+       *
+       * jer bi u tom slučaju pending_end mogao doći nakon
+       * resumea i pogrešno završiti aktivni session.
        */
       if (
         pendingEndPromise
@@ -1017,8 +1019,11 @@
         } catch {}
       } else {
         /*
-         * Kod bfcache / beacon slučaja nemamo
-         * HTTP Promise pa serveru damo malo vremena.
+         * Ako je postojao samo sendBeacon/pagehide,
+         * nemamo Promise koji možemo čekati.
+         *
+         * Kratko čekanje daje beaconu vremena da dođe
+         * do servera prije resume requesta.
          */
         await new Promise(
           (resolve) =>
@@ -1032,8 +1037,8 @@
       let result = null;
 
       /*
-       * Par kratkih retry pokušaja jer je RESUME
-       * važniji od običnog analytics requesta.
+       * Resume je važan jer sprječava lažni END.
+       * Zato imamo nekoliko kratkih retry pokušaja.
        */
       for (
         let attempt = 0;
@@ -1070,13 +1075,19 @@
           true
       ) {
         /*
-         * Isti session nastavlja.
+         * Session je još aktivan.
+         *
+         * Ponovno dopuštamo budući pending end i
+         * budući unload beacon.
          */
         pendingEndDispatched =
           false;
 
         pendingEndPromise =
           null;
+
+        unloadBeaconSent =
+          false;
 
         return;
       }
@@ -1087,10 +1098,10 @@
           true
       ) {
         /*
-         * Grace period je već prošao.
-         * Stari session je završen.
+         * Korisnik se vratio tek nakon što je grace
+         * period već završio stari session.
          *
-         * Tek sada stvaramo novi.
+         * Tada je ispravno napraviti novi session.
          */
         resetSession();
 
@@ -1100,10 +1111,9 @@
       }
 
       /*
-       * Ako se serveru nikako ne možemo javiti,
-       * ne stvaramo odmah novi session.
-       *
-       * Time izbjegavamo nepotrebne duplikate.
+       * Ako server trenutno nije dostupan, ne stvaramo
+       * automatski novi session jer bi to moglo proizvesti
+       * duplikate.
        */
     } finally {
       resumeRunning =
@@ -1149,17 +1159,16 @@
   );
 
   /*
-   * Tab/app ode u background.
+   * Tab samo ode u background.
    *
-   * Ne završavamo session odmah.
-   * Server samo pokrene 15 s grace period.
+   * Pokrećemo pending_end, ali backend još NE završava
+   * posjet. Ima 15 sekundi grace perioda.
    */
   document.addEventListener(
     "visibilitychange",
     () => {
       if (
-        document
-          .visibilityState ===
+        document.visibilityState ===
         "hidden"
       ) {
         void sendPendingEnd();
@@ -1168,8 +1177,7 @@
       }
 
       if (
-        document
-          .visibilityState ===
+        document.visibilityState ===
         "visible"
       ) {
         void resumeVisit();
@@ -1178,8 +1186,10 @@
   );
 
   /*
-   * Fallback ako browser ode/unloada dokument,
-   * a visibilitychange prije toga nije uspio.
+   * STVARNI ODLAZAK / UNLOAD
+   *
+   * Čak i ako je visibilitychange već pokušao poslati
+   * pending_end fetch, ovdje šaljemo zaseban beacon.
    */
   window.addEventListener(
     "pagehide",
@@ -1188,6 +1198,12 @@
     },
   );
 
+  /*
+   * Dodatni browser fallback.
+   *
+   * unloadBeaconSent sprječava da pagehide +
+   * beforeunload pošalju dva beacona.
+   */
   window.addEventListener(
     "beforeunload",
     () => {
@@ -1196,7 +1212,8 @@
   );
 
   /*
-   * Back-forward cache restore.
+   * Ako browser vrati stranicu iz back-forward cachea,
+   * ista sesija se pokušava nastaviti.
    */
   window.addEventListener(
     "pageshow",
