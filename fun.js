@@ -2,6 +2,7 @@
     "use strict";
 
     const ASSET = "images/slike%20update%20stranica/";
+    const SHINY_CHANCE = 1 / 64;
 
     const crazyImages = [
         `${ASSET}crazy%201.jpeg`,
@@ -29,11 +30,27 @@
     let chipsyClicks = 0;
     let hikingClicks = 0;
     let friendClicks = 0;
+    let ankleClicks = 0;
     let footerClicks = 0;
     let typed = "";
+    let lastMemeImage = "";
 
     function random(array) {
         return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function randomDifferent(array, previous) {
+        if (array.length < 2) return array[0];
+
+        let picked = random(array);
+        let guard = 0;
+
+        while (picked === previous && guard < 12) {
+            picked = random(array);
+            guard += 1;
+        }
+
+        return picked;
     }
 
     function ensurePopup() {
@@ -70,13 +87,92 @@
 
         if (!image || !text) return;
 
-        image.src = imageOverride || random(crazyImages);
+        const nextImage = imageOverride || randomDifferent(crazyImages, lastMemeImage);
+        lastMemeImage = nextImage;
+
+        image.src = nextImage;
         text.textContent = customText || random(memeTexts);
 
         popup.classList.remove("hidden");
         popup.classList.remove("meme-shake");
         void popup.offsetWidth;
         popup.classList.add("meme-shake");
+    }
+
+    function ensureLightbox() {
+        let lightbox = document.getElementById("image-lightbox");
+
+        if (lightbox) return lightbox;
+
+        lightbox = document.createElement("div");
+        lightbox.id = "image-lightbox";
+        lightbox.className = "image-lightbox hidden";
+        lightbox.innerHTML = `
+            <div class="image-lightbox-card">
+                <button class="image-lightbox-close" type="button" aria-label="zatvori">x</button>
+                <img id="image-lightbox-image" src="" alt="povećana slika">
+                <p class="image-lightbox-caption" id="image-lightbox-caption"></p>
+                <p class="image-lightbox-hint" id="image-lightbox-hint">klikni X ili izvan slike za zatvaranje</p>
+            </div>
+        `;
+
+        document.body.appendChild(lightbox);
+
+        lightbox.querySelector(".image-lightbox-close")?.addEventListener("click", () => {
+            lightbox.classList.add("hidden");
+        });
+
+        lightbox.addEventListener("click", event => {
+            if (event.target === lightbox) {
+                lightbox.classList.add("hidden");
+            }
+        });
+
+        const largeImage = lightbox.querySelector("#image-lightbox-image");
+
+        largeImage?.addEventListener("click", () => {
+            const action = largeImage.dataset.action || "";
+
+            if (action === "chipsy") {
+                spawnChipCan(14);
+                chipsyClicks += 1;
+
+                if (!location.pathname.endsWith("/chipsy.html") && !location.pathname.endsWith("chipsy.html")) {
+                    window.setTimeout(() => {
+                        location.href = "chipsy.html";
+                    }, 420);
+                }
+            }
+
+            if (action === "icici-youtube") {
+                location.href = "youtube.html";
+            }
+        });
+
+        return lightbox;
+    }
+
+    function openImage(src, caption = "", action = "") {
+        const lightbox = ensureLightbox();
+        const image = lightbox.querySelector("#image-lightbox-image");
+        const captionElement = lightbox.querySelector("#image-lightbox-caption");
+        const hint = lightbox.querySelector("#image-lightbox-hint");
+
+        if (!image || !captionElement || !hint) return;
+
+        image.src = src;
+        image.dataset.action = action;
+        captionElement.textContent = caption;
+
+        if (action === "chipsy") {
+            hint.textContent = "klikni još jednom na Chipsyja";
+        } else if (action === "icici-youtube") {
+            hint.textContent = "klikni sliku još jednom → Dora Pjer Vlogs";
+        } else {
+            hint.textContent = "klikni X ili izvan slike za zatvaranje";
+        }
+
+        lightbox.classList.remove("hidden");
     }
 
     function ensureChipLayer() {
@@ -109,10 +205,62 @@
         }
     }
 
-    const title = document.getElementById("secret-title");
+    function ensureGameShortcut() {
+        if (document.querySelector(".game-shortcut")) return;
+        if (location.pathname.endsWith("snake.html")) return;
+
+        const link = document.createElement("a");
+        link.className = "game-shortcut";
+        link.href = "snake.html";
+        link.textContent = "🎮 DORA VS DINO";
+        document.body.appendChild(link);
+    }
+
+    function isChipsyImage(image) {
+        const src = decodeURIComponent(image.getAttribute("src") || "").toLowerCase();
+        const alt = (image.getAttribute("alt") || "").toLowerCase();
+
+        return (
+            image.id === "chipsy-lab-image" ||
+            image.classList.contains("chipsy-photo") ||
+            src.includes("chipsi slika") ||
+            src.endsWith("img2.jpg") ||
+            src.endsWith("img3.jpg") ||
+            alt.includes("chipsy")
+        );
+    }
+
+    function chipsyHit() {
+        chipsyClicks += 1;
+        spawnChipCan(Math.min(1 + chipsyClicks, 9));
+
+        const caption = document.getElementById("chipsy-caption");
+
+        if (chipsyClicks === 2 && caption) {
+            caption.textContent = "Chipsy je proizveo čips???";
+        }
+
+        if (chipsyClicks === 4) {
+            openImage(
+                `${ASSET}chipsi%20slika.jpeg`,
+                "CHIPSY DROP. klikni još jednom.",
+                "chipsy"
+            );
+        }
+
+        if (chipsyClicks >= 8 && !location.pathname.endsWith("chipsy.html")) {
+            spawnChipCan(20);
+            window.setTimeout(() => {
+                location.href = "chipsy.html";
+            }, 650);
+        }
+    }
+
+    const title = document.querySelector(".top h1");
 
     title?.addEventListener("click", () => {
         titleClicks += 1;
+        showMeme(`naslov click #${titleClicks} · slika mora biti drugačija`);
 
         if (titleClicks === 3) {
             title.textContent = "zašto toliko klikaš naslov";
@@ -124,73 +272,81 @@
 
         if (titleClicks >= 7) {
             document.body.classList.toggle("trash-mode");
-            title.textContent = "Zašto je Dora najbolja cura?";
-            showMeme("oke sam si ovo tražio");
+            if (title.id === "secret-title") {
+                title.textContent = "Zašto je Dora najbolja cura?";
+            }
             spawnChipCan(6);
             titleClicks = 0;
         }
     });
 
-    const chipsy = document.getElementById("chipsy-secret");
+    document.querySelectorAll("img:not(.no-lightbox)").forEach(image => {
+        if (image.id === "meme-image") return;
 
-    chipsy?.addEventListener("click", () => {
-        chipsyClicks += 1;
-        const caption = document.getElementById("chipsy-caption");
+        image.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
 
-        spawnChipCan(Math.min(1 + chipsyClicks, 8));
+            if (image.id === "icici-photo") {
+                openImage(
+                    `${ASSET}funny%20slika%20na%20plazi.jpeg`,
+                    "Ičići arhiva 2/2 · klikni opet i ideš na vlogove",
+                    "icici-youtube"
+                );
+                return;
+            }
 
-        if (chipsyClicks === 2 && caption) {
-            caption.textContent = "Chipsy je proizveo čips???";
-        }
+            const ankle = image.closest("#ankle-photo");
+            if (ankle) {
+                ankleClicks += 1;
 
-        if (chipsyClicks === 4 && caption) {
-            caption.textContent = "nemoj ga više provocirati";
-        }
+                if (ankleClicks >= 3) {
+                    const caption = ankle.querySelector("figcaption");
+                    ankle.classList.remove("ankle-fall");
+                    void ankle.offsetWidth;
+                    ankle.classList.add("ankle-fall");
 
-        if (chipsyClicks === 5) {
-            showMeme("CHIPSY DROPS CHIPS. znanost još nema objašnjenje.", `${ASSET}chipsi%20slika.jpeg`);
-        }
+                    if (caption) caption.textContent = "i onda je stvar stvarno krenula nizbrdo";
 
-        if (chipsyClicks === 7 && caption) {
-            caption.textContent = "zadnje upozorenje.";
-        }
+                    window.setTimeout(() => {
+                        ankle.classList.remove("ankle-fall");
+                        if (caption) caption.textContent = "par trenutaka prije nego Dora padne i istegne gležanj";
+                    }, 2200);
 
-        if (chipsyClicks >= 8) {
-            spawnChipCan(18);
-            window.setTimeout(() => {
-                location.href = "chipsy.html";
-            }, 900);
-        }
-    });
+                    ankleClicks = 0;
+                }
+            }
 
-    const hiking = document.getElementById("hiking-secret");
+            if (image.closest("#hiking-secret")) {
+                hikingClicks += 1;
 
-    hiking?.addEventListener("click", () => {
-        hikingClicks += 1;
+                if (hikingClicks >= 4) {
+                    location.href = "hikes.html";
+                    return;
+                }
+            }
 
-        if (hikingClicks === 2) {
-            hiking.style.transform = "rotate(7deg)";
-        }
+            if (image.closest("#friend-secret")) {
+                friendClicks += 1;
+                if (friendClicks >= 3) {
+                    showMeme("Konrad + Maja Leea (MLMZ) squad easter egg", `${ASSET}slika%20konrad%20i%20maja%20lea.jpeg`);
+                    friendClicks = 0;
+                }
+            }
 
-        if (hikingClicks >= 4) {
-            location.href = "hikes.html";
-        }
-    });
+            if (isChipsyImage(image)) {
+                chipsyHit();
+                openImage(image.src, image.alt || "Chipsy", "chipsy");
+                return;
+            }
 
-    const friend = document.getElementById("friend-secret");
-
-    friend?.addEventListener("click", () => {
-        friendClicks += 1;
-
-        if (friendClicks >= 3) {
-            showMeme("squad easter egg pronađen", `${ASSET}slika%20konrad%20i%20maja%20lea.jpeg`);
-            friendClicks = 0;
-        }
+            openImage(image.src, image.alt || "slika");
+        });
     });
 
     const question = document.getElementById("definitely-not-secret");
 
-    question?.addEventListener("click", (event) => {
+    question?.addEventListener("click", event => {
         event.preventDefault();
         showMeme("ovo je doslovno samo upitnik. ili možda nije.");
     });
@@ -206,7 +362,13 @@
         }
     });
 
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape") {
+            document.getElementById("image-lightbox")?.classList.add("hidden");
+            document.getElementById("meme-popup")?.classList.add("hidden");
+            return;
+        }
+
         if (event.key.length !== 1) return;
 
         typed += event.key.toLowerCase();
@@ -219,12 +381,12 @@
 
         if (typed.endsWith("chipsy")) {
             spawnChipCan(15);
-            showMeme("CHIPSY MODE", `${ASSET}chipsi%20slika.jpeg`);
+            openImage(`${ASSET}chipsi%20slika.jpeg`, "CHIPSY MODE · klikni ga", "chipsy");
             typed = "";
         }
     });
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener("click", event => {
         const popup = document.getElementById("meme-popup");
         if (!popup || popup.classList.contains("hidden")) return;
 
@@ -233,8 +395,18 @@
         }
     });
 
+    ensureGameShortcut();
+
+    if (Math.random() < SHINY_CHANCE) {
+        document.body.classList.add("shiny-event");
+        window.setTimeout(() => {
+            showMeme("✨ SHINY PAGE! šansa: 1/64 (1.5625%). ništa korisno nisi dobio.");
+        }, 650);
+    }
+
     window.doraSite = {
         showMeme,
+        openImage,
         spawnChipCan,
         crazyImages
     };
