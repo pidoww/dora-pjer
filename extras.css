@@ -6,6 +6,15 @@
     cursor: zoom-in;
 }
 
+.chipsy-photo {
+    cursor: pointer !important;
+}
+
+.photo-help {
+    text-align: center;
+    margin-top: 22px;
+}
+
 .game-shortcut {
     position: fixed;
     right: 14px;
@@ -27,7 +36,55 @@
     box-shadow: 2px 2px 0 #111;
 }
 
-/* povećavanje bilo koje slike */
+/* malo uredniji raspored slika, ali i dalje namjerno malo krivo */
+.photo-wall {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+}
+
+.photo-wall .photo {
+    width: 100%;
+}
+
+.friend-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
+    max-width: 760px;
+    margin: 0 auto;
+    align-items: start;
+}
+
+.friend-grid .photo {
+    width: 100%;
+}
+
+.hike-wall {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 28px auto 0;
+    align-items: start;
+}
+
+.hike-wall .photo {
+    width: 100%;
+    margin: 0 !important;
+}
+
+.single-hike {
+    display: flex;
+    justify-content: center;
+}
+
+.single-hike .photo {
+    width: min(360px, 90vw);
+}
+
+/* povećavanje slika - samo X zatvara */
 .image-lightbox {
     position: fixed;
     inset: 0;
@@ -35,7 +92,7 @@
     display: grid;
     place-items: center;
     padding: 24px;
-    background: rgba(0, 0, 0, .82);
+    background: rgba(0, 0, 0, .84);
 }
 
 .image-lightbox.hidden {
@@ -63,11 +120,8 @@
     cursor: default;
 }
 
+.image-lightbox img[data-action="chypsi"],
 .image-lightbox img[data-action="chipsy"] {
-    cursor: pointer;
-}
-
-.image-lightbox img[data-action="icici-youtube"] {
     cursor: pointer;
 }
 
@@ -94,6 +148,15 @@
     color: white;
     font-weight: bold;
     cursor: pointer;
+}
+
+.chypsi-angry {
+    animation: chypsiAngry .16s steps(2, end) infinite;
+}
+
+@keyframes chypsiAngry {
+    0% { transform: translateX(-2px) rotate(-1deg); filter: saturate(1.1); }
+    100% { transform: translateX(2px) rotate(1deg); filter: saturate(1.7) contrast(1.1); }
 }
 
 /* shiny događaj */
@@ -198,7 +261,7 @@
     font-size: 12px;
 }
 
-/* youtube - izgleda kao kartica, ali player se učita tek na klik */
+/* youtube */
 .video-grid-real {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
@@ -260,23 +323,140 @@
     line-height: 1.45;
 }
 
-/* 8x8 Dora-dinosaur arena */
+/* Dora-dinosaur arena */
 .game-wrapper {
     max-width: 680px;
 }
 
 #snake {
     width: min(560px, 100%);
+    touch-action: none;
+    transition: outline-color .08s ease, transform .08s ease;
 }
 
-.board-note {
+#snake.dino-caught {
+    outline: 6px solid #ffe34f;
+    transform: scale(1.008);
+}
+
+.game-info {
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.game-level {
     display: inline-block;
-    margin: 0 0 12px;
-    padding: 4px 7px;
-    background: #fff088;
+    padding: 2px 7px;
+    background: #ffe66c;
     border: 1px solid #111;
-    font-size: 11px;
     transform: rotate(-1deg);
+}
+
+.game-controls button {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Chypsi page */
+.chipsy-page {
+    background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,0,.09) 0 12px, rgba(255,0,0,.08) 12px 24px),
+        url("images/background.jpg");
+}
+
+.chipsy-hero {
+    text-align: center;
+}
+
+.chipsy-hero h2 {
+    font-size: clamp(34px, 7vw, 72px);
+    margin: 8px 0;
+    color: #b30000;
+    text-shadow: 3px 3px 0 #ffe82f;
+}
+
+.lab {
+    position: relative;
+    min-height: 470px;
+    margin: 28px auto;
+    padding: 20px;
+    overflow: hidden;
+    background: #d7eef4;
+    border: 4px solid #111;
+    box-shadow: 9px 9px 0 #111;
+}
+
+.cat-stage {
+    position: relative;
+    width: min(380px, 90%);
+    margin: 35px auto 0;
+}
+
+.cat-stage img {
+    display: block;
+    width: 100%;
+    max-height: 310px;
+    object-fit: contain;
+    filter: drop-shadow(7px 8px 0 rgba(0,0,0,.22));
+}
+
+.hammer {
+    position: absolute;
+    z-index: 4;
+    right: 13%;
+    top: 42px;
+    font-size: 86px;
+    transform-origin: 85% 85%;
+    user-select: none;
+}
+
+.hammer.bonk {
+    animation: hammerBonk .36s ease-in-out;
+}
+
+@keyframes hammerBonk {
+    0% { transform: rotate(-28deg); }
+    55% { transform: rotate(44deg) translateY(12px); }
+    100% { transform: rotate(-28deg); }
+}
+
+/* Konami - izolirani easter egg, ne vodi na drugu stranicu */
+.konami-mode {
+    animation: konamiHue .7s linear infinite;
+}
+
+.konami-mode .photo {
+    border-style: dashed;
+}
+
+.konami-banner {
+    position: fixed;
+    z-index: 130000;
+    left: 50%;
+    top: 18px;
+    transform: translateX(-50%) rotate(-2deg);
+    padding: 8px 13px;
+    color: #111;
+    background: #7dff70;
+    border: 3px solid #111;
+    box-shadow: 5px 5px 0 #111;
+    font-weight: bold;
+}
+
+@keyframes konamiHue {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+    .photo-wall {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hike-wall {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 650px) {
@@ -295,5 +475,24 @@
     .game-shortcut {
         right: 9px;
         bottom: 9px;
+    }
+
+    .friend-grid,
+    .hike-wall {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .photo-wall {
+        grid-template-columns: 1fr;
+    }
+
+    .game-info {
+        justify-content: center;
+    }
+
+    .game-info > span {
+        min-width: 44%;
     }
 }
