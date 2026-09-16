@@ -1,13 +1,50 @@
-/* sitni dodaci preko postojećeg stila - namjerno nije previše ispeglano */
+/* dodaci preko postojećeg stila — namjerno malo neispeglano */
 
 .photo img,
 .wiki-card img,
-.cat-stage img {
+.cat-stage img,
+.project-card img,
+.physics-card img {
     cursor: zoom-in;
 }
 
-.chipsy-photo {
+.no-lightbox,
+#hiking-secret img,
+#ankle-photo img {
     cursor: pointer !important;
+}
+
+/* malo uredniji raspored, bez gubitka trashy izgleda */
+.homepage-photo-grid,
+.homepage-friends-grid,
+.hike-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    justify-items: center;
+    gap: 30px 24px;
+}
+
+.homepage-photo-grid .photo,
+.homepage-friends-grid .photo,
+.hike-grid .photo {
+    width: min(330px, 100%);
+}
+
+.homepage-photo-grid .photo:nth-child(2),
+.homepage-friends-grid .photo:nth-child(2),
+.hike-grid .photo:nth-child(2n) {
+    margin-top: 28px;
+}
+
+.homepage-photo-grid .photo:nth-child(3),
+.hike-grid .photo:nth-child(3) {
+    margin-top: -6px;
+}
+
+.homepage-friends-grid .photo:nth-child(3) {
+    grid-column: 1 / -1;
+    margin-top: -8px;
 }
 
 .photo-help {
@@ -15,6 +52,7 @@
     margin-top: 22px;
 }
 
+/* game shortcut */
 .game-shortcut {
     position: fixed;
     right: 14px;
@@ -36,55 +74,7 @@
     box-shadow: 2px 2px 0 #111;
 }
 
-/* malo uredniji raspored slika, ali i dalje namjerno malo krivo */
-.photo-wall {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 20px;
-    align-items: start;
-}
-
-.photo-wall .photo {
-    width: 100%;
-}
-
-.friend-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 26px;
-    max-width: 760px;
-    margin: 0 auto;
-    align-items: start;
-}
-
-.friend-grid .photo {
-    width: 100%;
-}
-
-.hike-wall {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-    max-width: 960px;
-    margin: 28px auto 0;
-    align-items: start;
-}
-
-.hike-wall .photo {
-    width: 100%;
-    margin: 0 !important;
-}
-
-.single-hike {
-    display: flex;
-    justify-content: center;
-}
-
-.single-hike .photo {
-    width: min(360px, 90vw);
-}
-
-/* povećavanje slika - samo X zatvara */
+/* lightbox — samo X zatvara */
 .image-lightbox {
     position: fixed;
     inset: 0;
@@ -92,7 +82,7 @@
     display: grid;
     place-items: center;
     padding: 24px;
-    background: rgba(0, 0, 0, .84);
+    background: rgba(0, 0, 0, .86);
 }
 
 .image-lightbox.hidden {
@@ -115,13 +105,13 @@
 .image-lightbox img {
     display: block;
     width: 100%;
-    max-height: 78vh;
+    max-height: 76vh;
     object-fit: contain;
     cursor: default;
 }
 
 .image-lightbox img[data-action="chypsi"],
-.image-lightbox img[data-action="chipsy"] {
+.image-lightbox img[data-action="projects"] {
     cursor: pointer;
 }
 
@@ -137,29 +127,45 @@
 }
 
 .image-lightbox-close {
-    position: absolute;
-    z-index: 3;
-    top: -8px;
-    right: -8px;
-    width: 38px;
-    height: 38px;
+    position: sticky;
+    z-index: 5;
+    float: right;
+    top: 0;
+    width: 42px;
+    height: 42px;
+    margin: -4px -4px -38px 0;
     border: 3px solid #111;
     background: #e62f2f;
     color: white;
     font-weight: bold;
+    font-size: 18px;
     cursor: pointer;
 }
 
 .chypsi-angry {
-    animation: chypsiAngry .16s steps(2, end) infinite;
+    animation: chypsiAngry .18s linear infinite alternate;
+    filter: contrast(1.15) saturate(1.25);
 }
 
 @keyframes chypsiAngry {
-    0% { transform: translateX(-2px) rotate(-1deg); filter: saturate(1.1); }
-    100% { transform: translateX(2px) rotate(1deg); filter: saturate(1.7) contrast(1.1); }
+    from { transform: translate(-3px, 1px) rotate(-1deg); }
+    to { transform: translate(3px, -1px) rotate(1deg); }
 }
 
-/* shiny događaj */
+/* title popup cipher link */
+.meme-code-link {
+    display: inline-block;
+    margin: 2px 0 7px;
+    padding: 5px 9px;
+    border: 2px solid #111;
+    background: #fff176;
+    color: #111;
+    font: bold 12px monospace;
+    text-decoration: none;
+    box-shadow: 3px 3px 0 #111;
+}
+
+/* shiny događaj je namjerno kratak */
 .shiny-event::before {
     content: "SHINY PAGE ✦ 1/64";
     position: fixed;
@@ -171,7 +177,7 @@
     font: bold 12px Arial, sans-serif;
     padding: 8px;
     text-shadow: 1px 1px #fff;
-    animation: shinyPulse .7s steps(2, end) infinite;
+    animation: shinyPulse .55s steps(2, end) infinite;
 }
 
 @keyframes shinyPulse {
@@ -180,24 +186,111 @@
     100% { box-shadow: inset 0 0 0 5px #ff4, 0 0 25px gold; }
 }
 
-/* gležanj lore */
+/* Chypsi čips */
+.chip-layer,
+.leg-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9990;
+    overflow: hidden;
+}
+
+.falling-leg {
+    position: absolute;
+    top: -90px;
+    font-size: clamp(34px, 6vw, 72px);
+    filter: drop-shadow(4px 5px 0 rgba(0,0,0,.25));
+    animation: legRain 1.6s cubic-bezier(.16,.76,.36,1) forwards;
+}
+
+@keyframes legRain {
+    from { transform: translateY(-100px) rotate(0deg); opacity: 0; }
+    12% { opacity: 1; }
+    to { transform: translateY(115vh) rotate(530deg); opacity: .3; }
+}
+
+/* ankle easter egg — prvo noge, onda cijela fotka nestane dolje */
 #ankle-photo {
     cursor: pointer;
+    transform-origin: 50% 95%;
 }
 
-#ankle-photo.ankle-fall {
-    z-index: 20;
-    animation: ankleFall 1.45s cubic-bezier(.38,.05,.74,.42) forwards;
+#ankle-photo.ankle-wobble {
+    animation: ankleWobble .35s linear infinite alternate;
 }
 
-@keyframes ankleFall {
-    0% { transform: rotate(-4deg) translateY(0); }
-    22% { transform: rotate(13deg) translateY(4px); }
-    58% { transform: rotate(54deg) translate(45px, 90px); }
-    100% { transform: rotate(87deg) translate(110px, 175px); opacity: .88; }
+@keyframes ankleWobble {
+    from { transform: rotate(-8deg) translateX(-3px); }
+    to { transform: rotate(7deg) translateX(4px); }
 }
 
-/* wikipedia / Schrödinger dio */
+#ankle-photo.ankle-fall-off {
+    position: relative;
+    z-index: 50;
+    animation: ankleFallOff 2.2s cubic-bezier(.44,.04,.79,.36) forwards;
+}
+
+@keyframes ankleFallOff {
+    0% { transform: rotate(-4deg) translate(0, 0); opacity: 1; }
+    18% { transform: rotate(10deg) translate(8px, 5px); opacity: 1; }
+    45% { transform: rotate(58deg) translate(55px, 110px); opacity: 1; }
+    100% { transform: rotate(130deg) translate(230px, 125vh); opacity: .15; }
+}
+
+.single-hike {
+    min-height: 420px;
+    overflow: visible;
+}
+
+.ankle-intro {
+    margin-top: 65px;
+}
+
+/* Konami */
+.konami-mode {
+    animation: konamiHue 1.1s linear infinite;
+}
+
+.konami-banner {
+    position: fixed;
+    left: 50%;
+    top: 18px;
+    z-index: 130000;
+    transform: translateX(-50%) rotate(-2deg);
+    padding: 10px 16px;
+    background: #111;
+    color: #5dff72;
+    border: 3px solid #5dff72;
+    font: bold 16px monospace;
+    box-shadow: 6px 6px 0 #5dff72;
+}
+
+@keyframes konamiHue {
+    to { filter: hue-rotate(360deg); }
+}
+
+/* DVD easter egg */
+.dvd-bouncer {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 125000;
+    width: 92px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background: #111;
+    color: #fff24a;
+    border: 3px solid #fff24a;
+    border-radius: 50%;
+    font: 900 22px Arial, sans-serif;
+    box-shadow: 0 0 15px #fff24a;
+    will-change: transform;
+}
+
+/* wikipedia / Schrödinger */
 .wiki-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -233,6 +326,20 @@
 .wiki-source {
     font-size: 11px;
     opacity: .68;
+}
+
+.schrodinger-secret {
+    cursor: pointer !important;
+}
+
+.schrodinger-hint {
+    display: table;
+    margin: 12px auto 0;
+    padding: 5px 8px;
+    background: #fff088;
+    border: 1px dashed #111;
+    font: 12px monospace;
+    transform: rotate(-1deg);
 }
 
 .schrodinger-target {
@@ -323,143 +430,185 @@
     line-height: 1.45;
 }
 
-/* Dora-dinosaur arena */
+/* game */
 .game-wrapper {
-    max-width: 680px;
+    max-width: 860px;
+}
+
+.game-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 560px) minmax(150px, 1fr);
+    gap: 18px;
+    align-items: start;
+    justify-content: center;
+}
+
+.game-board-column {
+    min-width: 0;
 }
 
 #snake {
     width: min(560px, 100%);
     touch-action: none;
-    transition: outline-color .08s ease, transform .08s ease;
-}
-
-#snake.dino-caught {
-    outline: 6px solid #ffe34f;
-    transform: scale(1.008);
 }
 
 .game-info {
-    align-items: center;
     flex-wrap: wrap;
 }
 
-.game-level {
-    display: inline-block;
-    padding: 2px 7px;
-    background: #ffe66c;
-    border: 1px solid #111;
-    transform: rotate(-1deg);
+.game-reward-rail {
+    min-height: 220px;
+    padding: 12px;
+    background: #fff7b6;
+    border: 3px dashed #111;
+    transform: rotate(1deg);
 }
 
-.game-controls button {
-    touch-action: manipulation;
-    user-select: none;
-    -webkit-user-select: none;
+.game-reward-rail h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
 }
 
-/* Chypsi page */
-.chipsy-page {
-    background-image:
-        repeating-linear-gradient(45deg, rgba(255,255,0,.09) 0 12px, rgba(255,0,0,.08) 12px 24px),
-        url("images/background.jpg");
-}
-
-.chipsy-hero {
-    text-align: center;
-}
-
-.chipsy-hero h2 {
-    font-size: clamp(34px, 7vw, 72px);
-    margin: 8px 0;
-    color: #b30000;
-    text-shadow: 3px 3px 0 #ffe82f;
-}
-
-.lab {
-    position: relative;
-    min-height: 470px;
-    margin: 28px auto;
-    padding: 20px;
-    overflow: hidden;
-    background: #d7eef4;
-    border: 4px solid #111;
-    box-shadow: 9px 9px 0 #111;
-}
-
-.cat-stage {
-    position: relative;
-    width: min(380px, 90%);
-    margin: 35px auto 0;
-}
-
-.cat-stage img {
-    display: block;
-    width: 100%;
-    max-height: 310px;
-    object-fit: contain;
-    filter: drop-shadow(7px 8px 0 rgba(0,0,0,.22));
-}
-
-.hammer {
-    position: absolute;
-    z-index: 4;
-    right: 13%;
-    top: 42px;
-    font-size: 86px;
-    transform-origin: 85% 85%;
-    user-select: none;
-}
-
-.hammer.bonk {
-    animation: hammerBonk .36s ease-in-out;
-}
-
-@keyframes hammerBonk {
-    0% { transform: rotate(-28deg); }
-    55% { transform: rotate(44deg) translateY(12px); }
-    100% { transform: rotate(-28deg); }
-}
-
-/* Konami - izolirani easter egg, ne vodi na drugu stranicu */
-.konami-mode {
-    animation: konamiHue .7s linear infinite;
-}
-
-.konami-mode .photo {
-    border-style: dashed;
-}
-
-.konami-banner {
-    position: fixed;
-    z-index: 130000;
-    left: 50%;
-    top: 18px;
-    transform: translateX(-50%) rotate(-2deg);
-    padding: 8px 13px;
-    color: #111;
-    background: #7dff70;
+.side-reward {
+    display: none;
+    margin-top: 12px;
+    padding: 7px;
+    background: white;
     border: 3px solid #111;
     box-shadow: 5px 5px 0 #111;
+    transform: rotate(-2deg);
+}
+
+.side-reward.show {
+    display: block;
+    animation: rewardPop .5s ease both;
+}
+
+.side-reward img {
+    display: block;
+    width: 100%;
+    max-height: 190px;
+    object-fit: contain;
+}
+
+.side-reward p {
+    margin: 6px 2px 0;
+    font-size: 11px;
     font-weight: bold;
 }
 
-@keyframes konamiHue {
-    from { filter: hue-rotate(0deg); }
-    to { filter: hue-rotate(360deg); }
+@keyframes rewardPop {
+    0% { transform: rotate(-5deg) scale(.82); opacity: 0; }
+    20% { transform: rotate(3deg) scale(1.05); opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: rotate(-2deg) scale(1); opacity: 0; }
 }
 
-@media (max-width: 900px) {
-    .photo-wall {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .hike-wall {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+#snake.dino-caught {
+    filter: brightness(1.12) contrast(1.05);
 }
 
-@media (max-width: 650px) {
+/* projects + physics */
+.project-grid,
+.physics-grid,
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.project-card,
+.physics-card,
+.timeline-card {
+    background: #fbf6df;
+    border: 3px solid #111;
+    box-shadow: 7px 7px 0 #111;
+    padding: 14px;
+}
+
+.project-card:nth-child(even),
+.physics-card:nth-child(even),
+.timeline-card:nth-child(even) {
+    transform: rotate(1deg);
+}
+
+.project-card:nth-child(odd),
+.physics-card:nth-child(odd),
+.timeline-card:nth-child(odd) {
+    transform: rotate(-.6deg);
+}
+
+.project-card img,
+.physics-card img,
+.timeline-card img {
+    display: block;
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    background: #eee;
+}
+
+.project-card h3,
+.physics-card h3,
+.timeline-card h3 {
+    margin: 12px 0 7px;
+}
+
+.source-row {
+    margin-top: 12px;
+    font-size: 12px;
+}
+
+.physics-formula {
+    display: table;
+    margin: 12px auto;
+    padding: 8px 12px;
+    background: #111;
+    color: #69ff7c;
+    font: bold 18px monospace;
+    transform: rotate(-1deg);
+}
+
+.physics-callout {
+    border-left: 7px solid #d53b3b;
+}
+
+/* mobile */
+@media (max-width: 760px) {
+    .homepage-photo-grid,
+    .homepage-friends-grid,
+    .hike-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .homepage-photo-grid .photo,
+    .homepage-friends-grid .photo,
+    .hike-grid .photo,
+    .homepage-photo-grid .photo:nth-child(n),
+    .homepage-friends-grid .photo:nth-child(n),
+    .hike-grid .photo:nth-child(n) {
+        margin-top: 0;
+        grid-column: auto;
+    }
+
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .game-reward-rail {
+        min-height: 105px;
+    }
+
+    .side-reward {
+        max-width: 210px;
+        margin: 8px auto 0;
+    }
+
+    .side-reward img {
+        max-height: 115px;
+    }
+
     .schrodinger-target {
         position: relative;
         right: auto;
@@ -475,24 +624,5 @@
     .game-shortcut {
         right: 9px;
         bottom: 9px;
-    }
-
-    .friend-grid,
-    .hike-wall {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 520px) {
-    .photo-wall {
-        grid-template-columns: 1fr;
-    }
-
-    .game-info {
-        justify-content: center;
-    }
-
-    .game-info > span {
-        min-width: 44%;
     }
 }
