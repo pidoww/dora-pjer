@@ -1,0 +1,122 @@
+(() => {
+    "use strict";
+
+    const hammer = document.getElementById("schrodinger-hammer");
+    const box = document.getElementById("schrodinger-box");
+    const message = document.getElementById("bonk-message");
+    const countElement = document.getElementById("bonk-count");
+    const bonkButton = document.getElementById("bonk-button");
+    const chipsButton = document.getElementById("chips-button");
+    const image = document.getElementById("chipsy-lab-image");
+
+    if (!bonkButton || !chipsButton) return;
+
+    const ASSET = "images/slike%20update%20stranica/";
+
+    const messages = [
+        "Schrödinger nije ovo stavio u originalni eksperiment.",
+        "BONK. valna funkcija se osjeća ugroženo.",
+        "Chipsy odbija komentirati događaj.",
+        "kutija je sada 12% manje kvantna.",
+        "mjerenje je izvršeno vrlo neprofesionalno.",
+        "peer review je upravo napustio chat.",
+        "čips je opažen. eksperiment je kompromitiran.",
+        "Schrödinger traži godišnji odmor.",
+        "Chipsy: miau. fizika: ???"
+    ];
+
+    let bonks = 0;
+
+    function random(array) {
+        return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function animateHammer() {
+        if (!hammer) return;
+        hammer.classList.remove("bonk");
+        void hammer.offsetWidth;
+        hammer.classList.add("bonk");
+    }
+
+    function shakeBox() {
+        if (!box) return;
+
+        box.animate(
+            [
+                { transform: "translateX(0) rotate(3deg)" },
+                { transform: "translateX(-8px) rotate(-3deg)" },
+                { transform: "translateX(9px) rotate(5deg)" },
+                { transform: "translateX(-5px) rotate(0deg)" },
+                { transform: "translateX(0) rotate(3deg)" }
+            ],
+            {
+                duration: 360,
+                easing: "linear"
+            }
+        );
+    }
+
+    function randomizeCat() {
+        if (!image || bonks % 5 !== 0) return;
+
+        const options = [
+            `${ASSET}chipsi%20slika.jpeg`,
+            `${ASSET}crazy%20slika.jpeg`,
+            `${ASSET}slika%20crazy%20kokos.jpeg`
+        ];
+
+        image.src = random(options);
+    }
+
+    function bonk() {
+        bonks += 1;
+
+        animateHammer();
+        shakeBox();
+        window.doraSite?.spawnChipCan(Math.min(2 + bonks, 12));
+
+        if (countElement) countElement.textContent = String(bonks);
+        if (message) message.textContent = random(messages);
+
+        if (bonks === 5 && message) {
+            message.textContent = "5 BONKOVA. Chipsy je sada istovremeno gladan i nije gladan.";
+        }
+
+        if (bonks === 10) {
+            window.doraSite?.showMeme("10 bonkova. kvantna mehanika je službeno odustala.", `${ASSET}crazy%20slika%20dora%20sova.jpeg`);
+        }
+
+        if (bonks === 15 && message) {
+            message.textContent = "15 BONKOVA. SCHRÖDINGER JE NAPUSTIO LABORATORIJ.";
+            document.body.classList.add("trash-mode");
+            window.doraSite?.spawnChipCan(30);
+        }
+
+        if (bonks >= 20) {
+            bonks = 0;
+            if (countElement) countElement.textContent = "0";
+            if (message) message.textContent = "timeline resetiran. nitko ništa nije vidio.";
+            document.body.classList.remove("trash-mode");
+        }
+
+        randomizeCat();
+    }
+
+    function chipsOnly() {
+        window.doraSite?.spawnChipCan(18);
+
+        if (message) {
+            message.textContent = "uspješna industrijska proizvodnja čipsa.";
+        }
+    }
+
+    bonkButton.addEventListener("click", bonk);
+    chipsButton.addEventListener("click", chipsOnly);
+
+    document.addEventListener("keydown", event => {
+        if (event.key === " " && !event.repeat) {
+            event.preventDefault();
+            bonk();
+        }
+    });
+})();
