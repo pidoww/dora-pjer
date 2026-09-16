@@ -6,14 +6,18 @@
       "https://kkvdaedxequoqfyyhavp.supabase.co/functions/v1/track-visit",
   };
 
-  let sessionId = createSessionId();
+  let sessionId =
+    createSessionId();
+
   let maxScroll = 0;
 
   let visitStarted = false;
   let visitStarting = false;
 
-  let endConfirmed = false;
-  let endRequestRunning = false;
+  let pendingEndDispatched = false;
+  let pendingEndPromise = null;
+
+  let resumeRunning = false;
 
   /* =========================================================
      SITE
@@ -21,7 +25,9 @@
 
   function setupExternalLinks() {
     document
-      .querySelectorAll('a[href^="http"]')
+      .querySelectorAll(
+        'a[href^="http"]',
+      )
       .forEach((link) => {
         try {
           const url =
@@ -47,8 +53,11 @@
         "img:not([loading])",
       )
       .forEach((img) => {
-        img.loading = "lazy";
-        img.decoding = "async";
+        img.loading =
+          "lazy";
+
+        img.decoding =
+          "async";
       });
   }
 
@@ -65,7 +74,8 @@
     document.addEventListener(
       "click",
       (event) => {
-        const target = event.target;
+        const target =
+          event.target;
 
         if (
           !(
@@ -114,10 +124,14 @@
 
         event.preventDefault();
 
-        destination.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        destination
+          .scrollIntoView({
+            behavior:
+              "smooth",
+
+            block:
+              "start",
+          });
       },
     );
   }
@@ -133,10 +147,12 @@
       .querySelectorAll(
         "[data-current-year]",
       )
-      .forEach((element) => {
-        element.textContent =
-          year;
-      });
+      .forEach(
+        (element) => {
+          element.textContent =
+            year;
+        },
+      );
   }
 
   /* =========================================================
@@ -145,8 +161,10 @@
 
   function createSessionId() {
     if (
-      typeof crypto !== "undefined" &&
-      typeof crypto.randomUUID === "function"
+      typeof crypto !==
+        "undefined" &&
+      typeof crypto.randomUUID ===
+        "function"
     ) {
       return crypto.randomUUID();
     }
@@ -168,22 +186,40 @@
 
     const hex =
       Array.from(bytes)
-        .map((byte) =>
-          byte
-            .toString(16)
-            .padStart(2, "0")
+        .map(
+          (byte) =>
+            byte
+              .toString(16)
+              .padStart(
+                2,
+                "0",
+              ),
         );
 
     return [
-      hex.slice(0, 4).join(""),
-      hex.slice(4, 6).join(""),
-      hex.slice(6, 8).join(""),
-      hex.slice(8, 10).join(""),
-      hex.slice(10, 16).join(""),
+      hex
+        .slice(0, 4)
+        .join(""),
+
+      hex
+        .slice(4, 6)
+        .join(""),
+
+      hex
+        .slice(6, 8)
+        .join(""),
+
+      hex
+        .slice(8, 10)
+        .join(""),
+
+      hex
+        .slice(10, 16)
+        .join(""),
     ].join("-");
   }
 
-  function beginNewSession() {
+  function resetSession() {
     sessionId =
       createSessionId();
 
@@ -192,12 +228,14 @@
     visitStarted = false;
     visitStarting = false;
 
-    endConfirmed = false;
-    endRequestRunning = false;
+    pendingEndDispatched =
+      false;
 
-    updateScroll();
+    pendingEndPromise =
+      null;
 
-    void sendVisit();
+    resumeRunning =
+      false;
   }
 
   /* =========================================================
@@ -215,27 +253,35 @@
         ?.brands;
 
     if (
-      Array.isArray(brands)
+      Array.isArray(
+        brands,
+      )
     ) {
       const names =
         brands.map(
           (item) =>
             String(
-              item.brand || "",
-            ).toLowerCase(),
+              item.brand ||
+                "",
+            )
+              .toLowerCase(),
         );
 
       if (
         names.some(
           (name) =>
-            name.includes("brave"),
+            name.includes(
+              "brave",
+            ),
         )
       ) {
         return "Brave";
       }
     }
 
-    if (ua.includes("Edg/")) {
+    if (
+      ua.includes("Edg/")
+    ) {
       return "Microsoft Edge";
     }
 
@@ -247,21 +293,31 @@
     }
 
     if (
-      ua.includes("Firefox/")
+      ua.includes(
+        "Firefox/",
+      )
     ) {
       return "Firefox";
     }
 
     if (
-      ua.includes("Chrome/") &&
-      !ua.includes("Edg/")
+      ua.includes(
+        "Chrome/",
+      ) &&
+      !ua.includes(
+        "Edg/",
+      )
     ) {
       return "Chrome";
     }
 
     if (
-      ua.includes("Safari/") &&
-      !ua.includes("Chrome/")
+      ua.includes(
+        "Safari/",
+      ) &&
+      !ua.includes(
+        "Chrome/",
+      )
     ) {
       return "Safari";
     }
@@ -278,11 +334,19 @@
       navigator.platform ||
       "";
 
-    if (/Windows/i.test(ua)) {
+    if (
+      /Windows/i.test(
+        ua,
+      )
+    ) {
       return "Windows";
     }
 
-    if (/Android/i.test(ua)) {
+    if (
+      /Android/i.test(
+        ua,
+      )
+    ) {
       return "Android";
     }
 
@@ -295,15 +359,23 @@
     }
 
     if (
-      /Mac/i.test(platform) ||
-      /Mac OS/i.test(ua)
+      /Mac/i.test(
+        platform,
+      ) ||
+      /Mac OS/i.test(
+        ua,
+      )
     ) {
       return "macOS";
     }
 
     if (
-      /Linux/i.test(platform) ||
-      /Linux/i.test(ua)
+      /Linux/i.test(
+        platform,
+      ) ||
+      /Linux/i.test(
+        ua,
+      )
     ) {
       return "Linux";
     }
@@ -313,7 +385,8 @@
 
   function detectMobile() {
     const uaData =
-      navigator.userAgentData;
+      navigator
+        .userAgentData;
 
     if (
       uaData &&
@@ -346,7 +419,9 @@
   function getOrientation() {
     try {
       return (
-        screen.orientation?.type ||
+        screen
+          .orientation
+          ?.type ||
         null
       );
     } catch {
@@ -382,10 +457,17 @@
 
     const documentHeight =
       Math.max(
-        root.scrollHeight || 0,
-        body?.scrollHeight || 0,
-        root.offsetHeight || 0,
-        body?.offsetHeight || 0,
+        root.scrollHeight ||
+          0,
+
+        body?.scrollHeight ||
+          0,
+
+        root.offsetHeight ||
+          0,
+
+        body?.offsetHeight ||
+          0,
       );
 
     const viewportHeight =
@@ -398,7 +480,9 @@
 
     let percent = 100;
 
-    if (scrollable > 0) {
+    if (
+      scrollable > 0
+    ) {
       percent =
         (
           scrollTop /
@@ -412,7 +496,9 @@
         0,
         Math.min(
           100,
-          Math.round(percent),
+          Math.round(
+            percent,
+          ),
         ),
       );
 
@@ -434,12 +520,16 @@
       getConnection();
 
     const uaData =
-      navigator.userAgentData ||
+      navigator
+        .userAgentData ||
       null;
 
     return {
-      event_type: "visit",
-      session_id: sessionId,
+      event_type:
+        "visit",
+
+      session_id:
+        sessionId,
 
       page:
         location.href,
@@ -509,7 +599,8 @@
 
       touch_support:
         (
-          navigator.maxTouchPoints >
+          navigator
+            .maxTouchPoints >
           0
         ) ||
         (
@@ -518,10 +609,12 @@
         ),
 
       cookies_enabled:
-        navigator.cookieEnabled,
+        navigator
+          .cookieEnabled,
 
       do_not_track:
-        navigator.doNotTrack ||
+        navigator
+          .doNotTrack ||
         null,
 
       screen_width:
@@ -571,7 +664,8 @@
         typeof connection
             ?.downlink ===
           "number"
-          ? connection.downlink
+          ? connection
+              .downlink
           : null,
 
       connection_rtt:
@@ -585,7 +679,8 @@
         typeof connection
             ?.saveData ===
           "boolean"
-          ? connection.saveData
+          ? connection
+              .saveData
           : null,
 
       ua_brands:
@@ -608,25 +703,136 @@
     };
   }
 
-  function buildEnd() {
+  function buildSessionState(
+    eventType,
+  ) {
     updateScroll();
 
+    const connection =
+      getConnection();
+
     return {
-      event_type: "end",
+      event_type:
+        eventType,
 
       session_id:
         sessionId,
 
       max_scroll_percent:
         maxScroll,
+
+      viewport_width:
+        innerWidth ||
+        null,
+
+      viewport_height:
+        innerHeight ||
+        null,
+
+      screen_orientation:
+        getOrientation(),
+
+      online_status:
+        navigator.onLine,
+
+      connection_type:
+        connection?.type ||
+        null,
+
+      connection_effective_type:
+        connection
+          ?.effectiveType ||
+        null,
+
+      connection_downlink:
+        typeof connection
+            ?.downlink ===
+          "number"
+          ? connection
+              .downlink
+          : null,
+
+      connection_rtt:
+        typeof connection
+            ?.rtt ===
+          "number"
+          ? connection.rtt
+          : null,
+
+      connection_save_data:
+        typeof connection
+            ?.saveData ===
+          "boolean"
+          ? connection
+              .saveData
+          : null,
     };
   }
 
   /* =========================================================
-     START
+     REQUEST
      ========================================================= */
 
-  async function sendVisit() {
+  async function post(
+    data,
+    keepalive = false,
+  ) {
+    const response =
+      await fetch(
+        CONFIG.endpoint,
+        {
+          method:
+            "POST",
+
+          headers: {
+            "Content-Type":
+              "text/plain;charset=UTF-8",
+          },
+
+          body:
+            JSON.stringify(
+              data,
+            ),
+
+          keepalive,
+
+          credentials:
+            "omit",
+
+          cache:
+            "no-store",
+
+          referrerPolicy:
+            "no-referrer",
+        },
+      );
+
+    let result = null;
+
+    try {
+      result =
+        await response.json();
+    } catch {
+      result = null;
+    }
+
+    return {
+      ok:
+        response.ok,
+
+      status:
+        response.status,
+
+      data:
+        result,
+    };
+  }
+
+  /* =========================================================
+     START VISIT
+     ========================================================= */
+
+  async function startVisit() {
     if (
       visitStarted ||
       visitStarting
@@ -634,150 +840,125 @@
       return;
     }
 
-    visitStarting = true;
+    visitStarting =
+      true;
+
+    updateScroll();
 
     try {
-      const response =
-        await fetch(
-          CONFIG.endpoint,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "text/plain;charset=UTF-8",
-            },
-
-            body:
-              JSON.stringify(
-                buildVisit(),
-              ),
-
-            credentials:
-              "omit",
-
-            cache:
-              "no-store",
-
-            referrerPolicy:
-              "no-referrer",
-          },
+      const result =
+        await post(
+          buildVisit(),
         );
 
-      if (response.ok) {
-        visitStarted = true;
+      if (
+        result.ok
+      ) {
+        visitStarted =
+          true;
       }
     } catch {
       // Initial tracking failed.
     } finally {
-      visitStarting = false;
+      visitStarting =
+        false;
     }
   }
 
   /* =========================================================
-     END - NORMAL FETCH
+     PENDING END
      ========================================================= */
 
-  async function sendEndFetch() {
+  function sendPendingEnd() {
     if (
       !visitStarted ||
-      endConfirmed ||
-      endRequestRunning
+      pendingEndDispatched
     ) {
-      return;
+      return (
+        pendingEndPromise ||
+        Promise.resolve()
+      );
     }
 
-    endRequestRunning = true;
+    pendingEndDispatched =
+      true;
 
-    try {
-      const response =
-        await fetch(
-          CONFIG.endpoint,
-          {
-            method: "POST",
+    pendingEndPromise =
+      post(
+        buildSessionState(
+          "pending_end",
+        ),
+        true,
+      )
+        .catch(() => {
+          /*
+           * Ako normalni fetch zakaže dok je
+           * dokument još živ, unload fallback
+           * i dalje smije pokušati.
+           */
+          pendingEndDispatched =
+            false;
 
-            headers: {
-              "Content-Type":
-                "text/plain;charset=UTF-8",
-            },
+          return null;
+        });
 
-            body:
-              JSON.stringify(
-                buildEnd(),
-              ),
-
-            keepalive:
-              true,
-
-            credentials:
-              "omit",
-
-            cache:
-              "no-store",
-
-            referrerPolicy:
-              "no-referrer",
-          },
-        );
-
-      if (response.ok) {
-        endConfirmed = true;
-      }
-    } catch {
-      /*
-       * pagehide fallback i dalje smije
-       * pokušati poslati završetak.
-       */
-    } finally {
-      endRequestRunning = false;
-    }
+    return pendingEndPromise;
   }
 
   /* =========================================================
-     END - BEACON FALLBACK
+     UNLOAD FALLBACK
      ========================================================= */
 
-  function sendEndBeacon() {
+  function sendPendingEndBeacon() {
     if (
       !visitStarted ||
-      endConfirmed
+      pendingEndDispatched
     ) {
       return;
     }
+
+    pendingEndDispatched =
+      true;
 
     const payload =
       JSON.stringify(
-        buildEnd(),
+        buildSessionState(
+          "pending_end",
+        ),
       );
 
     if (
-      typeof navigator.sendBeacon ===
+      typeof navigator
+          .sendBeacon ===
         "function"
     ) {
       try {
-        navigator.sendBeacon(
-          CONFIG.endpoint,
+        const queued =
+          navigator
+            .sendBeacon(
+              CONFIG.endpoint,
 
-          new Blob(
-            [payload],
-            {
-              type:
-                "text/plain;charset=UTF-8",
-            },
-          ),
-        );
+              new Blob(
+                [payload],
+                {
+                  type:
+                    "text/plain;charset=UTF-8",
+                },
+              ),
+            );
+
+        if (queued) {
+          return;
+        }
       } catch {}
     }
 
-    /*
-     * Drugi fallback.
-     * Backend ionako deduplicira END.
-     */
     try {
       void fetch(
         CONFIG.endpoint,
         {
-          method: "POST",
+          method:
+            "POST",
 
           headers: {
             "Content-Type":
@@ -804,6 +985,133 @@
   }
 
   /* =========================================================
+     RESUME
+     ========================================================= */
+
+  async function resumeVisit() {
+    if (
+      !visitStarted ||
+      !pendingEndDispatched ||
+      resumeRunning
+    ) {
+      return;
+    }
+
+    resumeRunning =
+      true;
+
+    try {
+      /*
+       * Ako je pending_end poslan normalnim fetchom,
+       * pričekaj da server prvo zaprimi njega.
+       *
+       * Time izbjegavamo:
+       * resume -> pending_end
+       * race condition.
+       */
+      if (
+        pendingEndPromise
+      ) {
+        try {
+          await pendingEndPromise;
+        } catch {}
+      } else {
+        /*
+         * Kod bfcache / beacon slučaja nemamo
+         * HTTP Promise pa serveru damo malo vremena.
+         */
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              350,
+            ),
+        );
+      }
+
+      let result = null;
+
+      /*
+       * Par kratkih retry pokušaja jer je RESUME
+       * važniji od običnog analytics requesta.
+       */
+      for (
+        let attempt = 0;
+        attempt < 3;
+        attempt += 1
+      ) {
+        try {
+          result =
+            await post(
+              buildSessionState(
+                "resume",
+              ),
+            );
+
+          if (
+            result.ok
+          ) {
+            break;
+          }
+        } catch {}
+
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              350,
+            ),
+        );
+      }
+
+      if (
+        result?.ok &&
+        result.data?.active ===
+          true
+      ) {
+        /*
+         * Isti session nastavlja.
+         */
+        pendingEndDispatched =
+          false;
+
+        pendingEndPromise =
+          null;
+
+        return;
+      }
+
+      if (
+        result?.ok &&
+        result.data?.ended ===
+          true
+      ) {
+        /*
+         * Grace period je već prošao.
+         * Stari session je završen.
+         *
+         * Tek sada stvaramo novi.
+         */
+        resetSession();
+
+        await startVisit();
+
+        return;
+      }
+
+      /*
+       * Ako se serveru nikako ne možemo javiti,
+       * ne stvaramo odmah novi session.
+       *
+       * Time izbjegavamo nepotrebne duplikate.
+       */
+    } finally {
+      resumeRunning =
+        false;
+    }
+  }
+
+  /* =========================================================
      INIT
      ========================================================= */
 
@@ -815,7 +1123,7 @@
 
     updateScroll();
 
-    void sendVisit();
+    void startVisit();
   }
 
   /* =========================================================
@@ -826,7 +1134,8 @@
     "scroll",
     updateScroll,
     {
-      passive: true,
+      passive:
+        true,
     },
   );
 
@@ -834,53 +1143,70 @@
     "resize",
     updateScroll,
     {
-      passive: true,
+      passive:
+        true,
     },
   );
 
   /*
-   * Kad tab samo postane hidden, još uvijek imamo
-   * normalno živi dokument pa koristimo pravi fetch.
+   * Tab/app ode u background.
+   *
+   * Ne završavamo session odmah.
+   * Server samo pokrene 15 s grace period.
    */
   document.addEventListener(
     "visibilitychange",
     () => {
       if (
-        document.visibilityState ===
+        document
+          .visibilityState ===
         "hidden"
       ) {
-        void sendEndFetch();
+        void sendPendingEnd();
+
         return;
       }
 
-      /*
-       * Ako se korisnik vrati nakon uspješno
-       * završenog posjeta, to je nova sesija.
-       */
       if (
-        document.visibilityState ===
-          "visible" &&
-        endConfirmed
+        document
+          .visibilityState ===
+        "visible"
       ) {
-        beginNewSession();
+        void resumeVisit();
       }
     },
   );
 
   /*
-   * Ako se dokument stvarno unload-a prije nego što
-   * normalni fetch potvrdi završetak, pokušavamo opet.
-   *
-   * Backend već sprječava dupli END mail.
+   * Fallback ako browser ode/unloada dokument,
+   * a visibilitychange prije toga nije uspio.
    */
   window.addEventListener(
     "pagehide",
-    sendEndBeacon,
+    () => {
+      sendPendingEndBeacon();
+    },
   );
 
   window.addEventListener(
     "beforeunload",
-    sendEndBeacon,
+    () => {
+      sendPendingEndBeacon();
+    },
+  );
+
+  /*
+   * Back-forward cache restore.
+   */
+  window.addEventListener(
+    "pageshow",
+    (event) => {
+      if (
+        event.persisted
+      ) {
+        void resumeVisit();
+      }
+    },
   );
 
   if (
@@ -891,7 +1217,8 @@
       "DOMContentLoaded",
       init,
       {
-        once: true,
+        once:
+          true,
       },
     );
   } else {
