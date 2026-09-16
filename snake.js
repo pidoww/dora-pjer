@@ -7,11 +7,13 @@
     const ctx = canvas.getContext("2d");
     const scoreElement = document.getElementById("score");
     const bestElement = document.getElementById("best-score");
+    const levelElement = document.getElementById("game-level");
     const restartButton = document.getElementById("restart");
 
     const GRID = 8;
     const SIZE = canvas.width / GRID;
-    const SPEED = 165;
+    const START_SPEED = 190;
+    const MIN_SPEED = 92;
 
     const doraImage = new Image();
     doraImage.src = "images/slike%20update%20stranica/slika%20dora%20za%20snake%20game.jpeg";
@@ -25,7 +27,9 @@
     let food = { x: 6, y: 4 };
     let score = 0;
     let dead = false;
+    let paused = false;
     let timer = null;
+    let touchStart = null;
 
     let best = 0;
     try {
@@ -33,6 +37,20 @@
     } catch {}
 
     if (bestElement) bestElement.textContent = String(best);
+
+    function currentLevel() {
+        return 1 + Math.floor(score / 3);
+    }
+
+    function currentSpeed() {
+        return Math.max(MIN_SPEED, START_SPEED - score * 8);
+    }
+
+    function updateHud() {
+        if (scoreElement) scoreElement.textContent = String(score);
+        if (bestElement) bestElement.textContent = String(best);
+        if (levelElement) levelElement.textContent = String(currentLevel());
+    }
 
     function randomFood() {
         const free = [];
@@ -141,31 +159,51 @@
         ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 30);
     }
 
+    function stopTimer() {
+        if (timer !== null) {
+            clearInterval(timer);
+            timer = null;
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        if (dead || paused) return;
+        timer = window.setInterval(tick, currentSpeed());
+    }
+
+    function pulseCatch() {
+        canvas.classList.remove("dino-caught");
+        void canvas.offsetWidth;
+        canvas.classList.add("dino-caught");
+        window.setTimeout(() => canvas.classList.remove("dino-caught"), 160);
+    }
+
+    function milestone(text) {
+        if (window.doraSite?.showMemeTimed) {
+            window.doraSite.showMemeTimed(text, null, 500);
+            return;
+        }
+
+        window.doraSite?.showMeme?.(text);
+        window.setTimeout(() => window.doraSite?.closeMeme?.(), 500);
+    }
+
     function endGame() {
         dead = true;
-        clearInterval(timer);
-        timer = null;
-
-        drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score}`);
-
-        if (score >= 8 && window.doraSite?.showMeme) {
-            window.setTimeout(() => {
-                window.doraSite.showMeme(`Dora je prije sudara uhvatila ${score} dinosaura.`);
-            }, 500);
-        }
+        stopTimer();
+        drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score} · Enter za opet`);
     }
 
     function winGame() {
         dead = true;
-        clearInterval(timer);
-        timer = null;
-        drawEndMessage("NEMA VIŠE DINOSAURA", "napunio si svih 64 polja. ovo je zabrinjavajuće.");
-
-        window.doraSite?.showMeme("64 polja. Dora je završila mezozoik.");
+        stopTimer();
+        drawEndMessage("NEMA VIŠE DINOSAURA", "arena je puna. ovo je zabrinjavajuće.");
+        milestone("Dora je završila mezozoik.");
     }
 
     function tick() {
-        if (dead) return;
+        if (dead || paused) return;
 
         direction = nextDirection;
 
@@ -189,15 +227,16 @@
 
         if (food && head.x === food.x && head.y === food.y) {
             score += 1;
-            if (scoreElement) scoreElement.textContent = String(score);
+            pulseCatch();
 
             if (score > best) {
                 best = score;
-                if (bestElement) bestElement.textContent = String(best);
                 try {
                     localStorage.setItem("doraDinoBest", String(best));
                 } catch {}
             }
+
+            updateHud();
 
             if (snake.length >= GRID * GRID) {
                 food = null;
@@ -206,13 +245,18 @@
             }
 
             food = randomFood();
+            startTimer();
 
-            if (score === 5 && window.doraSite?.showMeme) {
-                window.doraSite.showMeme("5 dinosaura. Dora postaje prijetnja mezozoiku.");
+            if (score === 5) {
+                milestone("5 dinosaura. Dora postaje prijetnja mezozoiku.");
             }
 
-            if (score === 10 && window.doraSite?.showMeme) {
-                window.doraSite.showMeme("10 DINOSAURA. ovo više nije snake nego masovno izumiranje.");
+            if (score === 10) {
+                milestone("10 DINOSAURA. ovo više nije snake nego masovno izumiranje.");
+            }
+
+            if (score === 15) {
+                milestone("15 dinosaura. ovo je već osobni problem dinosaura.");
             }
         } else {
             snake.pop();
@@ -222,7 +266,7 @@
     }
 
     function start() {
-        clearInterval(timer);
+        stopTimer();
 
         snake = [
             { x: 3, y: 4 },
@@ -235,44 +279,104 @@
         food = randomFood();
         score = 0;
         dead = false;
+        paused = document.hidden;
 
-        if (scoreElement) scoreElement.textContent = "0";
-
+        updateHud();
         draw();
-        timer = window.setInterval(tick, SPEED);
+        startTimer();
     }
 
     function changeDirection(x, y) {
-        if (direction.x + x === 0 && direction.y + y === 0) return;
+        if (dead) return;
+
+        if (nextDirection.x + x === 0 && nextDirection.y + y === 0) return;
         nextDirection = { x, y };
+    }
+
+    function handleDirectionKey(key) {
+        if (key === "arrowup" || key === "w") {
+            changeDirection(0, -1);
+            return true;
+        }
+
+        if (key === "arrowdown" || key === "s") {
+            changeDirection(0, 1);
+            return true;
+        }
+
+        if (key === "arrowleft" || key === "a") {
+            changeDirection(-1, 0);
+            return true;
+        }
+
+        if (key === "arrowright" || key === "d") {
+            changeDirection(1, 0);
+            return true;
+        }
+
+        return false;
     }
 
     document.addEventListener("keydown", event => {
         const key = event.key.toLowerCase();
 
-        if (key === "arrowup" || key === "w") {
+        if (dead && (key === "enter" || key === " ")) {
             event.preventDefault();
-            changeDirection(0, -1);
-        } else if (key === "arrowdown" || key === "s") {
+            start();
+            return;
+        }
+
+        if (handleDirectionKey(key)) {
             event.preventDefault();
-            changeDirection(0, 1);
-        } else if (key === "arrowleft" || key === "a") {
-            event.preventDefault();
-            changeDirection(-1, 0);
-        } else if (key === "arrowright" || key === "d") {
-            event.preventDefault();
-            changeDirection(1, 0);
         }
     });
 
     document.querySelectorAll("[data-dir]").forEach(button => {
-        button.addEventListener("click", () => {
+        const act = event => {
+            event.preventDefault();
             const value = button.dataset.dir;
             if (value === "up") changeDirection(0, -1);
             if (value === "down") changeDirection(0, 1);
             if (value === "left") changeDirection(-1, 0);
             if (value === "right") changeDirection(1, 0);
-        });
+        };
+
+        button.addEventListener("pointerdown", act);
+    });
+
+    canvas.addEventListener("touchstart", event => {
+        const touch = event.changedTouches[0];
+        touchStart = { x: touch.clientX, y: touch.clientY };
+        event.preventDefault();
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", event => {
+        if (!touchStart) return;
+
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - touchStart.x;
+        const dy = touch.clientY - touchStart.y;
+        touchStart = null;
+
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            changeDirection(dx > 0 ? 1 : -1, 0);
+        } else {
+            changeDirection(0, dy > 0 ? 1 : -1);
+        }
+
+        event.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener("visibilitychange", () => {
+        paused = document.hidden;
+
+        if (paused) {
+            stopTimer();
+        } else if (!dead) {
+            startTimer();
+        }
     });
 
     restartButton?.addEventListener("click", start);
