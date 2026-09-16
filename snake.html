@@ -6,6 +6,7 @@
     <title>Dora hvata dinosaure</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
+    <link rel="stylesheet" href="extras.css">
 </head>
 <body class="game-page">
     <header class="top">
@@ -13,6 +14,7 @@
         <p class="tiny-warning">ovo je nekad trebao biti običan snake</p>
         <nav>
             <a href="index.html">početna</a>
+            <a href="youtube.html">vlogovi</a>
             <a href="chipsy.html">Chipsy lore</a>
         </nav>
     </header>
@@ -21,13 +23,14 @@
         <section class="game-wrapper">
             <h2>uhvati dinosaure</h2>
             <p>Dora se umnožava svaki put kad ulovi jednog. Nemam objašnjenje.</p>
+            <p class="board-note">8 × 8 = 64 polja, kao šah ali gore</p>
 
             <div class="game-info">
                 <span>dinosauri: <strong id="score">0</strong></span>
                 <span>rekord: <strong id="best-score">0</strong></span>
             </div>
 
-            <canvas id="snake" width="500" height="500" aria-label="Dora dinosaur snake game"></canvas>
+            <canvas id="snake" width="560" height="560" aria-label="Dora dinosaur snake game"></canvas>
 
             <p class="game-help">strelice / WASD · na mobitelu tipke ispod</p>
 
