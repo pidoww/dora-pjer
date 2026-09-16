@@ -9,13 +9,14 @@
     const bonkButton = document.getElementById("bonk-button");
     const chipsButton = document.getElementById("chips-button");
     const image = document.getElementById("chipsy-lab-image");
+    const physicsHint = document.getElementById("schrodinger-hint");
 
     if (!bonkButton || !chipsButton) return;
 
     const ASSET = "images/slike%20update%20stranica/";
 
     const messages = [
-        "Schrödinger nije ovo stavio u originalni eksperiment.",
+        "Schrödinger nije ovo stavio u originalni misaoni eksperiment.",
         "BONK. valna funkcija se osjeća ugroženo.",
         "Chypsi odbija komentirati događaj.",
         "laboratorij je sada 12% manje kvantan.",
@@ -27,6 +28,7 @@
     ];
 
     let bonks = 0;
+    let schrodingerClicks = 0;
 
     function random(array) {
         return array[Math.floor(Math.random() * array.length)];
@@ -50,10 +52,7 @@
                 { transform: "translateX(-4px) rotate(0deg)" },
                 { transform: "translateX(0) rotate(3deg)" }
             ],
-            {
-                duration: 360,
-                easing: "linear"
-            }
+            { duration: 360, easing: "linear" }
         );
 
         if (photo) {
@@ -82,7 +81,6 @@
 
     function bonk() {
         bonks += 1;
-
         animateHammer();
         shakeTarget();
         window.doraSite?.spawnChipCan(Math.min(2 + bonks, 12));
@@ -116,14 +114,53 @@
 
     function chipsOnly() {
         window.doraSite?.spawnChipCan(18);
+        if (message) message.textContent = "uspješna industrijska proizvodnja čipsa.";
+    }
 
-        if (message) {
-            message.textContent = "uspješna industrijska proizvodnja čipsa.";
+    function clickSchrodinger() {
+        schrodingerClicks += 1;
+
+        const hints = [
+            "hint: Schrödinger na lijevoj slici izgleda kao da nešto skriva.",
+            "Schrödinger te je primijetio.",
+            "oke, ovo očito nije obična fotografija.",
+            "još malo i završit ćeš duboko u fizici.",
+            "zadnji klik prije rupe bez dna."
+        ];
+
+        if (physicsHint) {
+            physicsHint.textContent = hints[Math.min(schrodingerClicks, hints.length - 1)];
+        }
+
+        document.querySelectorAll(".schrodinger-secret").forEach(node => {
+            node.animate(
+                [
+                    { transform: "rotate(0deg) scale(1)" },
+                    { transform: "rotate(-2deg) scale(1.025)" },
+                    { transform: "rotate(1deg) scale(1)" }
+                ],
+                { duration: 230 }
+            );
+        });
+
+        if (schrodingerClicks >= 5) {
+            if (physicsHint) physicsHint.textContent = "oke. tražio si fiziku.";
+            window.setTimeout(() => {
+                location.href = "physics.html";
+            }, 350);
         }
     }
 
     bonkButton.addEventListener("click", bonk);
     chipsButton.addEventListener("click", chipsOnly);
+
+    document.querySelectorAll(".schrodinger-secret").forEach(node => {
+        node.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            clickSchrodinger();
+        });
+    });
 
     document.addEventListener("keydown", event => {
         if (event.key === " " && !event.repeat) {
