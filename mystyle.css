@@ -1,89 +1,648 @@
-/* Opća postavka za pozadinsku sliku */
-body {
-    background-image: url('images/background.jpg');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center center;
-    margin: 0;
-    font-family: Arial, sans-serif;
+* {
+    box-sizing: border-box;
 }
 
-h1 {
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #262626;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.20), rgba(0, 0, 0, 0.20)),
+        url("images/background.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+a {
+    color: #7c143c;
+}
+
+.top {
     color: white;
     text-align: center;
-    padding: 40px 20px;
+    padding: 30px 15px 22px;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.82)),
+        url("images/header-pattern.jpg") center / cover;
+    border-bottom: 5px solid #e5d75e;
+}
+
+.top h1 {
     margin: 0;
-    background: rgba(0, 0, 0, 0.7);
+    font-size: clamp(34px, 7vw, 68px);
+    line-height: 1;
+    text-shadow: 3px 3px 0 #000;
+    user-select: none;
 }
 
-.content {
-    background-color: rgba(255, 255, 255, 0.8);
-    margin: 50px auto;
-    padding: 20px;
-    width: 80%;
-    border-radius: 10px;
+.tiny-warning {
+    margin: 10px 0 15px;
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.8;
 }
 
-.content p {
-    color: #333;
-    line-height: 1.6;
-    font-size: 20px;
-}
-
-.images {
+nav {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    margin-bottom: 50px;
+    gap: 10px;
 }
 
-.image-container {
-    margin: 10px;
-    text-align: center;
-}
-
-.image-container img {
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    display: block;
-    margin: 0 auto;
-}
-
-/* Specifične širine za pojedine slike */
-.image-container:nth-child(1) img {
-    width: 300px;
-}
-
-.image-container:nth-child(2) img {
-    width: 200px;
-}
-
-.image-container:nth-child(3) img,
-.image-container:nth-child(4) img {
-    width: 260px;
-}
-
-/* Stiliziranje opisa ispod slika */
-.caption {
-    margin-top: 10px;
-    color: #333;
-    font-size: 16px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 10px;
+nav a,
+.ugly-button,
+.youtube-button,
+.retro-button {
     display: inline-block;
-    width: calc(100% - 20px);
-    box-sizing: border-box;
+    padding: 8px 13px;
+    color: #111;
+    background: #f3e97d;
+    border: 2px solid #111;
+    box-shadow: 4px 4px 0 #111;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+nav a:hover,
+.ugly-button:hover,
+.youtube-button:hover,
+.retro-button:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #111;
+}
+
+main {
+    width: min(1000px, calc(100% - 24px));
+    margin: 35px auto 80px;
+}
+
+.paper {
+    margin: 30px auto;
+    padding: 22px;
+    background: rgba(255, 253, 240, 0.95);
+    border: 2px solid #222;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.36);
+}
+
+.paper p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.intro {
+    max-width: 850px;
+    transform: rotate(-0.35deg);
+}
+
+.random-note {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 7px 12px;
+    background: #fff081;
+    border: 1px solid #ad9f32;
+    font-family: "Comic Sans MS", cursive;
+    transform: rotate(-2deg);
+}
+
+.section-title {
+    display: table;
+    margin: 45px auto 25px;
+    padding: 8px 15px;
+    color: white;
+    background: #111;
+    transform: rotate(1deg);
+}
+
+.photo-wall,
+.hike-wall,
+.friend-grid {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.photo {
+    width: min(300px, 88vw);
+    margin: 0;
+    padding: 12px 12px 25px;
+    background: #faf6e6;
+    border: 1px solid #444;
+    box-shadow: 7px 8px 4px rgba(0, 0, 0, 0.4);
+    transition: transform 0.12s ease;
+}
+
+.photo:hover {
+    z-index: 3;
+    transform: rotate(0deg) scale(1.035);
+}
+
+.photo img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    background: #ddd;
+}
+
+.photo figcaption {
+    padding-top: 12px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.rotate-left { transform: rotate(-2deg); }
+.rotate-right { transform: rotate(2.3deg); }
+.hard-rotate { transform: rotate(-4.2deg); }
+
+.small-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+.clickable-secret {
+    cursor: pointer;
+}
+
+.friend-photo {
+    width: min(300px, 86vw);
+}
+
+.youtube-box {
+    position: relative;
+    margin: 50px auto;
+    padding: 34px;
+    color: white;
+    background: #d93b3b;
+    border: 4px solid #111;
+    box-shadow: 10px 10px 0 #111;
+    transform: rotate(0.6deg);
+}
+
+.youtube-box h2 {
+    font-size: 32px;
+    margin: 0 0 8px;
+}
+
+.youtube-box small {
+    display: block;
+    margin-top: 15px;
+    opacity: 0.75;
+}
+
+.sticker {
+    position: absolute;
+    top: -18px;
+    right: 20px;
+    padding: 8px;
+    color: #111;
+    background: yellow;
+    border: 2px solid #111;
+    font-weight: bold;
+    transform: rotate(7deg);
+}
+
+.button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.secondary-button {
+    background: #fff;
+}
+
+.suspicious {
+    font-size: 12px !important;
+    opacity: 0.48;
+}
+
+footer {
+    padding: 30px;
+    color: #ddd;
+    background: rgba(0, 0, 0, 0.87);
+    text-align: center;
+    font-size: 13px;
+}
+
+footer a {
+    color: #ffe664;
+}
+
+.footer-secret {
+    opacity: 0.55;
+}
+
+/* popup */
+.meme-popup {
+    position: fixed;
+    z-index: 99999;
+    left: 50%;
+    top: 50%;
+    width: min(430px, calc(100% - 28px));
+    padding: 12px;
+    background: #fff;
+    border: 5px solid #111;
+    box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.62);
+    text-align: center;
+    transform: translate(-50%, -50%) rotate(-2deg);
+}
+
+.meme-popup img {
+    display: block;
+    width: 100%;
+    max-height: 58vh;
+    object-fit: contain;
+}
+
+.meme-popup p {
+    margin: 10px 4px 3px;
+    font-weight: bold;
+}
+
+.meme-popup button {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 36px;
+    height: 36px;
+    color: white;
+    background: #e41f1f;
+    border: 3px solid #111;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.meme-shake {
+    animation: memeShake 0.42s linear;
+}
+
+@keyframes memeShake {
+    0% { transform: translate(-50%, -50%) rotate(-6deg); }
+    25% { transform: translate(-47%, -51%) rotate(5deg); }
+    50% { transform: translate(-52%, -48%) rotate(-4deg); }
+    75% { transform: translate(-49%, -53%) rotate(3deg); }
+    100% { transform: translate(-50%, -50%) rotate(-2deg); }
+}
+
+/* fake chips cans */
+.chip-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9990;
+    overflow: hidden;
+}
+
+.chip-can {
+    position: fixed;
+    width: 64px;
+    height: 118px;
+    border: 3px solid #111;
+    border-radius: 18px 18px 13px 13px;
+    background: linear-gradient(90deg, #b82125 0%, #f54b34 48%, #b82125 100%);
+    color: #fff45a;
+    box-shadow: inset 0 7px 0 #eee1a0, inset 0 -7px 0 #c9b664, 5px 7px 0 rgba(0, 0, 0, 0.22);
+    font-family: Impact, Haettenschweiler, sans-serif;
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-align: center;
+    line-height: 118px;
+    animation: chipDrop 1.45s cubic-bezier(.18,.78,.34,1) forwards;
+}
+
+.chip-can::before {
+    content: "CHIPS!";
+}
+
+@keyframes chipDrop {
+    0% { transform: translateY(-150px) rotate(0deg) scale(.7); opacity: 0; }
+    18% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(540deg) scale(1); opacity: 0; }
+}
+
+/* title trash mode */
+.trash-mode {
+    animation: badBackground 1.2s linear infinite;
+}
+
+.trash-mode .paper {
+    border: 5px dashed red;
+}
+
+.trash-mode .photo:nth-child(odd) {
+    transform: rotate(8deg);
+}
+
+.trash-mode .photo:nth-child(even) {
+    transform: rotate(-9deg);
+}
+
+.trash-mode nav a:nth-child(2) {
+    transform: rotate(9deg);
+}
+
+@keyframes badBackground {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(360deg); }
+}
+
+/* youtube */
+.youtube-intro {
+    transform: rotate(-0.5deg);
+}
+
+.youtube-card {
+    margin-top: 22px;
+    padding: 18px;
+    color: white;
+    background: #111;
+    border: 4px solid #eee;
+    outline: 2px solid #111;
+}
+
+.youtube-card h3 {
+    margin-top: 0;
+}
+
+.youtube-channel-big {
+    font-size: clamp(28px, 6vw, 52px);
+    margin: 0 0 10px;
+}
+
+.marquee-ish {
+    overflow: hidden;
+    padding: 7px 0;
+    color: #111;
+    background: #ffe650;
+    border-top: 2px solid #111;
+    border-bottom: 2px solid #111;
+    white-space: nowrap;
+}
+
+.marquee-ish span {
+    display: inline-block;
+    min-width: 100%;
+    animation: scrollText 10s linear infinite;
+}
+
+@keyframes scrollText {
+    from { transform: translateX(100%); }
+    to { transform: translateX(-100%); }
+}
+
+/* hiking */
+.secret-header h1 {
+    color: #f4e963;
+}
+
+.hike-wall {
+    margin-top: 30px;
+}
+
+.hike-wall .photo:nth-child(2) {
+    margin-top: 38px;
+}
+
+.hike-wall .photo:nth-child(4) {
+    margin-top: -18px;
+}
+
+.hike-note {
+    font-family: "Comic Sans MS", cursive;
+    color: #761414;
+}
+
+/* snake */
+.game-wrapper {
+    max-width: 610px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 3px solid #111;
+    box-shadow: 8px 8px 0 #111;
     text-align: center;
 }
 
-/* Prilagodba za mobilne uređaje */
-@media (max-width: 768px) {
+.game-wrapper h2 {
+    margin-top: 0;
+}
+
+.game-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    max-width: 500px;
+    margin: 0 auto 12px;
+    font-size: 18px;
+}
+
+#snake {
+    display: block;
+    width: min(500px, 100%);
+    height: auto;
+    margin: 0 auto;
+    background: #f4f0df;
+    border: 5px solid #111;
+    image-rendering: pixelated;
+}
+
+.game-help {
+    margin: 12px 0;
+    font-size: 12px;
+}
+
+.game-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 58px);
+    justify-content: center;
+    gap: 5px;
+    margin: 18px auto;
+}
+
+.game-controls button {
+    height: 50px;
+    border: 2px solid #111;
+    background: #ffe66c;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.game-controls .up { grid-column: 2; }
+.game-controls .left { grid-column: 1; grid-row: 2; }
+.game-controls .down { grid-column: 2; grid-row: 2; }
+.game-controls .right { grid-column: 3; grid-row: 2; }
+
+/* Chipsy page */
+.chipsy-page {
+    background-image:
+        repeating-linear-gradient(45deg, rgba(255,255,0,.09) 0 12px, rgba(255,0,0,.08) 12px 24px),
+        url("images/background.jpg");
+}
+
+.chipsy-hero {
+    text-align: center;
+}
+
+.chipsy-hero h2 {
+    font-size: clamp(34px, 7vw, 72px);
+    margin: 8px 0;
+    color: #b30000;
+    text-shadow: 3px 3px 0 #ffe82f;
+}
+
+.lab {
+    position: relative;
+    min-height: 470px;
+    margin: 28px auto;
+    padding: 20px;
+    overflow: hidden;
+    background: #d7eef4;
+    border: 4px solid #111;
+    box-shadow: 9px 9px 0 #111;
+}
+
+.cat-stage {
+    position: relative;
+    width: min(380px, 90%);
+    margin: 35px auto 0;
+}
+
+.cat-stage img {
+    display: block;
+    width: 100%;
+    max-height: 310px;
+    object-fit: contain;
+    filter: drop-shadow(7px 8px 0 rgba(0,0,0,.22));
+}
+
+.schrodinger-box {
+    position: absolute;
+    right: 7%;
+    bottom: 28px;
+    width: 155px;
+    height: 100px;
+    display: grid;
+    place-items: center;
+    background: #89633f;
+    border: 4px solid #342414;
+    color: white;
+    font-weight: bold;
+    transform: rotate(3deg);
+}
+
+.hammer {
+    position: absolute;
+    z-index: 4;
+    right: 13%;
+    top: 42px;
+    font-size: 86px;
+    transform-origin: 85% 85%;
+    user-select: none;
+}
+
+.hammer.bonk {
+    animation: bonk .45s ease-in-out;
+}
+
+@keyframes bonk {
+    0% { transform: rotate(-35deg); }
+    55% { transform: rotate(36deg) translateY(25px); }
+    100% { transform: rotate(-35deg); }
+}
+
+.equation {
+    display: inline-block;
+    padding: 9px 13px;
+    background: white;
+    border: 2px solid #111;
+    font-family: Georgia, serif;
+    font-size: 20px;
+    transform: rotate(-1deg);
+}
+
+.bonk-counter {
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.chipsy-warning {
+    margin-top: 15px;
+    font-size: 12px;
+    opacity: .65;
+}
+
+/* misc */
+.center {
+    text-align: center;
+}
+
+.bad-list li {
+    margin: 10px 0;
+}
+
+code {
+    background: #eee;
+    padding: 2px 5px;
+    border: 1px solid #bbb;
+}
+
+@media (max-width: 700px) {
     body {
-        background-size: contain; /* Omogućava da cijela slika stane u vidljivi dio zaslona */
-        background-attachment: scroll; /* Uklanja fiksni efekt na mobilnim uređajima */
-        background-position: center top; /* Pozicionira sliku od vrha za bolji prikaz */
+        background-attachment: scroll;
+    }
+
+    .top {
+        padding-top: 24px;
+    }
+
+    .paper {
+        padding: 16px;
+    }
+
+    .paper p {
+        font-size: 16px;
+    }
+
+    .youtube-box {
+        padding: 28px 18px;
+    }
+
+    .sticker {
+        right: 5px;
+    }
+
+    .lab {
+        min-height: 420px;
+        padding: 12px;
+    }
+
+    .hammer {
+        right: 5%;
+        top: 70px;
+        font-size: 70px;
+    }
+
+    .schrodinger-box {
+        right: 2%;
+        width: 130px;
     }
 }
