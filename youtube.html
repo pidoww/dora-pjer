@@ -6,6 +6,7 @@
     <title>Dora Pjer Vlogs</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
+    <link rel="stylesheet" href="extras.css">
 </head>
 <body>
     <header class="top">
@@ -14,6 +15,7 @@
         <nav>
             <a href="index.html">početna</a>
             <a href="youtube.html">vlogovi</a>
+            <a href="snake.html">Dora vs dinosauri</a>
         </nav>
     </header>
 
@@ -31,19 +33,32 @@
         </section>
 
         <section class="paper">
-            <h2>arhiva</h2>
+            <h2>oba videa / oba loša izbora</h2>
+            <p class="small-text">klikni PLAY i YouTube se učita ovdje u stranici. thumbnaili su naši jer mi se više sviđaju.</p>
 
-            <div class="youtube-card">
-                <h3>Pronašli 100.000 ANOMALIJA u Ičićima</h3>
-                <p>Ičići, more, ronjenje, penjanje, planinarenje i sve ostalo što je završilo na kameri.</p>
-                <a class="ugly-button" href="https://www.youtube.com/@Dora_Pjer_Vlogs" target="_blank" rel="noopener noreferrer">na kanal ↗</a>
+            <div class="video-grid-real">
+                <article class="channel-video-card">
+                    <div class="video-player-shell">
+                        <img class="video-thumb no-lightbox" src="images/slike%20update%20stranica/icici%20selfie%20ljetovanje.jpeg" alt="Ičići vlog thumbnail">
+                        <button class="play-overlay" type="button" data-video-index="0">▶ PLAY</button>
+                    </div>
+                    <h3>Pronašli 100.000 ANOMALIJA u Ičićima</h3>
+                    <p class="video-description">Ičići: more, ronjenje, penjanje, napuhanci, ribe, planinarenje i ostale stvari koje su nekako završile u jednom videu.</p>
+                    <a href="https://www.youtube.com/@Dora_Pjer_Vlogs" target="_blank" rel="noopener noreferrer">otvori na YouTubeu ↗</a>
+                </article>
+
+                <article class="channel-video-card">
+                    <div class="video-player-shell">
+                        <img class="video-thumb no-lightbox" src="images/slike%20update%20stranica/hike%20normal.jpeg" alt="Drugi Dora Pjer Vlogs video thumbnail">
+                        <button class="play-overlay" type="button" data-video-index="1">▶ PLAY</button>
+                    </div>
+                    <h3>drugi upload s kanala</h3>
+                    <p class="video-description">Drugi video s Dora Pjer Vlogs kanala. Klikni play i player otvara drugi upload iz kanala direktno na ovoj stranici.</p>
+                    <a href="https://www.youtube.com/@Dora_Pjer_Vlogs/videos" target="_blank" rel="noopener noreferrer">svi videi ↗</a>
+                </article>
             </div>
 
-            <div class="youtube-card" style="transform: rotate(-1deg); margin-top: 28px;">
-                <h3>ostali videi</h3>
-                <p>ostatak kaosa je direktno na kanalu.</p>
-                <a class="ugly-button" href="https://www.youtube.com/@Dora_Pjer_Vlogs/videos" target="_blank" rel="noopener noreferrer">svi videi ↗</a>
-            </div>
+            <p class="small-text" style="margin-top:20px;">Ako YouTube odluči biti YouTube i player ne učita kanal preko username feeda, link na kanal ispod kartice i dalje radi normalno.</p>
         </section>
 
         <section class="paper">
@@ -64,5 +79,6 @@
 
     <script src="/main.js"></script>
     <script src="/fun.js"></script>
+    <script src="/youtube.js"></script>
 </body>
 </html>
