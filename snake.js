@@ -9,41 +9,55 @@
     const bestElement = document.getElementById("best-score");
     const levelElement = document.getElementById("game-level");
     const restartButton = document.getElementById("restart");
+    const rewardBox = document.getElementById("side-reward");
+    const rewardImage = document.getElementById("side-reward-image");
+    const rewardText = document.getElementById("side-reward-text");
 
     const GRID = 8;
     const SIZE = canvas.width / GRID;
-    const START_SPEED = 190;
-    const MIN_SPEED = 92;
+    const START_SPEED = 205;
+    const MIN_SPEED = 88;
+    const ASSET = "images/slike%20update%20stranica/";
+
+    const rewardImages = [
+        `${ASSET}crazy%201.jpeg`,
+        `${ASSET}crazy%202.jpeg`,
+        `${ASSET}crazy%203.jpeg`,
+        `${ASSET}crazy%20dora.jpeg`,
+        `${ASSET}crazy%20slika.jpeg`,
+        `${ASSET}crazy%20slika%20dora%20sova.jpeg`
+    ];
 
     const doraImage = new Image();
-    doraImage.src = "images/slike%20update%20stranica/slika%20dora%20za%20snake%20game.jpeg";
+    doraImage.src = `${ASSET}slika%20dora%20za%20snake%20game.jpeg`;
 
     const dinosaurImage = new Image();
-    dinosaurImage.src = "images/slike%20update%20stranica/dinosaur.png";
+    dinosaurImage.src = `${ASSET}dinosaur.png`;
 
     let snake = [];
     let direction = { x: 1, y: 0 };
     let nextDirection = { x: 1, y: 0 };
-    let food = { x: 6, y: 4 };
+    let food = null;
     let score = 0;
     let dead = false;
     let paused = false;
     let timer = null;
     let touchStart = null;
+    let rewardTimer = null;
 
     let best = 0;
     try {
         best = Number(localStorage.getItem("doraDinoBest")) || 0;
     } catch {}
 
-    if (bestElement) bestElement.textContent = String(best);
-
     function currentLevel() {
         return 1 + Math.floor(score / 3);
     }
 
     function currentSpeed() {
-        return Math.max(MIN_SPEED, START_SPEED - score * 8);
+        const levelDrop = (currentLevel() - 1) * 13;
+        const scoreDrop = score * 3;
+        return Math.max(MIN_SPEED, START_SPEED - levelDrop - scoreDrop);
     }
 
     function updateHud() {
@@ -100,13 +114,13 @@
             ctx.rect(px, py, size, size);
             ctx.clip();
 
-            const sourceRatio = image.naturalWidth / image.naturalHeight;
+            const ratio = image.naturalWidth / image.naturalHeight;
             let sx = 0;
             let sy = 0;
             let sw = image.naturalWidth;
             let sh = image.naturalHeight;
 
-            if (sourceRatio > 1) {
+            if (ratio > 1) {
                 sw = image.naturalHeight;
                 sx = (image.naturalWidth - sw) / 2;
             } else {
@@ -132,7 +146,7 @@
                 part.x,
                 part.y,
                 index === 0 ? "#d44f34" : "#e58c6d",
-                index === 0 ? 1 : 5
+                index === 0 ? 1 : 4
             );
 
             if (index === 0) {
@@ -143,20 +157,20 @@
         });
 
         if (food) {
-            drawSquareImage(dinosaurImage, food.x, food.y, "#4c9b43", 2);
+            drawSquareImage(dinosaurImage, food.x, food.y, "#4c9b43", 1);
         }
     }
 
     function drawEndMessage(title, subtitle) {
         draw();
         ctx.fillStyle = "rgba(0,0,0,.79)";
-        ctx.fillRect(0, canvas.height / 2 - 64, canvas.width, 128);
+        ctx.fillRect(0, canvas.height / 2 - 68, canvas.width, 136);
         ctx.textAlign = "center";
         ctx.fillStyle = "white";
-        ctx.font = "bold 34px Arial";
-        ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 10);
-        ctx.font = "17px Arial";
-        ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 30);
+        ctx.font = "bold 32px Arial";
+        ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 11);
+        ctx.font = "16px Arial";
+        ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 31);
     }
 
     function stopTimer() {
@@ -176,30 +190,41 @@
         canvas.classList.remove("dino-caught");
         void canvas.offsetWidth;
         canvas.classList.add("dino-caught");
-        window.setTimeout(() => canvas.classList.remove("dino-caught"), 160);
+        window.setTimeout(() => canvas.classList.remove("dino-caught"), 150);
     }
 
-    function milestone(text) {
-        if (window.doraSite?.showMemeTimed) {
-            window.doraSite.showMemeTimed(text, null, 500);
-            return;
-        }
+    function sideReward(text) {
+        if (!rewardBox || !rewardImage || !rewardText) return;
 
-        window.doraSite?.showMeme?.(text);
-        window.setTimeout(() => window.doraSite?.closeMeme?.(), 500);
+        if (rewardTimer) window.clearTimeout(rewardTimer);
+
+        rewardImage.src = rewardImages[Math.floor(Math.random() * rewardImages.length)];
+        rewardText.textContent = text;
+        rewardBox.classList.remove("show");
+        void rewardBox.offsetWidth;
+        rewardBox.classList.add("show");
+
+        rewardTimer = window.setTimeout(() => {
+            rewardBox.classList.remove("show");
+        }, 500);
     }
 
-    function endGame() {
+    function lose(reason) {
         dead = true;
         stopTimer();
-        drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score} · Enter za opet`);
+
+        if (reason === "self") {
+            drawEndMessage("DORA JE UGRIZLA SAMU SEBE", `uhvaćeni dinosauri: ${score} · Enter za opet`);
+        } else {
+            drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score} · Enter za opet`);
+        }
     }
 
     function winGame() {
         dead = true;
         stopTimer();
         drawEndMessage("NEMA VIŠE DINOSAURA", "arena je puna. ovo je zabrinjavajuće.");
-        milestone("Dora je završila mezozoik.");
+        sideReward("Dora je završila mezozoik.");
     }
 
     function tick() {
@@ -212,14 +237,15 @@
             y: snake[0].y + direction.y
         };
 
-        if (
-            head.x < 0 ||
-            head.y < 0 ||
-            head.x >= GRID ||
-            head.y >= GRID ||
-            snake.some(part => part.x === head.x && part.y === head.y)
-        ) {
-            endGame();
+        const hitWall = head.x < 0 || head.y < 0 || head.x >= GRID || head.y >= GRID;
+        if (hitWall) {
+            lose("wall");
+            return;
+        }
+
+        const hitSelf = snake.some(part => part.x === head.x && part.y === head.y);
+        if (hitSelf) {
+            lose("self");
             return;
         }
 
@@ -247,17 +273,10 @@
             food = randomFood();
             startTimer();
 
-            if (score === 5) {
-                milestone("5 dinosaura. Dora postaje prijetnja mezozoiku.");
-            }
-
-            if (score === 10) {
-                milestone("10 DINOSAURA. ovo više nije snake nego masovno izumiranje.");
-            }
-
-            if (score === 15) {
-                milestone("15 dinosaura. ovo je već osobni problem dinosaura.");
-            }
+            if (score === 5) sideReward("5 dinosaura. Dora postaje prijetnja mezozoiku.");
+            if (score === 10) sideReward("10 dinosaura. ovo više nije običan snake.");
+            if (score === 15) sideReward("15 dinosaura. dinosauri počinju paničariti.");
+            if (score > 15 && score % 7 === 0) sideReward(`${score} dinosaura. zašto još uvijek ideš?`);
         } else {
             snake.pop();
         }
@@ -281,6 +300,7 @@
         dead = false;
         paused = document.hidden;
 
+        if (rewardBox) rewardBox.classList.remove("show");
         updateHud();
         draw();
         startTimer();
@@ -288,7 +308,6 @@
 
     function changeDirection(x, y) {
         if (dead) return;
-
         if (nextDirection.x + x === 0 && nextDirection.y + y === 0) return;
         nextDirection = { x, y };
     }
@@ -298,22 +317,18 @@
             changeDirection(0, -1);
             return true;
         }
-
         if (key === "arrowdown" || key === "s") {
             changeDirection(0, 1);
             return true;
         }
-
         if (key === "arrowleft" || key === "a") {
             changeDirection(-1, 0);
             return true;
         }
-
         if (key === "arrowright" || key === "d") {
             changeDirection(1, 0);
             return true;
         }
-
         return false;
     }
 
@@ -340,7 +355,6 @@
             if (value === "left") changeDirection(-1, 0);
             if (value === "right") changeDirection(1, 0);
         };
-
         button.addEventListener("pointerdown", act);
     });
 
@@ -358,7 +372,7 @@
         const dy = touch.clientY - touchStart.y;
         touchStart = null;
 
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
 
         if (Math.abs(dx) > Math.abs(dy)) {
             changeDirection(dx > 0 ? 1 : -1, 0);
@@ -371,7 +385,6 @@
 
     document.addEventListener("visibilitychange", () => {
         paused = document.hidden;
-
         if (paused) {
             stopTimer();
         } else if (!dead) {
@@ -380,7 +393,6 @@
     });
 
     restartButton?.addEventListener("click", start);
-
     doraImage.addEventListener("load", draw);
     dinosaurImage.addEventListener("load", draw);
 
