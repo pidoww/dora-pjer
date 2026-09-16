@@ -6,18 +6,11 @@
       "https://kkvdaedxequoqfyyhavp.supabase.co/functions/v1/track-visit",
   };
 
-  const sessionId =
-    createSessionId();
+  let sessionId = createSessionId();
 
   let maxScroll = 0;
-
-  /*
-   * Postaje true čim pošaljemo početni VISIT.
-   * Ne čekamo nužno odgovor servera jer korisnik
-   * može vrlo brzo zatvoriti stranicu.
-   */
-  let visitRequested = false;
-
+  let visitStarted = false;
+  let visitStarting = false;
   let endSent = false;
 
   /* =========================================================
@@ -26,9 +19,7 @@
 
   function setupExternalLinks() {
     document
-      .querySelectorAll(
-        'a[href^="http"]',
-      )
+      .querySelectorAll('a[href^="http"]')
       .forEach((link) => {
         try {
           const url =
@@ -44,9 +35,7 @@
             link.rel =
               "noopener noreferrer";
           }
-        } catch {
-          // Ignore invalid URL.
-        }
+        } catch {}
       });
   }
 
@@ -56,11 +45,8 @@
         "img:not([loading])",
       )
       .forEach((img) => {
-        img.loading =
-          "lazy";
-
-        img.decoding =
-          "async";
+        img.loading = "lazy";
+        img.decoding = "async";
       });
   }
 
@@ -110,7 +96,7 @@
           return;
         }
 
-        let destination = null;
+        let destination;
 
         try {
           destination =
@@ -127,14 +113,10 @@
 
         event.preventDefault();
 
-        destination
-          .scrollIntoView({
-            behavior:
-              "smooth",
-
-            block:
-              "start",
-          });
+        destination.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
       },
     );
   }
@@ -150,16 +132,14 @@
       .querySelectorAll(
         "[data-current-year]",
       )
-      .forEach(
-        (element) => {
-          element.textContent =
-            year;
-        },
-      );
+      .forEach((element) => {
+        element.textContent =
+          year;
+      });
   }
 
   /* =========================================================
-     SESSION ID
+     SESSION
      ========================================================= */
 
   function createSessionId() {
@@ -179,9 +159,6 @@
       bytes,
     );
 
-    /*
-     * UUID v4
-     */
     bytes[6] =
       (
         bytes[6] &
@@ -198,56 +175,33 @@
 
     const hex =
       Array.from(bytes)
-        .map(
-          (byte) =>
-            byte
-              .toString(16)
-              .padStart(
-                2,
-                "0",
-              ),
+        .map((byte) =>
+          byte
+            .toString(16)
+            .padStart(2, "0")
         );
 
     return [
-      hex
-        .slice(
-          0,
-          4,
-        )
-        .join(""),
-
-      hex
-        .slice(
-          4,
-          6,
-        )
-        .join(""),
-
-      hex
-        .slice(
-          6,
-          8,
-        )
-        .join(""),
-
-      hex
-        .slice(
-          8,
-          10,
-        )
-        .join(""),
-
-      hex
-        .slice(
-          10,
-          16,
-        )
-        .join(""),
+      hex.slice(0, 4).join(""),
+      hex.slice(4, 6).join(""),
+      hex.slice(6, 8).join(""),
+      hex.slice(8, 10).join(""),
+      hex.slice(10, 16).join(""),
     ].join("-");
   }
 
+  function resetSession() {
+    sessionId =
+      createSessionId();
+
+    maxScroll = 0;
+    visitStarted = false;
+    visitStarting = false;
+    endSent = false;
+  }
+
   /* =========================================================
-     BROWSER / DEVICE INFO
+     BROWSER / DEVICE
      ========================================================= */
 
   function detectBrowser() {
@@ -261,25 +215,20 @@
         ?.brands;
 
     if (
-      Array.isArray(
-        brands,
-      )
+      Array.isArray(brands)
     ) {
       const names =
         brands.map(
           (item) =>
             String(
-              item.brand ||
-                "",
+              item.brand || "",
             ).toLowerCase(),
         );
 
       if (
         names.some(
           (name) =>
-            name.includes(
-              "brave",
-            ),
+            name.includes("brave"),
         )
       ) {
         return "Brave";
@@ -287,50 +236,34 @@
     }
 
     if (
-      ua.includes(
-        "Edg/",
-      )
+      ua.includes("Edg/")
     ) {
       return "Microsoft Edge";
     }
 
     if (
-      ua.includes(
-        "OPR/",
-      ) ||
-      ua.includes(
-        "Opera",
-      )
+      ua.includes("OPR/") ||
+      ua.includes("Opera")
     ) {
       return "Opera";
     }
 
     if (
-      ua.includes(
-        "Firefox/",
-      )
+      ua.includes("Firefox/")
     ) {
       return "Firefox";
     }
 
     if (
-      ua.includes(
-        "Chrome/",
-      ) &&
-      !ua.includes(
-        "Edg/",
-      )
+      ua.includes("Chrome/") &&
+      !ua.includes("Edg/")
     ) {
       return "Chrome";
     }
 
     if (
-      ua.includes(
-        "Safari/",
-      ) &&
-      !ua.includes(
-        "Chrome/",
-      )
+      ua.includes("Safari/") &&
+      !ua.includes("Chrome/")
     ) {
       return "Safari";
     }
@@ -348,47 +281,33 @@
       "";
 
     if (
-      /Windows/i.test(
-        ua,
-      )
+      /Windows/i.test(ua)
     ) {
       return "Windows";
     }
 
     if (
-      /Android/i.test(
-        ua,
-      )
+      /Android/i.test(ua)
     ) {
       return "Android";
     }
 
     if (
-      /iPhone|iPad|iPod/i.test(
-        ua,
-      )
+      /iPhone|iPad|iPod/i.test(ua)
     ) {
       return "iOS";
     }
 
     if (
-      /Mac/i.test(
-        platform,
-      ) ||
-      /Mac OS/i.test(
-        ua,
-      )
+      /Mac/i.test(platform) ||
+      /Mac OS/i.test(ua)
     ) {
       return "macOS";
     }
 
     if (
-      /Linux/i.test(
-        platform,
-      ) ||
-      /Linux/i.test(
-        ua,
-      )
+      /Linux/i.test(platform) ||
+      /Linux/i.test(ua)
     ) {
       return "Linux";
     }
@@ -398,8 +317,7 @@
 
   function detectMobile() {
     const uaData =
-      navigator
-        .userAgentData;
+      navigator.userAgentData;
 
     if (
       uaData &&
@@ -432,9 +350,7 @@
   function getOrientation() {
     try {
       return (
-        screen
-          .orientation
-          ?.type ||
+        screen.orientation?.type ||
         null
       );
     } catch {
@@ -452,7 +368,7 @@
   }
 
   /* =========================================================
-     SCROLL TRACKING
+     SCROLL
      ========================================================= */
 
   function updateScroll() {
@@ -470,17 +386,10 @@
 
     const documentHeight =
       Math.max(
-        root.scrollHeight ||
-          0,
-
-        body?.scrollHeight ||
-          0,
-
-        root.offsetHeight ||
-          0,
-
-        body?.offsetHeight ||
-          0,
+        root.scrollHeight || 0,
+        body?.scrollHeight || 0,
+        root.offsetHeight || 0,
+        body?.offsetHeight || 0,
       );
 
     const viewportHeight =
@@ -509,9 +418,7 @@
         0,
         Math.min(
           100,
-          Math.round(
-            percent,
-          ),
+          Math.round(percent),
         ),
       );
 
@@ -525,7 +432,7 @@
   }
 
   /* =========================================================
-     INITIAL VISIT PAYLOAD
+     PAYLOADS
      ========================================================= */
 
   function buildVisit() {
@@ -533,16 +440,12 @@
       getConnection();
 
     const uaData =
-      navigator
-        .userAgentData ||
+      navigator.userAgentData ||
       null;
 
     return {
-      event_type:
-        "visit",
-
-      session_id:
-        sessionId,
+      event_type: "visit",
+      session_id: sessionId,
 
       page:
         location.href,
@@ -622,12 +525,10 @@
         ),
 
       cookies_enabled:
-        navigator
-          .cookieEnabled,
+        navigator.cookieEnabled,
 
       do_not_track:
-        navigator
-          .doNotTrack ||
+        navigator.doNotTrack ||
         null,
 
       screen_width:
@@ -677,8 +578,7 @@
         typeof connection
             ?.downlink ===
           "number"
-          ? connection
-              .downlink
+          ? connection.downlink
           : null,
 
       connection_rtt:
@@ -692,8 +592,7 @@
         typeof connection
             ?.saveData ===
           "boolean"
-          ? connection
-              .saveData
+          ? connection.saveData
           : null,
 
       ua_brands:
@@ -716,10 +615,6 @@
     };
   }
 
-  /* =========================================================
-     FINAL END PAYLOAD
-     ========================================================= */
-
   function buildEnd() {
     updateScroll();
 
@@ -727,23 +622,14 @@
       getConnection();
 
     return {
-      event_type:
-        "end",
+      event_type: "end",
 
       session_id:
         sessionId,
 
-      /*
-       * Konačno stanje sesije.
-       */
       max_scroll_percent:
         maxScroll,
 
-      /*
-       * Zadnje stanje browsera/ekrana u trenutku odlaska.
-       * Backend zasad koristi spremljene početne podatke
-       * + konačni duration i scroll za završni mail.
-       */
       viewport_width:
         innerWidth ||
         null,
@@ -771,8 +657,7 @@
         typeof connection
             ?.downlink ===
           "number"
-          ? connection
-              .downlink
+          ? connection.downlink
           : null,
 
       connection_rtt:
@@ -786,26 +671,33 @@
         typeof connection
             ?.saveData ===
           "boolean"
-          ? connection
-              .saveData
+          ? connection.saveData
           : null,
     };
   }
 
   /* =========================================================
-     NORMAL REQUEST
+     INITIAL REQUEST
      ========================================================= */
 
-  async function send(
-    data,
-  ) {
+  async function sendVisit() {
+    if (
+      visitStarted ||
+      visitStarting
+    ) {
+      return;
+    }
+
+    visitStarting = true;
+
+    updateScroll();
+
     try {
       const response =
         await fetch(
           CONFIG.endpoint,
           {
-            method:
-              "POST",
+            method: "POST",
 
             headers: {
               "Content-Type":
@@ -814,11 +706,8 @@
 
             body:
               JSON.stringify(
-                data,
+                buildVisit(),
               ),
-
-            keepalive:
-              true,
 
             credentials:
               "omit",
@@ -831,69 +720,44 @@
           },
         );
 
-      return response.ok;
+      if (response.ok) {
+        visitStarted = true;
+      }
     } catch {
-      return false;
+      // Initial tracking failure.
+    } finally {
+      visitStarting = false;
     }
   }
 
   /* =========================================================
-     FINAL BEACON
+     FINAL REQUEST
      ========================================================= */
 
-  function sendFinalRequest() {
-    const data =
-      buildEnd();
+  function sendEnd() {
+    if (
+      !visitStarted ||
+      endSent
+    ) {
+      return;
+    }
+
+    endSent = true;
 
     const payload =
       JSON.stringify(
-        data,
+        buildEnd(),
       );
 
     /*
-     * sendBeacon je napravljen upravo za slanje
-     * zadnjih podataka prilikom odlaska sa stranice.
-     */
-    if (
-      typeof navigator
-          .sendBeacon ===
-        "function"
-    ) {
-      try {
-        const blob =
-          new Blob(
-            [payload],
-            {
-              type:
-                "text/plain;charset=UTF-8",
-            },
-          );
-
-        const queued =
-          navigator
-            .sendBeacon(
-              CONFIG.endpoint,
-              blob,
-            );
-
-        if (queued) {
-          return;
-        }
-      } catch {
-        // Use fetch keepalive fallback.
-      }
-    }
-
-    /*
-     * Fallback ako sendBeacon nije dostupan
-     * ili nije prihvatio request.
+     * fetch keepalive je namijenjen zahtjevima
+     * koji trebaju preživjeti odlazak sa stranice.
      */
     try {
-      fetch(
+      void fetch(
         CONFIG.endpoint,
         {
-          method:
-            "POST",
+          method: "POST",
 
           headers: {
             "Content-Type":
@@ -916,118 +780,104 @@
             "no-referrer",
         },
       );
+
+      return;
     } catch {
-      // Nothing more browser can safely do here.
+      // sendBeacon fallback below.
     }
-  }
 
-  /* =========================================================
-     START VISIT
-     ========================================================= */
-
-  async function startVisit() {
     if (
-      visitRequested
+      typeof navigator
+          .sendBeacon ===
+        "function"
     ) {
-      return;
+      try {
+        navigator.sendBeacon(
+          CONFIG.endpoint,
+          new Blob(
+            [payload],
+            {
+              type:
+                "text/plain;charset=UTF-8",
+            },
+          ),
+        );
+      } catch {}
     }
-
-    visitRequested =
-      true;
-
-    updateScroll();
-
-    await send(
-      buildVisit(),
-    );
   }
 
   /* =========================================================
-     END VISIT
-     ========================================================= */
-
-  function endVisit() {
-    if (
-      !visitRequested ||
-      endSent
-    ) {
-      return;
-    }
-
-    endSent =
-      true;
-
-    sendFinalRequest();
-  }
-
-  /* =========================================================
-     INITIALIZATION
+     INIT
      ========================================================= */
 
   function init() {
     setupExternalLinks();
-
     setupLazyImages();
-
     setupSmoothScroll();
-
     setupCurrentYear();
 
     updateScroll();
 
-    void startVisit();
+    void sendVisit();
   }
 
   /* =========================================================
      EVENTS
      ========================================================= */
 
-  /*
-   * Scroll se računa lokalno.
-   * Ovdje se NE šalje nikakav request.
-   */
   window.addEventListener(
     "scroll",
     updateScroll,
     {
-      passive:
-        true,
+      passive: true,
     },
   );
 
-  /*
-   * Promjena veličine također se samo lokalno prati.
-   */
   window.addEventListener(
     "resize",
     updateScroll,
     {
-      passive:
-        true,
-    },
-  );
-
-  window.addEventListener(
-    "load",
-    updateScroll,
-    {
-      once:
-        true,
+      passive: true,
     },
   );
 
   /*
-   * Ovo je jedini završni request.
-   *
-   * Aktivira se kod:
-   * - zatvaranja taba
-   * - refreshanja
-   * - odlaska na drugu stranicu
-   * - navigacije unatrag/naprijed
+   * Glavni završni event.
    */
   window.addEventListener(
     "pagehide",
-    endVisit,
+    sendEnd,
+  );
+
+  /*
+   * Fallback za browsere/situacije u kojima
+   * zatvaranje taba ne dovede pouzdano do pagehide.
+   *
+   * endSent osigurava da se iz browsera pokuša
+   * poslati samo jedan završni request.
+   */
+  window.addEventListener(
+    "beforeunload",
+    sendEnd,
+  );
+
+  /*
+   * Povratak iz back-forward cachea tretiramo
+   * kao novu sesiju.
+   */
+  window.addEventListener(
+    "pageshow",
+    (event) => {
+      if (
+        event.persisted
+      ) {
+        resetSession();
+
+        updateScroll();
+
+        void sendVisit();
+      }
+    },
   );
 
   if (
@@ -1038,8 +888,7 @@
       "DOMContentLoaded",
       init,
       {
-        once:
-          true,
+        once: true,
       },
     );
   } else {
