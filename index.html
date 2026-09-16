@@ -31,20 +31,20 @@
 
         <h2 class="section-title">neki dokazi</h2>
 
-        <section class="photo-wall" aria-label="fotke">
+        <section class="photo-wall homepage-photo-grid" aria-label="fotke">
             <figure class="photo rotate-left">
                 <img src="images/img1.jpg" alt="Dora drži Sivku">
                 <figcaption>Dora drži Sivku</figcaption>
             </figure>
 
             <figure class="photo rotate-right">
-                <img class="chipsy-photo" src="images/img2.jpg" alt="Dora drži Chypsija">
+                <img class="chypsi-photo" src="images/img2.jpg" alt="Dora drži Chypsija">
                 <figcaption>Dora drži Chypsija</figcaption>
             </figure>
 
-            <figure class="photo rotate-left clickable-secret" id="chipsy-secret" title="Chypsi izgleda sumnjivo klikabilno">
-                <img class="chipsy-photo" src="images/img3.jpg" alt="Chypsi sjedi na Dori">
-                <figcaption id="chipsy-caption">Chypsi sjedi na Dori <span class="small-text">(normalna slika, sigurno)</span></figcaption>
+            <figure class="photo rotate-left clickable-secret" id="chypsi-secret" title="Chypsi izgleda sumnjivo klikabilno">
+                <img class="chypsi-photo" src="images/img3.jpg" alt="Chypsi sjedi na Dori">
+                <figcaption id="chypsi-caption">Chypsi sjedi na Dori <span class="small-text">(normalna slika, sigurno)</span></figcaption>
             </figure>
 
             <figure class="photo rotate-right clickable-secret" id="hiking-secret" title="vjetar u kosi">
@@ -56,19 +56,24 @@
         <section class="paper friends-section">
             <h2>ljudi koji su se nekako našli na ovoj stranici</h2>
 
-            <div class="friend-grid">
+            <div class="friend-grid homepage-friends-grid">
                 <figure class="photo friend-photo rotate-left" id="friend-secret">
-                    <img src="images/slike%20update%20stranica/slika%20konrad%20i%20maja%20lea.jpeg" alt="Konrad, Maja, Lea, Pjer i Dora">
-                    <figcaption>Konrad + Maja + Lea + Pjer + Dora <span class="small-text">(MLMZ)</span></figcaption>
+                    <img class="pjer-secret" src="images/slike%20update%20stranica/slika%20konrad%20i%20maja%20lea.jpeg" alt="Konrad, Maja-Lea, Pjer i Dora">
+                    <figcaption>Konrad + (MLMZ) Maja-Lea + Pjer + Dora</figcaption>
                 </figure>
 
-                <figure class="photo friend-photo rotate-right" id="icici-card">
-                    <img id="icici-photo" src="images/slike%20update%20stranica/icici%20selfie%20ljetovanje.jpeg" alt="Ičići selfie s ljetovanja">
-                    <figcaption id="icici-caption">Ičići arhiva <span class="small-text">klikni. ima nastavak.</span></figcaption>
+                <figure class="photo friend-photo rotate-right">
+                    <img src="images/slike%20update%20stranica/icici%20selfie%20ljetovanje.jpeg" alt="Ičići ljetovanje selfie">
+                    <figcaption>Ičići ljetovanje</figcaption>
+                </figure>
+
+                <figure class="photo friend-photo hard-rotate">
+                    <img src="images/slike%20update%20stranica/funny%20slika%20na%20plazi.jpeg" alt="Ičići ljetovanje na plaži">
+                    <figcaption>Ičići ljetovanje, drugi kadar</figcaption>
                 </figure>
             </div>
 
-            <p class="small-text photo-help">double click na običnu sliku = veća slika. neke slike imaju svoja pravila.</p>
+            <p class="small-text photo-help">jedan klik na običnu sliku = veća slika. neke slike imaju svoja pravila.</p>
         </section>
 
         <section class="youtube-box">
@@ -85,7 +90,7 @@
             <h2>ostalo</h2>
             <p>Ova stranica možda sadrži stvari koje nisu baš odmah vidljive.</p>
             <p>Nema posebnog razloga zašto ovo piše ovdje.</p>
-            <p class="suspicious">pogotovo nemoj previše puta kliknuti Chypsija. ni naslov. ni onu sliku s kosom.</p>
+            <p class="suspicious">pogotovo nemoj previše puta kliknuti Chypsija. ni naslov. ni onu sliku s kosom. i neke slike s Pjerom izgledaju sumnjivo.</p>
         </section>
     </main>
 
@@ -98,9 +103,11 @@
         <button id="close-meme" type="button" aria-label="zatvori">x</button>
         <img id="meme-image" class="no-lightbox" src="" alt="random cursed slika">
         <p id="meme-text">čestitam. našao si nešto potpuno beskorisno.</p>
+        <a id="meme-link" class="meme-code-link hidden" href="#" target="_blank" rel="noopener noreferrer"></a>
     </div>
 
     <div id="chip-layer" class="chip-layer" aria-hidden="true"></div>
+    <div id="leg-layer" class="leg-layer" aria-hidden="true"></div>
 
     <script src="/main.js"></script>
     <script src="/fun.js"></script>
