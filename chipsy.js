@@ -17,13 +17,13 @@
     const messages = [
         "Schrödinger nije ovo stavio u originalni eksperiment.",
         "BONK. valna funkcija se osjeća ugroženo.",
-        "Chipsy odbija komentirati događaj.",
+        "Chypsi odbija komentirati događaj.",
         "laboratorij je sada 12% manje kvantan.",
         "mjerenje je izvršeno vrlo neprofesionalno.",
         "peer review je upravo napustio chat.",
         "čips je opažen. eksperiment je kompromitiran.",
         "Schrödinger traži godišnji odmor.",
-        "Chipsy: miau. fizika: ???"
+        "Chypsi: miau. fizika: ???"
     ];
 
     let bonks = 0;
@@ -68,7 +68,7 @@
         }
     }
 
-    function randomizeCat() {
+    function randomizeChypsi() {
         if (!image || bonks % 5 !== 0) return;
 
         const options = [
@@ -91,7 +91,7 @@
         if (message) message.textContent = random(messages);
 
         if (bonks === 5 && message) {
-            message.textContent = "5 BONKOVA. Chipsy je sada istovremeno gladan i nije gladan.";
+            message.textContent = "5 BONKOVA. Chypsi je sada istovremeno gladan i nije gladan.";
         }
 
         if (bonks === 10) {
@@ -111,7 +111,7 @@
             document.body.classList.remove("trash-mode");
         }
 
-        randomizeCat();
+        randomizeChypsi();
     }
 
     function chipsOnly() {
