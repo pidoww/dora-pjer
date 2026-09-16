@@ -9,9 +9,9 @@
     const bestElement = document.getElementById("best-score");
     const restartButton = document.getElementById("restart");
 
-    const GRID = 20;
+    const GRID = 8;
     const SIZE = canvas.width / GRID;
-    const SPEED = 120;
+    const SPEED = 165;
 
     const doraImage = new Image();
     doraImage.src = "images/slike%20update%20stranica/slika%20dora%20za%20snake%20game.jpeg";
@@ -22,7 +22,7 @@
     let snake = [];
     let direction = { x: 1, y: 0 };
     let nextDirection = { x: 1, y: 0 };
-    let food = { x: 14, y: 10 };
+    let food = { x: 6, y: 4 };
     let score = 0;
     let dead = false;
     let timer = null;
@@ -35,29 +35,30 @@
     if (bestElement) bestElement.textContent = String(best);
 
     function randomFood() {
-        let position;
+        const free = [];
 
-        do {
-            position = {
-                x: Math.floor(Math.random() * GRID),
-                y: Math.floor(Math.random() * GRID)
-            };
-        } while (
-            snake.some(part => part.x === position.x && part.y === position.y)
-        );
+        for (let y = 0; y < GRID; y += 1) {
+            for (let x = 0; x < GRID; x += 1) {
+                if (!snake.some(part => part.x === x && part.y === y)) {
+                    free.push({ x, y });
+                }
+            }
+        }
 
-        return position;
+        if (free.length === 0) return null;
+        return free[Math.floor(Math.random() * free.length)];
     }
 
     function drawBackground() {
         ctx.fillStyle = "#f3edcf";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.strokeStyle = "rgba(0,0,0,.055)";
+        ctx.strokeStyle = "rgba(0,0,0,.16)";
         ctx.lineWidth = 1;
 
         for (let i = 0; i <= GRID; i += 1) {
             const p = i * SIZE;
+
             ctx.beginPath();
             ctx.moveTo(p, 0);
             ctx.lineTo(p, canvas.height);
@@ -70,7 +71,7 @@
         }
     }
 
-    function drawSquareImage(image, x, y, fallback, padding = 1) {
+    function drawSquareImage(image, x, y, fallback, padding = 3) {
         const px = x * SIZE + padding;
         const py = y * SIZE + padding;
         const size = SIZE - padding * 2;
@@ -82,13 +83,12 @@
             ctx.clip();
 
             const sourceRatio = image.naturalWidth / image.naturalHeight;
-            const targetRatio = 1;
             let sx = 0;
             let sy = 0;
             let sw = image.naturalWidth;
             let sh = image.naturalHeight;
 
-            if (sourceRatio > targetRatio) {
+            if (sourceRatio > 1) {
                 sw = image.naturalHeight;
                 sx = (image.naturalWidth - sw) / 2;
             } else {
@@ -114,17 +114,31 @@
                 part.x,
                 part.y,
                 index === 0 ? "#d44f34" : "#e58c6d",
-                index === 0 ? 0 : 2
+                index === 0 ? 1 : 5
             );
 
             if (index === 0) {
                 ctx.strokeStyle = "#111";
-                ctx.lineWidth = 2;
-                ctx.strokeRect(part.x * SIZE + 1, part.y * SIZE + 1, SIZE - 2, SIZE - 2);
+                ctx.lineWidth = 3;
+                ctx.strokeRect(part.x * SIZE + 2, part.y * SIZE + 2, SIZE - 4, SIZE - 4);
             }
         });
 
-        drawSquareImage(dinosaurImage, food.x, food.y, "#4c9b43", 0);
+        if (food) {
+            drawSquareImage(dinosaurImage, food.x, food.y, "#4c9b43", 2);
+        }
+    }
+
+    function drawEndMessage(title, subtitle) {
+        draw();
+        ctx.fillStyle = "rgba(0,0,0,.79)";
+        ctx.fillRect(0, canvas.height / 2 - 64, canvas.width, 128);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = "bold 34px Arial";
+        ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = "17px Arial";
+        ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 30);
     }
 
     function endGame() {
@@ -132,23 +146,22 @@
         clearInterval(timer);
         timer = null;
 
-        draw();
-
-        ctx.fillStyle = "rgba(0,0,0,.78)";
-        ctx.fillRect(0, canvas.height / 2 - 58, canvas.width, 116);
-
-        ctx.textAlign = "center";
-        ctx.fillStyle = "white";
-        ctx.font = "bold 31px Arial";
-        ctx.fillText("DORA JE UDARILA U ZID", canvas.width / 2, canvas.height / 2 - 8);
-        ctx.font = "16px Arial";
-        ctx.fillText(`uhvaćeni dinosauri: ${score}`, canvas.width / 2, canvas.height / 2 + 27);
+        drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score}`);
 
         if (score >= 8 && window.doraSite?.showMeme) {
             window.setTimeout(() => {
                 window.doraSite.showMeme(`Dora je prije sudara uhvatila ${score} dinosaura.`);
             }, 500);
         }
+    }
+
+    function winGame() {
+        dead = true;
+        clearInterval(timer);
+        timer = null;
+        drawEndMessage("NEMA VIŠE DINOSAURA", "napunio si svih 64 polja. ovo je zabrinjavajuće.");
+
+        window.doraSite?.showMeme("64 polja. Dora je završila mezozoik.");
     }
 
     function tick() {
@@ -174,10 +187,9 @@
 
         snake.unshift(head);
 
-        if (head.x === food.x && head.y === food.y) {
+        if (food && head.x === food.x && head.y === food.y) {
             score += 1;
             if (scoreElement) scoreElement.textContent = String(score);
-            food = randomFood();
 
             if (score > best) {
                 best = score;
@@ -186,6 +198,14 @@
                     localStorage.setItem("doraDinoBest", String(best));
                 } catch {}
             }
+
+            if (snake.length >= GRID * GRID) {
+                food = null;
+                winGame();
+                return;
+            }
+
+            food = randomFood();
 
             if (score === 5 && window.doraSite?.showMeme) {
                 window.doraSite.showMeme("5 dinosaura. Dora postaje prijetnja mezozoiku.");
@@ -205,9 +225,9 @@
         clearInterval(timer);
 
         snake = [
-            { x: 10, y: 10 },
-            { x: 9, y: 10 },
-            { x: 8, y: 10 }
+            { x: 3, y: 4 },
+            { x: 2, y: 4 },
+            { x: 1, y: 4 }
         ];
 
         direction = { x: 1, y: 0 };
