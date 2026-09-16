@@ -7,11 +7,13 @@
   };
 
   let sessionId = createSessionId();
-
   let maxScroll = 0;
+
   let visitStarted = false;
   let visitStarting = false;
-  let endSent = false;
+
+  let endConfirmed = false;
+  let endRequestRunning = false;
 
   /* =========================================================
      SITE
@@ -143,10 +145,8 @@
 
   function createSessionId() {
     if (
-      typeof crypto !==
-        "undefined" &&
-      typeof crypto.randomUUID ===
-        "function"
+      typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
     ) {
       return crypto.randomUUID();
     }
@@ -159,17 +159,11 @@
     );
 
     bytes[6] =
-      (
-        bytes[6] &
-        0x0f
-      ) |
+      (bytes[6] & 0x0f) |
       0x40;
 
     bytes[8] =
-      (
-        bytes[8] &
-        0x3f
-      ) |
+      (bytes[8] & 0x3f) |
       0x80;
 
     const hex =
@@ -189,14 +183,17 @@
     ].join("-");
   }
 
-  function startNewSession() {
+  function beginNewSession() {
     sessionId =
       createSessionId();
 
     maxScroll = 0;
+
     visitStarted = false;
     visitStarting = false;
-    endSent = false;
+
+    endConfirmed = false;
+    endRequestRunning = false;
 
     updateScroll();
 
@@ -238,9 +235,7 @@
       }
     }
 
-    if (
-      ua.includes("Edg/")
-    ) {
+    if (ua.includes("Edg/")) {
       return "Microsoft Edge";
     }
 
@@ -431,7 +426,7 @@
   }
 
   /* =========================================================
-     VISIT PAYLOAD
+     PAYLOADS
      ========================================================= */
 
   function buildVisit() {
@@ -568,23 +563,27 @@
         null,
 
       connection_effective_type:
-        connection?.effectiveType ||
+        connection
+          ?.effectiveType ||
         null,
 
       connection_downlink:
-        typeof connection?.downlink ===
+        typeof connection
+            ?.downlink ===
           "number"
           ? connection.downlink
           : null,
 
       connection_rtt:
-        typeof connection?.rtt ===
+        typeof connection
+            ?.rtt ===
           "number"
           ? connection.rtt
           : null,
 
       connection_save_data:
-        typeof connection?.saveData ===
+        typeof connection
+            ?.saveData ===
           "boolean"
           ? connection.saveData
           : null,
@@ -597,7 +596,8 @@
           : null,
 
       ua_mobile:
-        typeof uaData?.mobile ===
+        typeof uaData
+            ?.mobile ===
           "boolean"
           ? uaData.mobile
           : null,
@@ -607,10 +607,6 @@
         null,
     };
   }
-
-  /* =========================================================
-     END PAYLOAD
-     ========================================================= */
 
   function buildEnd() {
     updateScroll();
@@ -623,20 +619,6 @@
 
       max_scroll_percent:
         maxScroll,
-
-      viewport_width:
-        innerWidth ||
-        null,
-
-      viewport_height:
-        innerHeight ||
-        null,
-
-      screen_orientation:
-        getOrientation(),
-
-      online_status:
-        navigator.onLine,
     };
   }
 
@@ -686,63 +668,110 @@
         visitStarted = true;
       }
     } catch {
-      // Failed visit request.
+      // Initial tracking failed.
     } finally {
       visitStarting = false;
     }
   }
 
   /* =========================================================
-     END
+     END - NORMAL FETCH
      ========================================================= */
 
-  function sendEnd() {
+  async function sendEndFetch() {
     if (
       !visitStarted ||
-      endSent
+      endConfirmed ||
+      endRequestRunning
     ) {
       return;
     }
 
-    endSent = true;
+    endRequestRunning = true;
+
+    try {
+      const response =
+        await fetch(
+          CONFIG.endpoint,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "text/plain;charset=UTF-8",
+            },
+
+            body:
+              JSON.stringify(
+                buildEnd(),
+              ),
+
+            keepalive:
+              true,
+
+            credentials:
+              "omit",
+
+            cache:
+              "no-store",
+
+            referrerPolicy:
+              "no-referrer",
+          },
+        );
+
+      if (response.ok) {
+        endConfirmed = true;
+      }
+    } catch {
+      /*
+       * pagehide fallback i dalje smije
+       * pokušati poslati završetak.
+       */
+    } finally {
+      endRequestRunning = false;
+    }
+  }
+
+  /* =========================================================
+     END - BEACON FALLBACK
+     ========================================================= */
+
+  function sendEndBeacon() {
+    if (
+      !visitStarted ||
+      endConfirmed
+    ) {
+      return;
+    }
 
     const payload =
       JSON.stringify(
         buildEnd(),
       );
 
-    /*
-     * sendBeacon prvo.
-     *
-     * Ovo je najvažnije za Android/mobile
-     * jer se document često prvo samo sakrije.
-     */
     if (
       typeof navigator.sendBeacon ===
         "function"
     ) {
       try {
-        const queued =
-          navigator.sendBeacon(
-            CONFIG.endpoint,
+        navigator.sendBeacon(
+          CONFIG.endpoint,
 
-            new Blob(
-              [payload],
-              {
-                type:
-                  "text/plain;charset=UTF-8",
-              },
-            ),
-          );
-
-        if (queued) {
-          return;
-        }
+          new Blob(
+            [payload],
+            {
+              type:
+                "text/plain;charset=UTF-8",
+            },
+          ),
+        );
       } catch {}
     }
 
     /*
-     * Fallback.
+     * Drugi fallback.
+     * Backend ionako deduplicira END.
      */
     try {
       void fetch(
@@ -810,10 +839,8 @@
   );
 
   /*
-   * GLAVNI mobile/Brave signal.
-   *
-   * Čim stranica postane hidden,
-   * završavamo posjet.
+   * Kad tab samo postane hidden, još uvijek imamo
+   * normalno živi dokument pa koristimo pravi fetch.
    */
   document.addEventListener(
     "visibilitychange",
@@ -822,36 +849,38 @@
         document.visibilityState ===
         "hidden"
       ) {
-        sendEnd();
+        void sendEndFetch();
         return;
       }
 
       /*
-       * Ako se korisnik vrati nakon što je
-       * prethodni posjet već završen,
-       * to računamo kao novi posjet.
+       * Ako se korisnik vrati nakon uspješno
+       * završenog posjeta, to je nova sesija.
        */
       if (
         document.visibilityState ===
           "visible" &&
-        endSent
+        endConfirmed
       ) {
-        startNewSession();
+        beginNewSession();
       }
     },
   );
 
   /*
-   * Desktop/navigation fallback.
+   * Ako se dokument stvarno unload-a prije nego što
+   * normalni fetch potvrdi završetak, pokušavamo opet.
+   *
+   * Backend već sprječava dupli END mail.
    */
   window.addEventListener(
     "pagehide",
-    sendEnd,
+    sendEndBeacon,
   );
 
   window.addEventListener(
     "beforeunload",
-    sendEnd,
+    sendEndBeacon,
   );
 
   if (
