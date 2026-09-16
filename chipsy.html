@@ -6,6 +6,7 @@
     <title>CHIPSY LORE</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
+    <link rel="stylesheet" href="extras.css">
 </head>
 <body class="chipsy-page">
     <header class="top">
@@ -13,6 +14,7 @@
         <p class="tiny-warning">ovo više nema nikakve veze s originalnom stranicom</p>
         <nav>
             <a href="index.html">početna</a>
+            <a href="youtube.html">vlogovi</a>
             <a href="snake.html">Dora vs dinosauri</a>
         </nav>
     </header>
@@ -28,15 +30,37 @@
             <p class="small-text">ova jednadžba je ovdje da stranica izgleda znanstvenije</p>
         </section>
 
+        <section class="paper">
+            <h2>ljudi i stvari koje su završile u ovom eksperimentu</h2>
+            <div class="wiki-grid">
+                <figure class="wiki-card">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Erwin_Schr%C3%B6dinger_%281933%29.jpg" alt="Erwin Schrödinger 1933">
+                    <figcaption>
+                        Erwin Schrödinger, 1933. stvarna osoba iza cijele fore.
+                        <div class="wiki-source"><a href="https://en.wikipedia.org/wiki/Erwin_Schr%C3%B6dinger" target="_blank" rel="noopener noreferrer">Wikipedia ↗</a></div>
+                    </figcaption>
+                </figure>
+
+                <figure class="wiki-card">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/90/Schroedingers_cat_box.svg" alt="Schrödingerov eksperiment s mačkom u kutiji">
+                    <figcaption>
+                        originalna ideja: mačka, kutija, radioaktivni izvor, čekić i otrov. Chipsy verzija je znatno manje akademska.
+                        <div class="wiki-source"><a href="https://commons.wikimedia.org/wiki/File:Schroedingers_cat_box.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons ↗</a></div>
+                    </figcaption>
+                </figure>
+            </div>
+        </section>
+
         <section class="lab" id="chipsy-lab">
             <div class="hammer" id="schrodinger-hammer" aria-hidden="true">🔨</div>
 
             <div class="cat-stage">
-                <img id="chipsy-lab-image" src="images/slike%20update%20stranica/chipsi%20slika.jpeg" alt="Chipsy">
+                <img class="chipsy-photo" id="chipsy-lab-image" src="images/slike%20update%20stranica/chipsi%20slika.jpeg" alt="Chipsy u laboratoriju">
             </div>
 
-            <div class="schrodinger-box" id="schrodinger-box">
-                SCHRÖDINGER
+            <div class="schrodinger-target" id="schrodinger-target">
+                <img id="schrodinger-photo" src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Erwin_Schr%C3%B6dinger_%281933%29.jpg" alt="Erwin Schrödinger">
+                <div class="schrodinger-label">SCHRÖDINGER</div>
             </div>
         </section>
 
@@ -58,14 +82,14 @@
                 <li>Chipsy uđe u kutiju.</li>
                 <li>Nitko ne zna je li unutra čips.</li>
                 <li>Netko klikne gumb.</li>
-                <li>Schrödinger dobije čekićem.</li>
+                <li>čekić napravi BONK.</li>
                 <li>čips se materijalizira.</li>
                 <li>peer review: nije prošao.</li>
             </ol>
         </section>
 
         <section class="paper center">
-            <p>ako si došao ovdje nakon osam klikova po mački, zaslužio si još jednu lošu odluku:</p>
+            <p>ako si došao ovdje nakon klikanja po mački, zaslužio si još jednu lošu odluku:</p>
             <a class="ugly-button" href="snake.html">igraj Dora vs. dinosauri →</a>
         </section>
     </main>
