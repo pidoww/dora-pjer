@@ -14,7 +14,7 @@
   let endSent = false;
 
   /* =========================================================
-     GENERAL SITE FUNCTIONS
+     SITE
      ========================================================= */
 
   function setupExternalLinks() {
@@ -63,8 +63,7 @@
     document.addEventListener(
       "click",
       (event) => {
-        const target =
-          event.target;
+        const target = event.target;
 
         if (
           !(
@@ -190,7 +189,7 @@
     ].join("-");
   }
 
-  function resetSession() {
+  function startNewSession() {
     sessionId =
       createSessionId();
 
@@ -198,10 +197,14 @@
     visitStarted = false;
     visitStarting = false;
     endSent = false;
+
+    updateScroll();
+
+    void sendVisit();
   }
 
   /* =========================================================
-     BROWSER / DEVICE
+     DEVICE / BROWSER
      ========================================================= */
 
   function detectBrowser() {
@@ -280,20 +283,18 @@
       navigator.platform ||
       "";
 
-    if (
-      /Windows/i.test(ua)
-    ) {
+    if (/Windows/i.test(ua)) {
       return "Windows";
     }
 
-    if (
-      /Android/i.test(ua)
-    ) {
+    if (/Android/i.test(ua)) {
       return "Android";
     }
 
     if (
-      /iPhone|iPad|iPod/i.test(ua)
+      /iPhone|iPad|iPod/i.test(
+        ua,
+      )
     ) {
       return "iOS";
     }
@@ -402,9 +403,7 @@
 
     let percent = 100;
 
-    if (
-      scrollable > 0
-    ) {
+    if (scrollable > 0) {
       percent =
         (
           scrollTop /
@@ -432,7 +431,7 @@
   }
 
   /* =========================================================
-     PAYLOADS
+     VISIT PAYLOAD
      ========================================================= */
 
   function buildVisit() {
@@ -515,8 +514,7 @@
 
       touch_support:
         (
-          navigator
-            .maxTouchPoints >
+          navigator.maxTouchPoints >
           0
         ) ||
         (
@@ -570,27 +568,23 @@
         null,
 
       connection_effective_type:
-        connection
-          ?.effectiveType ||
+        connection?.effectiveType ||
         null,
 
       connection_downlink:
-        typeof connection
-            ?.downlink ===
+        typeof connection?.downlink ===
           "number"
           ? connection.downlink
           : null,
 
       connection_rtt:
-        typeof connection
-            ?.rtt ===
+        typeof connection?.rtt ===
           "number"
           ? connection.rtt
           : null,
 
       connection_save_data:
-        typeof connection
-            ?.saveData ===
+        typeof connection?.saveData ===
           "boolean"
           ? connection.saveData
           : null,
@@ -603,8 +597,7 @@
           : null,
 
       ua_mobile:
-        typeof uaData
-            ?.mobile ===
+        typeof uaData?.mobile ===
           "boolean"
           ? uaData.mobile
           : null,
@@ -615,11 +608,12 @@
     };
   }
 
+  /* =========================================================
+     END PAYLOAD
+     ========================================================= */
+
   function buildEnd() {
     updateScroll();
-
-    const connection =
-      getConnection();
 
     return {
       event_type: "end",
@@ -643,41 +637,11 @@
 
       online_status:
         navigator.onLine,
-
-      connection_type:
-        connection?.type ||
-        null,
-
-      connection_effective_type:
-        connection
-          ?.effectiveType ||
-        null,
-
-      connection_downlink:
-        typeof connection
-            ?.downlink ===
-          "number"
-          ? connection.downlink
-          : null,
-
-      connection_rtt:
-        typeof connection
-            ?.rtt ===
-          "number"
-          ? connection.rtt
-          : null,
-
-      connection_save_data:
-        typeof connection
-            ?.saveData ===
-          "boolean"
-          ? connection.saveData
-          : null,
     };
   }
 
   /* =========================================================
-     INITIAL REQUEST
+     START
      ========================================================= */
 
   async function sendVisit() {
@@ -689,8 +653,6 @@
     }
 
     visitStarting = true;
-
-    updateScroll();
 
     try {
       const response =
@@ -724,14 +686,14 @@
         visitStarted = true;
       }
     } catch {
-      // Initial tracking failure.
+      // Failed visit request.
     } finally {
       visitStarting = false;
     }
   }
 
   /* =========================================================
-     FINAL REQUEST
+     END
      ========================================================= */
 
   function sendEnd() {
@@ -750,8 +712,37 @@
       );
 
     /*
-     * fetch keepalive je namijenjen zahtjevima
-     * koji trebaju preživjeti odlazak sa stranice.
+     * sendBeacon prvo.
+     *
+     * Ovo je najvažnije za Android/mobile
+     * jer se document često prvo samo sakrije.
+     */
+    if (
+      typeof navigator.sendBeacon ===
+        "function"
+    ) {
+      try {
+        const queued =
+          navigator.sendBeacon(
+            CONFIG.endpoint,
+
+            new Blob(
+              [payload],
+              {
+                type:
+                  "text/plain;charset=UTF-8",
+              },
+            ),
+          );
+
+        if (queued) {
+          return;
+        }
+      } catch {}
+    }
+
+    /*
+     * Fallback.
      */
     try {
       void fetch(
@@ -780,30 +771,7 @@
             "no-referrer",
         },
       );
-
-      return;
-    } catch {
-      // sendBeacon fallback below.
-    }
-
-    if (
-      typeof navigator
-          .sendBeacon ===
-        "function"
-    ) {
-      try {
-        navigator.sendBeacon(
-          CONFIG.endpoint,
-          new Blob(
-            [payload],
-            {
-              type:
-                "text/plain;charset=UTF-8",
-            },
-          ),
-        );
-      } catch {}
-    }
+    } catch {}
   }
 
   /* =========================================================
@@ -842,42 +810,48 @@
   );
 
   /*
-   * Glavni završni event.
+   * GLAVNI mobile/Brave signal.
+   *
+   * Čim stranica postane hidden,
+   * završavamo posjet.
+   */
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (
+        document.visibilityState ===
+        "hidden"
+      ) {
+        sendEnd();
+        return;
+      }
+
+      /*
+       * Ako se korisnik vrati nakon što je
+       * prethodni posjet već završen,
+       * to računamo kao novi posjet.
+       */
+      if (
+        document.visibilityState ===
+          "visible" &&
+        endSent
+      ) {
+        startNewSession();
+      }
+    },
+  );
+
+  /*
+   * Desktop/navigation fallback.
    */
   window.addEventListener(
     "pagehide",
     sendEnd,
   );
 
-  /*
-   * Fallback za browsere/situacije u kojima
-   * zatvaranje taba ne dovede pouzdano do pagehide.
-   *
-   * endSent osigurava da se iz browsera pokuša
-   * poslati samo jedan završni request.
-   */
   window.addEventListener(
     "beforeunload",
     sendEnd,
-  );
-
-  /*
-   * Povratak iz back-forward cachea tretiramo
-   * kao novu sesiju.
-   */
-  window.addEventListener(
-    "pageshow",
-    (event) => {
-      if (
-        event.persisted
-      ) {
-        resetSession();
-
-        updateScroll();
-
-        void sendVisit();
-      }
-    },
   );
 
   if (
