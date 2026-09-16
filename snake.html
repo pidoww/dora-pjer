@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dora hvata dinosaure</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="stylesheet" href="mystyle.css">
+</head>
+<body class="game-page">
+    <header class="top">
+        <h1>DORA VS. DINOSAURI</h1>
+        <p class="tiny-warning">ovo je nekad trebao biti običan snake</p>
+        <nav>
+            <a href="index.html">početna</a>
+            <a href="chipsy.html">Chipsy lore</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="game-wrapper">
+            <h2>uhvati dinosaure</h2>
+            <p>Dora se umnožava svaki put kad ulovi jednog. Nemam objašnjenje.</p>
+
+            <div class="game-info">
+                <span>dinosauri: <strong id="score">0</strong></span>
+                <span>rekord: <strong id="best-score">0</strong></span>
+            </div>
+
+            <canvas id="snake" width="500" height="500" aria-label="Dora dinosaur snake game"></canvas>
+
+            <p class="game-help">strelice / WASD · na mobitelu tipke ispod</p>
+
+            <div class="game-controls" aria-label="kontrole">
+                <button class="up" data-dir="up" type="button">↑</button>
+                <button class="left" data-dir="left" type="button">←</button>
+                <button class="down" data-dir="down" type="button">↓</button>
+                <button class="right" data-dir="right" type="button">→</button>
+            </div>
+
+            <div class="button-row" style="justify-content:center;">
+                <button id="restart" class="retro-button" type="button">opet</button>
+                <a class="ugly-button secondary-button" href="index.html">← povratak</a>
+            </div>
+
+            <p class="small-text">Dora sprite: slika dora za snake game.jpeg · meta: dinosaur.png</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>nijedan dinosaur nije stvarno ozlijeđen</p>
+        <p class="footer-secret">© <span data-current-year></span> Dora &amp; Pjer</p>
+    </footer>
+
+    <script src="/main.js"></script>
+    <script src="/fun.js"></script>
+    <script src="/snake.js"></script>
+</body>
+</html>
