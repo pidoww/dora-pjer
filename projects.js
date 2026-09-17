@@ -138,6 +138,11 @@ RetroPie runcommand / emulator config
         const extra = document.createElement("div");
         extra.className = "robot-extra";
         extra.innerHTML = `
+            <figure class="project-media">
+                <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Mecanum_wheel_control_principle.svg" alt="Princip rada mecanum kotača i osnovni smjerovi gibanja">
+                <figcaption>Mecanum wheel control principle — prikaz kombinacija vrtnje za ravno, bočno, dijagonalno i rotacijsko gibanje. Wikimedia Commons, CC0.</figcaption>
+            </figure>
+
             <h3>mecanum: kako četiri kotača mogu napraviti bočno gibanje</h3>
             <p>Mecanum kotač ima valjčiće postavljene pod kutom, pa kontaktna sila svakog kotača nije usmjerena samo naprijed/natrag. Kombiniranjem smjerova vrtnje sva četiri kotača njihove se uzdužne i bočne komponente mogu zbrajati ili poništavati. Zato ista baza može ići naprijed, rotirati oko svoje osi ili napraviti gotovo čisti strafe bez zakretanja cijelog robota.</p>
 
@@ -154,6 +159,14 @@ FL →    FR ←
 RL →    RR ←</pre>
 
             <p>Oznake FL/FR/RL/RR znače front-left, front-right, rear-left i rear-right. Točan predznak ovisi o tome kako su kotači fizički orijentirani i kako je definiran pozitivan smjer motora, ali ideja je ista: svaki motor doprinosi translaciji i/ili rotaciji.</p>
+
+            <h3>kinematički mixing: od željenog gibanja do četiri kotača</h3>
+            <p>Za standardni X raspored mecanum kotača korisno je razmišljati o tri komponente naredbe: <strong>Vx</strong> za naprijed/natrag, <strong>Vy</strong> za bočno gibanje i <strong>ω</strong> za rotaciju. Jedna često korištena konvencija izgleda ovako:</p>
+            <pre class="project-diagram">FL = Vx + Vy + ω
+FR = Vx - Vy - ω
+RL = Vx - Vy + ω
+RR = Vx + Vy - ω</pre>
+            <p>Predznaci nisu univerzalni jer ovise o orijentaciji valjčića, ožičenju i koordinatnom sustavu robota, ali princip je univerzalan: svaka od tri željene komponente gibanja raspodijeli se na sva četiri motora. Ako neki rezultat prijeđe dopušteni maksimum, sva četiri izlaza treba proporcionalno skalirati da se sačuva omjer — inače saturacija jednog kotača mijenja željeni vektor gibanja.</p>
 
             <h3>zašto isti PWM ne znači istu brzinu</h3>
             <p>Četiri nominalno ista DC motora nisu četiri savršeno jednaka sustava. Razlikuju se trenje u gearboxu, otpor namota, pritisak kotača, masa na pojedinom kutu robota, napon pod opterećenjem i stanje podloge. Zato otvorena petlja tipa „svima PWM 30” može dati četiri različite stvarne brzine.</p>
@@ -181,6 +194,22 @@ error = izmjereni položaj crte - centar</pre>
 
             <p>U zadnjoj zabilježenoj konfiguraciji line-follow PID je bio približno <strong>Kp 0.26, Ki 0.02, Kd 0.18</strong>. Ti brojevi nemaju univerzalno značenje izvan ovog robota jer ovise o skali senzorske pogreške, loop periodu, motornoj komandi i mehanici.</p>
 
+            <h3>stvarni tuning parametri zadnje verzije</h3>
+            <div class="project-facts">
+                <div><strong>BASE:</strong> 24</div>
+                <div><strong>MAX:</strong> 42</div>
+                <div><strong>TURN:</strong> 38</div>
+                <div><strong>STRAFE:</strong> 36</div>
+                <div><strong>OBST:</strong> 15</div>
+                <div><strong>CLEAR:</strong> 22</div>
+                <div><strong>SEARCH_FWD:</strong> 14</div>
+                <div><strong>SEARCH_TURN:</strong> 30</div>
+                <div><strong>STRAFE_PRELOAD:</strong> 70 ms</div>
+                <div><strong>STRAFE_RAMP:</strong> 170 ms</div>
+                <div><strong>STRAFE_BIAS_FWD:</strong> 4</div>
+            </div>
+            <p>Ovo nisu fizikalne konstante ni postoci snage nego konkretne komandne vrijednosti iz te verzije programa. Njihovo značenje ovisi o načinu na koji driver mapira naredbu na motor i zato ih nema smisla uspoređivati 1:1 s drugim robotom bez istog softverskog i hardverskog stacka.</p>
+
             <h3>zašto state machine ide iznad PID-a</h3>
             <p>PID je dobar dok problem glasi „slijedi kontinuiranu crtu”. Ali raskrižje, 90° zavoj, gubitak crte, prepreka ili puna poprečna linija nisu ista regulacijska situacija. Zato robot ima diskretna stanja poput <code>FOLLOW_LINE</code>, <code>TURN_L_90</code>, <code>TURN_R_90</code>, <code>SEARCH_LINE</code>, <code>STRAFE</code>, <code>FRONT_BUMP</code>, <code>BACK_BUMP</code> i <code>FULL_LINE_STOP</code>.</p>
 
@@ -195,8 +224,8 @@ error = izmjereni položaj crte - centar</pre>
        ├── STRAFE ─────── mecanum bočni vektor
        └── BUMP/STOP ─── sigurnosna reakcija</pre>
 
-            <h3>zašto strafe ima preload i ramp</h3>
-            <p>Idealni kinematički model pretpostavlja da kotač odmah proizvede željenu silu. Stvarni mecanum valjčići imaju trenje i zazor, motor ima inerciju, a gearbox backlash. Kratki preload i zatim ramp mogu pomoći da svi kotači „sjednu” u bočni režim prije nego se očekuje stabilna putanja.</p>
+            <h3>zašto strafe ima preload, ramp i mali forward bias</h3>
+            <p>Idealni kinematički model pretpostavlja da kotač odmah proizvede željenu silu. Stvarni mecanum valjčići imaju trenje i zazor, motor ima inerciju, gearbox backlash, a podloga nije savršeno jednaka. Kratki <strong>STRAFE_PRELOAD = 70 ms</strong> pomaže kotačima ući u bočni režim, zatim <strong>STRAFE_RAMP = 170 ms</strong> ublažava nagli prijelaz, a <strong>STRAFE_BIAS_FWD = 4</strong> dodaje malu uzdužnu komponentu ako je stvarna mehanika imala tendenciju bočno „zapeti” ili izgubiti liniju.</p>
 
             <h3>I²C: više uređaja na istim dvjema signalnim linijama</h3>
             <p>Motor/encoder modul na adresi <code>0x34</code> i IR modul na <code>0x5D</code> mogu dijeliti SDA i SCL jer ih razlikuju 7-bitne adrese. Arduino Mega je master: šalje adresu uređaja, a samo odabrani slave odgovara. To štedi pinove i ožičenje, ali znači da bus mora imati ispravne pull-up otpornike i kompatibilne naponske razine.</p>
@@ -217,9 +246,13 @@ error = izmjereni položaj crte - centar</pre>
 logika / Arduino / I²C moraju imati zajedničku referencu mase s driverom</pre>
             <p>Buck converter ne služi samo „da broj bude manji”. On aktivno regulira viši baterijski napon na napon prikladniji motorima. Pri ubrzanju i zastoju motora struja može snažno porasti, pa dimenzioniranje napajanja i drivera mora gledati vršne/stall uvjete, ne samo mirnu nominalnu potrošnju.</p>
 
+            <h3>zašto su driveri bili kritična točka</h3>
+            <p>DC motor u zastoju nema back-EMF koji bi ograničavao struju kao pri normalnoj brzini, pa je stall current tipično mnogo veći od struje u slobodnom hodu. Nagla promjena smjera dodatno može značiti da driver prvo mora ukloniti mehaničku energiju rotirajućeg sustava pa zatim ubrzati motor u suprotnom smjeru. Kod četiri motora takvi tranzijenti mogu postati puno neugodniji od onoga što sugerira obična nominalna vrijednost „12 V, 110 RPM”.</p>
+            <p>Uz to, motori i ožičenje su induktivni. Brza promjena struje pokušava održati tok struje i može generirati naponske tranzijente. Dobar H-bridge mora imati put za recirkulaciju struje i dovoljno električnog/termičkog margina. Ako napajanje ili driver ne mogu apsorbirati regenerativnu energiju, rail se također može nakratko podići.</p>
+
             <div class="misconception"><strong>Dva pregorena drivera ne dokazuju jedan konkretan uzrok.</strong> Mogući stresovi uključuju velike struje pri zastoju/promjeni smjera, termičko opterećenje, regenerativne naponske špiceve ili naponske uvjete izvan onoga što driver dobro podnosi. Bez mjerenja napona, struje i temperature bilo bi nagađanje tvrditi koji je točno mehanizam bio kriv.</div>
 
-            <p class="deep-source"><a href="https://docs.arduino.cc/hardware/mega-2560" target="_blank" rel="noopener noreferrer">Arduino Mega 2560 dokumentacija ↗</a> · <a href="https://en.wikipedia.org/wiki/Mecanum_wheel" target="_blank" rel="noopener noreferrer">Mecanum wheel – geometrija / povijest ↗</a> · <a href="https://en.wikipedia.org/wiki/PID_controller" target="_blank" rel="noopener noreferrer">PID controller ↗</a></p>
+            <p class="deep-source"><a href="https://docs.arduino.cc/hardware/mega-2560" target="_blank" rel="noopener noreferrer">Arduino Mega 2560 dokumentacija ↗</a> · <a href="https://commons.wikimedia.org/wiki/File:Mecanum_wheel_control_principle.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Mecanum control principle, CC0 ↗</a> · <a href="https://en.wikipedia.org/wiki/PID_controller" target="_blank" rel="noopener noreferrer">PID controller ↗</a></p>
         `;
 
         const sourceRow = body.querySelector(".deep-source");
