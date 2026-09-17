@@ -17,6 +17,13 @@
         }
     }
 
+    function renameDoraGameLink() {
+        const link = document.querySelector('a[href="snake.html"]');
+        if (link && link.textContent.trim() === "Dora vs dinosauri") {
+            link.textContent = "Dora skuplja dinose";
+        }
+    }
+
     function naturalizeScienceNotes() {
         const softLabels = ["fun fact:", "lako je ovo pobrkati:", "fora je da:"];
         let softLabelIndex = 0;
@@ -250,6 +257,7 @@
     }
 
     rewritePhysicsIntro();
+    renameDoraGameLink();
 
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
