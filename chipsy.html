@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
     <link rel="stylesheet" href="extras.css">
+    <link rel="stylesheet" href="deep.css">
 </head>
 <body class="chipsy-page">
     <header class="top">
@@ -26,14 +27,14 @@
             <p class="youtube-channel-big">CHYPSI</p>
             <h2>misterij. mačka. industrija čipsa.</h2>
             <p>Nitko ne zna odakle dolazi čips. Svaki put kad dovoljno provociraš Chypsija, limenke samo... počnu padati s neba.</p>
-            <div class="equation">iℏ ∂ψ/∂t = Ĥψ</div>
-            <p class="small-text">ova jednadžba je stvarna Schrödingerova jednadžba. ostatak laboratorija je znatno manje akademski.</p>
+            <a class="formula-link" href="physics.html#quantum" title="ovo očito vodi dublje">iℏ ∂ψ/∂t = Ĥψ</a>
+            <p class="small-text">klik na jednadžbu vodi ravno u fiziku. ostatak laboratorija je znatno manje akademski.</p>
         </section>
 
         <section class="paper physics-callout">
             <h2>mala bitna stvar: Schrödinger nije stvarno stavio mačku u ovakav pokus</h2>
-            <p>Schrödingerova mačka je <strong>misaoni eksperiment</strong> iz 1935., a ne uputa za stvarni laboratorijski pokus. Poanta mu je bila pokazati koliko čudno izgleda ako kvantnu superpoziciju izravno prenesemo na veliki, svakodnevni objekt: prije opažanja bi mačka u toj priči morala biti opisana kao kombinacija „živa” i „mrtva”.</p>
-            <p>Drugim riječima, mačka je zamišljena kao način da se naglasi problem mjerenja i neobičnost tadašnjih tumačenja kvantne mehanike. Ovdje smo samo dodali Chypsija i potpuno nepotreban čekić.</p>
+            <p>Schrödingerova mačka je <strong>misaoni eksperiment</strong> iz 1935., a ne povijesni pokus s pravom mačkom. Poanta mu je bila pokazati koliko čudno izgleda ako kvantnu superpoziciju bez dodatnog objašnjenja prenesemo iz mikroskopskog svijeta na velik svakodnevni objekt.</p>
+            <p>Ovdje smo na tu raspravu potpuno nepotrebno dodali Chypsija i čekić.</p>
         </section>
 
         <section class="paper">
@@ -42,7 +43,7 @@
                 <figure class="wiki-card">
                     <img class="schrodinger-secret no-lightbox" src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Erwin_Schr%C3%B6dinger_%281933%29.jpg" alt="Erwin Schrödinger 1933">
                     <figcaption>
-                        Erwin Schrödinger, 1933.
+                        Erwin Schrödinger, 1933. Klikanje portreta još uvijek skriva prečac prema fizici.
                         <div class="wiki-source"><a href="https://en.wikipedia.org/wiki/Erwin_Schr%C3%B6dinger" target="_blank" rel="noopener noreferrer">Wikipedia ↗</a></div>
                     </figcaption>
                 </figure>
@@ -50,59 +51,65 @@
                 <figure class="wiki-card">
                     <img class="no-lightbox" src="https://upload.wikimedia.org/wikipedia/commons/9/91/Schrodingers_cat.svg" alt="Schrodingerova mačka, misaoni eksperiment">
                     <figcaption>
-                        dijagram Schrödingerove mačke: radioaktivni događaj, detektor, mehanizam i mačka. To je misaoni eksperiment, ne stvarno izveden pokus s mačkom.
+                        baš dijagram <em>Schrodingers_cat.svg</em>: radioaktivni događaj, detektor, mehanizam i mačka. Misaoni eksperiment, ne stvarno izveden pokus.
                         <div class="wiki-source"><a href="https://en.wikipedia.org/wiki/File:Schrodingers_cat.svg" target="_blank" rel="noopener noreferrer">Wikipedia / Wikimedia Commons · CC BY-SA 3.0 ↗</a></div>
                     </figcaption>
                 </figure>
             </div>
-            <p id="schrodinger-hint" class="schrodinger-hint">hint: Schrödinger na lijevoj slici izgleda kao da nešto skriva.</p>
+            <p id="schrodinger-hint" class="schrodinger-hint">hint: portret Schrödingera izgleda previše klikabilno.</p>
         </section>
 
-        <section class="lab" id="chipsy-lab">
-            <div class="hammer" id="schrodinger-hammer" aria-hidden="true">🔨</div>
+        <section class="paper">
+            <h2 style="text-align:center;">CHYPSI vs. SCHRÖDINGER</h2>
+            <p style="text-align:center;">klikni Chypsija ili BONK gumb. nakon 40 udaraca fizika pobjeđuje.</p>
 
-            <div class="cat-stage">
-                <img class="chypsi-photo no-lightbox" id="chipsy-lab-image" src="images/slike%20update%20stranica/chipsi%20slika.jpeg" alt="Chypsi u laboratoriju">
+            <div class="chypsi-bonk-stage" id="chipsy-lab">
+                <div class="chypsi-combatant">
+                    <img class="chypsi-photo no-lightbox" id="chipsy-lab-image" src="images/slike%20update%20stranica/chipsi%20slika.jpeg" alt="Chypsi spreman za bonk">
+                    <div class="combat-label">CHYPSI</div>
+                </div>
+
+                <div class="bonk-hammer" id="schrodinger-hammer" aria-hidden="true">🔨</div>
+
+                <div class="schrodinger-combatant" id="schrodinger-target">
+                    <img class="schrodinger-secret no-lightbox" id="schrodinger-photo" src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Erwin_Schr%C3%B6dinger_%281933%29.jpg" alt="Erwin Schrödinger">
+                    <div class="combat-label">SCHRÖDINGER</div>
+                </div>
             </div>
 
-            <div class="schrodinger-target" id="schrodinger-target">
-                <img class="schrodinger-secret no-lightbox" id="schrodinger-photo" src="https://upload.wikimedia.org/wikipedia/commons/2/2e/Erwin_Schr%C3%B6dinger_%281933%29.jpg" alt="Erwin Schrödinger">
-                <div class="schrodinger-label">SCHRÖDINGER</div>
-            </div>
-        </section>
-
-        <section class="paper center">
-            <p id="bonk-message">Chypsi trenutno promatra Schrödingera.</p>
-            <p class="bonk-counter">BONK counter: <span id="bonk-count">0</span></p>
+            <div class="bonk-progress" aria-label="bonk progress"><div id="bonk-progress-fill"></div></div>
+            <p id="bonk-message" style="text-align:center;">Chypsi trenutno samo promatra Schrödingera.</p>
+            <p class="bonk-counter" style="text-align:center;">BONK counter: <span id="bonk-count">0</span> / 40</p>
 
             <div class="button-row" style="justify-content:center;">
-                <button id="bonk-button" class="retro-button" type="button">🔨 BONK SCHRÖDINGER</button>
+                <button id="bonk-button" class="retro-button" type="button">🔨 CHYPSI BONK</button>
                 <button id="chips-button" class="retro-button" type="button">PROIZVEDI ČIPS</button>
             </div>
 
-            <p class="chipsy-warning">upozorenje: dovoljno bonkova može destabilizirati kvantnu mehaniku ove stranice</p>
+            <p class="chipsy-warning" style="text-align:center;">40 bonkova = physics.html. to je sad službeno pravilo laboratorija.</p>
         </section>
 
         <section class="paper">
             <h2>službena Chypsi teorija</h2>
             <ol class="bad-list">
-                <li>Chypsi uđe u kutiju.</li>
-                <li>Nitko ne zna je li unutra čips.</li>
-                <li>Netko klikne gumb.</li>
-                <li>čekić napravi BONK.</li>
+                <li>Chypsi uđe u kadar.</li>
+                <li>Schrödinger se pojavi s druge strane.</li>
+                <li>čekić postane zabrinjavajuće centralan dio eksperimenta.</li>
+                <li>netko klikne Chypsija.</li>
+                <li>BONK.</li>
                 <li>čips se materijalizira.</li>
-                <li>peer review: nije prošao.</li>
+                <li>nakon 40 udaraca otvara se stranica koja pokušava popraviti svu znanost koju je ova stranica upravo uvrijedila.</li>
             </ol>
         </section>
 
         <section class="paper center">
-            <p>ako si došao ovdje nakon klikanja po mački, zaslužio si još jednu lošu odluku:</p>
             <a class="ugly-button" href="snake.html">igraj Dora vs. dinosauri →</a>
         </section>
     </main>
 
     <footer>
         <p>CHYPSI RESEARCH INSTITUTE · financiranje: 0 €</p>
+        <p class="license-note">Izvorni kod i originalni tekst: GNU GPL-3.0-or-later. Schrödingerov portret i dijagram ostaju pod licencama navedenima na Wikimedia Commonsu. <a href="https://github.com/pidoww/dora-pjer/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">LICENSE ↗</a></p>
         <p class="footer-secret">© <span data-current-year></span> Chypsi, vjerojatno</p>
     </footer>
 
