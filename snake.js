@@ -20,13 +20,13 @@
     const ASSET = "images/slike%20update%20stranica/";
 
     const levelArt = [
-        { image: `${ASSET}crazy%201.jpeg`, text: "level 1 · dinosauri još nisu zabrinuti" },
-        { image: `${ASSET}crazy%202.jpeg`, text: "level 2 · situacija postaje čudna" },
-        { image: `${ASSET}crazy%203.jpeg`, text: "level 3 · mezozoik gubi kontrolu" },
-        { image: `${ASSET}crazy%20dora.jpeg`, text: "level 4 · Dora eskalira" },
-        { image: `${ASSET}crazy%20slika%20dora%20sova.jpeg`, text: "level 5 · sova zna što si napravio" },
-        { image: `${ASSET}crazy%20slika.jpeg`, text: "level 6 · ovo je već osobno" },
-        { image: `${ASSET}slika%20crazy%20kokos.jpeg`, text: "level 7+ · nema više pravila" }
+        { image: `${ASSET}crazy%201.jpeg`, text: "dinosauri još nisu zabrinuti" },
+        { image: `${ASSET}crazy%202.jpeg`, text: "situacija postaje čudna" },
+        { image: `${ASSET}crazy%203.jpeg`, text: "mezozoik gubi kontrolu" },
+        { image: `${ASSET}crazy%20dora.jpeg`, text: "Dora eskalira" },
+        { image: `${ASSET}crazy%20slika%20dora%20sova.jpeg`, text: "sova zna što si napravio" },
+        { image: `${ASSET}crazy%20slika.jpeg`, text: "ovo je već osobno" },
+        { image: `${ASSET}slika%20crazy%20kokos.jpeg`, text: "nema više pravila" }
     ];
 
     const doraImage = new Image();
@@ -62,7 +62,7 @@
     }
 
     function levelArtFor(level) {
-        return levelArt[Math.min(level - 1, levelArt.length - 1)];
+        return levelArt[(Math.max(1, level) - 1) % levelArt.length];
     }
 
     function updateLevelArt(force = false) {
@@ -74,7 +74,7 @@
         shownLevel = level;
         const art = levelArtFor(level);
         rewardImage.src = art.image;
-        rewardText.textContent = art.text;
+        rewardText.textContent = `level ${level} · ${art.text}`;
         rewardBox.classList.remove("level-change");
         void rewardBox.offsetWidth;
         rewardBox.classList.add("level-change");
