@@ -115,5 +115,42 @@
 
     <script src="/main.js"></script>
     <script src="/fun.js"></script>
+    <script>
+        (() => {
+            const cleanCodeHint = () => {
+                const text = document.getElementById("meme-text")?.textContent.trim() || "";
+                const link = document.getElementById("meme-link");
+                if (!link) return;
+
+                const obviousBinary = /^(?:[01]{8}\s*){3,}$/.test(text);
+                const obviousDotsAndDashes = /^[.\-\s\[\]A-Z]+$/.test(text) && text.includes(".") && text.includes("-");
+
+                if (obviousBinary || obviousDotsAndDashes) {
+                    if (link.hasAttribute("href")) link.removeAttribute("href");
+                    if (link.textContent) link.textContent = "";
+                    link.classList.add("hidden");
+                    return;
+                }
+
+                if (!link.classList.contains("hidden") && link.textContent.trim() && link.textContent !== "trag ↗") {
+                    link.textContent = "trag ↗";
+                }
+            };
+
+            const popup = document.getElementById("meme-popup");
+            if (!popup) return;
+
+            const observer = new MutationObserver(cleanCodeHint);
+            observer.observe(popup, {
+                subtree: true,
+                childList: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: ["href", "class"]
+            });
+
+            cleanCodeHint();
+        })();
+    </script>
 </body>
 </html>
