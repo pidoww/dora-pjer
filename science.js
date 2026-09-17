@@ -9,6 +9,8 @@
     }
 
     loadScript("/science-core.js", () => {
-        loadScript("/physics-extra.js");
+        loadScript("/physics-extra.js", () => {
+            loadScript("/anthro-extra.js");
+        });
     });
 })();
