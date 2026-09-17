@@ -67,8 +67,53 @@
         });
     }
 
+    function deepenRadiationSection() {
+        if (document.getElementById("radiation-verified-deep")) return;
+
+        const headings = [...document.querySelectorAll("h2")];
+        const apolloHeading = headings.find(heading => heading.textContent.toLowerCase().includes("koliko su apollo posade stvarno dobile"));
+        const section = apolloHeading?.closest("section");
+        if (!section) return;
+
+        const block = document.createElement("div");
+        block.id = "radiation-verified-deep";
+        block.innerHTML = `
+            <h3>kako pravilno čitati te Apollo brojke</h3>
+            <p>NASA-ini Apollo izvještaji uglavnom koriste <strong>rad</strong>, staru jedinicu apsorbirane doze. To je energija koju zračenje ostavi u materijalu: <strong>1 rad = 0.01 Gy</strong>. To nije automatski isto što i biološki ponderirana doza u sievertima. Za Sv/rem treba znati vrstu i energiju zračenja, organ/tkivo i koji se radiološki weighting model koristi.</p>
+
+            <div class="misconception"><strong>Zato nije korektno napraviti slijepu konverziju „0.18 rad = 1.8 mSv” i završiti priču.</strong> Numerička konverzija apsorbirane doze iz rad u Gy jest jednostavna, ali prijelaz na Sv zahtijeva radiobiološki kontekst. Povijesni Apollo izvještaji također razlikuju skin dose, depth dose i procjene za blood-forming organs.</div>
+
+            <h3>Apollo 11: tri osobna dozimetra i poseban Van Allen dosimeter</h3>
+            <p>Apollo 11 Mission Report navodi neispravljene integrirane osobne vrijednosti od <strong>0.25, 0.26 i 0.28 rad</strong> za tri člana posade. Nakon korekcija i procjene NASA je zaključila da je ukupna doza svakog člana posade bila <strong>manja od 0.2 rad</strong>. Poseban Van Allen belt dosimeter kroz cijelu misiju registrirao je oko <strong>0.11 rad skin dose</strong> i <strong>0.08 rad depth dose</strong>.</p>
+
+            <h3>Apollo 13 pokazuje razliku između dose rate i total dose</h3>
+            <p>Pri izlaznom prolazu kroz pojas Apollo 13 je registrirao maksimalnu brzinu doze od približno <strong>2.27 rad/h na koži</strong> i <strong>1.35 rad/h na dubinskom kanalu</strong>. To ne znači da je posada sat vremena primala tu maksimalnu vrijednost. Završna osobna očitanja bila su oko <strong>0.29, 0.34 i 0.41 rad</strong>.</p>
+
+            <pre class="project-diagram">dose rate = koliko brzo doza raste
+            npr. rad/h
+
+ukupna doza = integral dose-rate kroz vrijeme
+            ∫ Ḋ(t) dt</pre>
+
+            <p>To je ključ cijele Van Allen rasprave: putanja Apollo letjelice nije satima stajala u najintenzivnijoj zoni. Letjelica je prolazila kroz promjenjivo polje čestica određenom putanjom i brzinom, uz zaštitu konstrukcije, pa se konačna doza dobiva integracijom stvarne izloženosti.</p>
+
+            <h3>zašto se različite brojke za kolovoz 1972. ne moraju međusobno pobijati</h3>
+            <p>Za veliki solarni particle event iz kolovoza 1972. postoje različite NASA procjene jer ne opisuju uvijek isti scenarij. Jedan povijesni Apollo biomedical prikaz procjenjuje da bi unutar Command Modulea taj događaj mogao dati oko <strong>360 rad koži</strong> i <strong>35 rad blood-forming organs</strong>. Druge analize modeliraju čovjeka iza različitih debljina aluminija, spacesuit, storm shelter ili nezaštićenu površinu i zato daju druge vrijednosti.</p>
+            <p>To nije kontradikcija dok god se uspoređuje isti organ, ista shielding geometrija, isti radiation field i ista dozimetrijska veličina. „Koliko bi astronaut dobio u eventu iz 1972.?” nema jednu univerzalnu brojku bez opisa gdje se astronaut nalazi i koliko je zaštićen.</p>
+
+            <div class="misconception"><strong>Mit: „Van Allenovi pojasevi su smrtonosna ljuska koju čovjek ne može prijeći.”</strong><br>Stvarni problem je dozimetrijski: tok čestica nije svugdje jednak, putanja može izbjegavati najintenzivnije dijelove, letjelica ne ostaje tamo neograničeno dugo, a struktura letjelice pruža određenu zaštitu. Apollo podaci pokazuju mjerljive, ali daleko manje od akutno smrtonosnih ukupne doze tijekom stvarnih misija.</div>
+
+            <div class="misconception"><strong>Mit: „Space radiation je samo Van Allen belt.”</strong><br>Izvan zaštite Zemljine magnetosfere važna su najmanje dva dodatna izvora: <strong>galactic cosmic rays (GCR)</strong>, stalnija visokoenergetska pozadina, i <strong>solar energetic particles (SEP)</strong>, rjeđi ali potencijalno vrlo intenzivni događaji. Za dugotrajne Moon/Mars misije upravo ta kombinacija postaje velik inženjerski i biomedicinski problem.</div>
+
+            <p class="deep-source"><a href="https://www.nasa.gov/wp-content/uploads/static/apollo50th/pdf/A11_MissionReport.pdf" target="_blank" rel="noopener noreferrer">NASA – Apollo 11 Mission Report, radiation section ↗</a> · <a href="https://ntrs.nasa.gov/api/citations/19710003598/downloads/19710003598.pdf" target="_blank" rel="noopener noreferrer">NASA – Apollo 13 Mission Report ↗</a> · <a href="https://www.nasa.gov/wp-content/uploads/static/history/alsj/tnD7080RadProtect.pdf" target="_blank" rel="noopener noreferrer">NASA – Radiation Protection and Instrumentation ↗</a> · <a href="https://ntrs.nasa.gov/api/citations/19760005580/downloads/19760005580.pdf" target="_blank" rel="noopener noreferrer">NASA – Biomedical Results of Apollo ↗</a></p>
+        `;
+
+        section.appendChild(block);
+    }
+
     insertOzoneSection();
     applyVerifiedCorrections();
+    deepenRadiationSection();
 
     const summaryCache = new Map();
     const imageCache = new Map();
