@@ -35,23 +35,27 @@
     const doraImage = new Image();
     doraImage.src = `${ASSET}slika%20dora%20za%20snake%20game.jpeg`;
 
+    // Svaka slika ima svoj zoom i pomak (ox, oy) da se fino centrira dinosaur
     const dinosaurSources = [
-        `${ASSET}dinosaur.png`,
-        `${ASSET}tyrannosaurus-rex-dinosaur-23090111.jpg`,
-        "images/dinosaurus%20parasaurolopus.jpg",
-        "images/brachiosaurus-dinosaurs-toy-isolated-white-background-clipping-path-dinosaur-jurassic-morrison-formation-north-87172614.jpg"
+        { src: `${ASSET}dinosaur.png`, zoom: 1.0, ox: 0, oy: 0 },
+        { src: `${ASSET}tyrannosaurus-rex-dinosaur-23090111.jpg`, zoom: 1.25, ox: 0, oy: 0 },
+        { src: "images/dinosaurus%20parasaurolopus.jpg", zoom: 1.25, ox: 0, oy: 0 },
+        { src: "images/brachiosaurus-dinosaurs-toy-isolated-white-background-clipping-path-dinosaur-jurassic-morrison-formation-north-87172614.jpg", zoom: 1.0, ox: 0, oy: 0 }
     ];
 
-    const dinosaurImages = dinosaurSources.map(src => {
+    const dinosaurImages = dinosaurSources.map(cfg => {
         const image = new Image();
-        image.src = src;
+        image.src = cfg.src;
         return image;
     });
 
     let currentDinosaurImage = dinosaurImages[0];
+    let currentDinosaurConfig = dinosaurSources[0];
 
     function pickRandomDinosaur() {
-        currentDinosaurImage = dinosaurImages[Math.floor(Math.random() * dinosaurImages.length)];
+        const index = Math.floor(Math.random() * dinosaurImages.length);
+        currentDinosaurImage = dinosaurImages[index];
+        currentDinosaurConfig = dinosaurSources[index];
     }
 
     let snake = [];
@@ -160,7 +164,6 @@
             let dw = size;
             let dh = size;
 
-            // Sačuvaj proporcije — cijela slika stane u kvadrat (bez rezanja)
             if (ratio > 1) {
                 dh = size / ratio;
             } else {
@@ -177,6 +180,43 @@
 
         ctx.fillStyle = fallback;
         ctx.fillRect(px, py, size, size);
+    }
+
+    function drawDinoImage(image, config, x, y) {
+        const padding = 2;
+        const px = x * SIZE + padding;
+        const py = y * SIZE + padding;
+        const size = SIZE - padding * 2;
+
+        if (!image.complete || image.naturalWidth === 0) {
+            ctx.fillStyle = "#4c9b43";
+            ctx.fillRect(px, py, size, size);
+            return;
+        }
+
+        const zoom = config.zoom || 1;
+        const ox = config.ox || 0;
+        const oy = config.oy || 0;
+
+        const ratio = image.naturalWidth / image.naturalHeight;
+        let dw = size * zoom;
+        let dh = size * zoom;
+
+        if (ratio > 1) {
+            dh = (size * zoom) / ratio;
+        } else {
+            dw = (size * zoom) * ratio;
+        }
+
+        const dx = px + (size - dw) / 2 + ox * size;
+        const dy = py + (size - dh) / 2 + oy * size;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(px, py, size, size);
+        ctx.clip();
+        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, dx, dy, dw, dh);
+        ctx.restore();
     }
 
     function draw() {
@@ -199,7 +239,7 @@
         });
 
         if (food) {
-            drawSquareImage(currentDinosaurImage, food.x, food.y, "#4c9b43", 2);
+            drawDinoImage(currentDinosaurImage, currentDinosaurConfig, food.x, food.y);
         }
     }
 
