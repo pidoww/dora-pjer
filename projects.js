@@ -15,7 +15,9 @@
 
     loadScript("/projects-core.js", () => {
         loadScript("/projects-cleanup.js", () => {
-            loadScript("/projects-personal.js");
+            loadScript("/projects-personal.js", () => {
+                loadScript("/projects-tweaks.js");
+            });
         });
     });
 })();
