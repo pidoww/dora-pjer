@@ -260,6 +260,82 @@ logika / Arduino / I²C moraju imati zajedničku referencu mase s driverom</pre>
         else body.appendChild(extra);
     }
 
+    function insertOzoneDeepDive() {
+        const ozone = document.querySelectorAll(".project-deep")[3];
+        const body = ozone?.querySelector(".project-deep-body");
+        if (!body || body.querySelector(".ozone-extra")) return;
+
+        const extra = document.createElement("div");
+        extra.className = "ozone-extra";
+        extra.innerHTML = `
+            <figure class="project-media">
+                <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/18650_and_21700_lithium_ion_battery_cell.jpg" alt="18650 i 21700 Li-ion ćelije za usporedbu veličine">
+                <figcaption>18650 i 21700 Li-ion ćelije — reprezentativna slika formata ćelije. Wikimedia Commons, CC0.</figcaption>
+            </figure>
+
+            <h3>stvarni električni lanac ovog projekta</h3>
+            <pre class="project-diagram">USB-C 5 V
+   │
+   ▼
+TP4056 charger (~1 A)
+   │
+   ▼
+1S Li-ion / BMS
+   │
+   ├── punjenje i osnovna zaštita ćelije
+   │
+   └── load output
+          │
+          ▼
+ON/OFF + momentary tipkalo
+          │
+          ▼
+3–6 V pulse HV generator
+          │
+          ▼
+visokonaponski izlaz → elektrode / iskra / korona</pre>
+
+            <p>Napajanje je bilo jedna 18650 Li-ion ćelija: oko <strong>3.6–3.7 V nominalno</strong> i do <strong>4.2 V puna</strong>. To je električki unutar deklariranog 3–6 V ulaznog raspona modula. BMS i TP4056 imaju odvojene uloge: charger regulira punjenje ćelije, dok zaštitni 1S BMS nadzire uvjete poput previsokog/preniskog napona i prevelike struje ovisno o konkretnoj pločici.</p>
+
+            <h3>što se nalazi unutar tipičnog „3–6 V → 400 kV” modula</h3>
+            <p>Točan sklop zalivenog kineskog modula nije nužno poznat bez destruktivnog rastavljanja, ali fizikalno mora riješiti isti osnovni problem: transformator ne može raditi iz savršeno konstantnog DC-a. Ulazni DC zato se prvo brzo prekida/oscilira, stvarajući promjenjivi magnetski tok u malom transformatoru. Visoki omjer namota zatim daje mnogo veći sekundarni napon; neke izvedbe nakon toga imaju dodatno ispravljanje ili multiplikaciju napona.</p>
+            <div class="misconception"><strong>„400 kV” nije mjerenje.</strong> Oznake 400 kV / 1000 kV na ovoj klasi jeftinih modula često su marketinške. Bez HV sonde odgovarajućeg raspona, poznatog opterećenja i specificirane metode mjerenja ne možemo tvrditi stvarni peak izlaz.</div>
+
+            <h3>što nam govori iskra od približno 15 mm</h3>
+            <p>U projektu smo vidjeli iskru reda <strong>15 mm</strong>. Za centimetarske razmake u približno standardnom zraku često se koristi vrlo gruba intuicija reda nekoliko megavolta po metru — otprilike nekoliko kilovolta po milimetru. To bi 15 mm stavilo u područje <strong>desetaka kilovolta</strong>, ali ne daje precizan napon.</p>
+            <p>Razlog je što proboj ovisi o tlaku, temperaturi i sastavu plina, razmaku, obliku elektroda, vlažnosti i tome razvija li se streamer. Oštar vrh koncentrira električno polje i može pokrenuti koronu ili streamer prije nego što bi uniformno polje između velikih glatkih elektroda došlo do proboja. Paschenov zakon opisuje važnu ovisnost o produktu tlak × razmak za idealizirane uvjete, ali stvarna iskra između šiljastih elektroda nije jednostavan laboratorijski paralelno-pločasti slučaj.</p>
+
+            <h3>korona, streamer i luk nisu ista faza</h3>
+            <ul class="bad-list">
+                <li><strong>korona:</strong> lokalna ionizacija oko područja vrlo jakog električnog polja, često oko oštrog vrha;</li>
+                <li><strong>streamer:</strong> brzo rastući ionizirani kanal koji može krenuti kroz plin prema drugoj elektrodi;</li>
+                <li><strong>spark/arc:</strong> kada se formira vodljivi kanal kroz razmak, struja snažno poraste; kod održavanog luka kanal se jako zagrijava.</li>
+            </ul>
+            <p>Za ozon je važno da „veća iskra” nije isto što i „više O₃”. Vrući luk velik dio energije pretvara u toplinu i pokreće kemiju koja može i stvarati i razgrađivati reaktivne vrste. Corona/discharge ozonatori zato nisu jednostavno maksimalni spark generatori.</p>
+
+            <h3>zašto električni izboj može pretvoriti O₂ u O₃</h3>
+            <p>Elektroni ubrzani električnim poljem mogu u sudaru s O₂ predati dovoljno energije za disocijaciju. Jedna pojednostavljena reakcija je:</p>
+            <a class="formula-link" href="physics.html#ozone-physics">e⁻ + O₂ → e⁻ + O + O</a>
+            <p>Slobodni atom O zatim se može spojiti s O₂. Da bi novonastali O₃ ostao stabiliziran, treće tijelo M odnosi višak energije:</p>
+            <a class="formula-link" href="physics.html#ozone-physics">O + O₂ + M → O₃ + M</a>
+            <p>U zraku je stvarna kemija složenija od te dvije jednadžbe: uz kisik postoje dušik, vodena para, pobuđena stanja, ioni i radikali. Električni izboj zato može proizvesti i druge reaktivne spojeve, uključujući dušikove okside.</p>
+
+            <h3>zašto je oštar vrh toliko bitan</h3>
+            <p>Električno polje uz površinu vodiča nije jednako za svaku geometriju. Na mjestu male zakrivljenosti — primjerice na oštrom vrhu — površinski naboj se može koncentrirati pa lokalno polje postaje mnogo veće nego na glatkoj, velikoj elektrodi. Zbog toga vrh može početi ionizirati okolni zrak i kada prosječno polje kroz cijeli razmak još nije dovoljno za potpuni proboj.</p>
+
+            <h3>neonska indikatorska lampica koja zasvijetli bez direktnog kontakta</h3>
+            <p>U starom testiranju HV impuls je mogao pobuditi malu neonku u ispitivaču i bez čvrstog galvanijskog kontakta. To nije „struja kroz ništa”: nagla promjena visokog napona može se kapacitivno spregnuti kroz nekoliko pikofarada parazitskog kapaciteta između sonde, modula, tijela i okoline. Za takvu struju vrijedi osnovna relacija <strong>I = C · dV/dt</strong>; vrlo mali C može kratko prenijeti zamjetan impuls ako je dV/dt velik.</p>
+
+            <div class="project-warning"><strong>sigurnost:</strong> ovaj dio dokumentira stari projekt i fiziku, nije vodič za povećavanje izlaznog napona ili energije. Visoki napon može izazvati električni udar i nekontrolirane preskoke, Li-ion ćelija nosi rizik požara pri pogrešnom punjenju/kratkom spoju, a proizvedeni ozon je respiratorni iritans. EPA izričito navodi da se ozonski generatori ne koriste u occupied spaces te da su koncentracije dovoljno velike za učinkovito uklanjanje mnogih onečišćenja često iznad razina prihvatljivih za ljude.</div>
+
+            <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:18650_and_21700_lithium_ion_battery_cell.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – 18650/21700 cells, CC0 ↗</a> · <a href="https://en.wikipedia.org/wiki/Paschen%27s_law" target="_blank" rel="noopener noreferrer">Paschenov zakon ↗</a> · <a href="https://www.epa.gov/indoor-air-quality-iaq/ozone-generators-are-sold-air-cleaners" target="_blank" rel="noopener noreferrer">EPA – ozone generators ↗</a></p>
+        `;
+
+        const sourceRow = body.querySelector(".deep-source");
+        if (sourceRow) body.insertBefore(extra, sourceRow);
+        else body.appendChild(extra);
+    }
+
     function ensureLightbox() {
         let lightbox = document.getElementById("project-lightbox");
         if (lightbox) return lightbox;
@@ -287,6 +363,7 @@ logika / Arduino / I²C moraju imati zajedničku referencu mase s driverom</pre>
     insertHomelabDeepDive();
     insertRetroDeepDive();
     insertRobotDeepDive();
+    insertOzoneDeepDive();
 
     document.querySelectorAll(".project-zoom, .project-card img").forEach(image => {
         image.addEventListener("click", event => {
