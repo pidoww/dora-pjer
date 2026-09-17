@@ -39,6 +39,56 @@
         });
     }
 
+    function naturalizeProjectCopy() {
+        document.querySelectorAll("details.project-deep p, details.project-deep h3").forEach(node => {
+            let html = node.innerHTML;
+
+            html = html.replace(
+                "Bitna odluka u dizajnu je da se ",
+                "Kod mene se "
+            );
+            html = html.replace(
+                "To je važna razlika u odnosu na običan web login: VPN ne štiti samo jednu stranicu nego stvara privatni mrežni put kroz koji mogu prolaziti različiti protokoli.",
+                "Za razliku od običnog web logina, VPN ne štiti samo jednu stranicu. Napravi privatni mrežni put kroz koji mogu prolaziti različiti protokoli."
+            );
+            html = html.replace(
+                "Obrambeni slojevi se zato nadopunjuju.",
+                "Zato oba imaju smisla u istom setupu."
+            );
+            html = html.replace(
+                "To daje jednostavan audit trail bez potrebe da stalno ručno gledaš server:",
+                "Tako ne moram stalno ručno gledati server:"
+            );
+            html = html.replace(
+                "Ideja nije bila samo pokrenuti emulator na Piju, nego složiti cijeli fizički uređaj:",
+                "Htio sam složiti cijeli uređaj, ne samo pokrenuti emulator na Piju:"
+            );
+            html = html.replace(
+                "Zato je smislen pristup imati dva poznata config stanja",
+                "Najjednostavnije je imati dva poznata config stanja"
+            );
+            html = html.replace(
+                "zašto je projekt više od „instalirao sam RetroPie”",
+                "što je sve trebalo složiti"
+            );
+            html = html.replace(
+                "homelab nije „siguran zato što je Raspberry Pi”. siguran je samo onoliko koliko su dobri mrežni dizajn, konfiguracija, credentiali, updateovi i backup strategija.",
+                "Raspberry Pi sam po sebi ne čini setup sigurnim. bitni su konfiguracija, updateovi, credentiali i backup."
+            );
+            html = html.replace(
+                "Tako se na stranici ne miješaju dva različita plasmana.",
+                "Izlučno i državno zato nisu isti rezultat: prvo mjesto na izlučnom, srebro na državnom."
+            );
+
+            if (html !== node.innerHTML) node.innerHTML = html;
+        });
+
+        const footerLead = document.querySelector("footer p:first-child");
+        if (footerLead?.textContent.includes("PROJECT DUMP")) {
+            footerLead.textContent = "PROJECT DUMP · previše kablova, premalo mjesta na stolu.";
+        }
+    }
+
     function addHomelabMailAndDns() {
         const homelab = document.querySelector("details.project-deep");
         const body = homelab?.querySelector(".project-deep-body");
@@ -94,4 +144,5 @@ inbox / administrativna obavijest</pre>
     renameDoraGameLink();
     addHomelabMailAndDns();
     removeProjects();
+    naturalizeProjectCopy();
 })();
