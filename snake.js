@@ -35,8 +35,24 @@
     const doraImage = new Image();
     doraImage.src = `${ASSET}slika%20dora%20za%20snake%20game.jpeg`;
 
-    const dinosaurImage = new Image();
-    dinosaurImage.src = `${ASSET}dinosaur.png`;
+    const dinosaurSources = [
+        `${ASSET}dinosaur.png`,
+        `${ASSET}tyrannosaurus-rex-dinosaur-23090111.jpg`,
+        "images/dinosaurus%20parasaurolopus.jpg",
+        "images/brachiosaurus-dinosaurs-toy-isolated-white-background-clipping-path-dinosaur-jurassic-morrison-formation-north-87172614.jpg"
+    ];
+
+    const dinosaurImages = dinosaurSources.map(src => {
+        const image = new Image();
+        image.src = src;
+        return image;
+    });
+
+    let currentDinosaurImage = dinosaurImages[0];
+
+    function pickRandomDinosaur() {
+        currentDinosaurImage = dinosaurImages[Math.floor(Math.random() * dinosaurImages.length)];
+    }
 
     let snake = [];
     let direction = { x: 1, y: 0 };
@@ -103,6 +119,7 @@
         }
 
         if (free.length === 0) return null;
+        pickRandomDinosaur();
         return free[Math.floor(Math.random() * free.length)];
     }
 
@@ -182,7 +199,7 @@
         });
 
         if (food) {
-            drawSquareImage(dinosaurImage, food.x, food.y, "#4c9b43", 1);
+            drawSquareImage(currentDinosaurImage, food.x, food.y, "#4c9b43", 1);
         }
     }
 
@@ -359,57 +376,4 @@
             if (value === "up") changeDirection(0, -1);
             if (value === "down") changeDirection(0, 1);
             if (value === "left") changeDirection(-1, 0);
-            if (value === "right") changeDirection(1, 0);
-        };
-        button.addEventListener("pointerdown", act);
-    });
-
-    canvas.addEventListener("touchstart", event => {
-        const touch = event.changedTouches[0];
-        touchStart = { x: touch.clientX, y: touch.clientY };
-        event.preventDefault();
-    }, { passive: false });
-
-    canvas.addEventListener("touchmove", event => {
-        event.preventDefault();
-    }, { passive: false });
-
-    canvas.addEventListener("touchend", event => {
-        if (!touchStart) return;
-
-        const touch = event.changedTouches[0];
-        const dx = touch.clientX - touchStart.x;
-        const dy = touch.clientY - touchStart.y;
-        touchStart = null;
-
-        const swipeThreshold = MOBILE_MODE ? 12 : 18;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < swipeThreshold) return;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            changeDirection(dx > 0 ? 1 : -1, 0);
-        } else {
-            changeDirection(0, dy > 0 ? 1 : -1);
-        }
-
-        event.preventDefault();
-    }, { passive: false });
-
-    canvas.addEventListener("touchcancel", () => {
-        touchStart = null;
-    });
-
-    document.addEventListener("visibilitychange", () => {
-        paused = document.hidden;
-        if (paused) {
-            stopTimer();
-        } else if (!dead) {
-            startTimer();
-        }
-    });
-
-    restartButton?.addEventListener("click", start);
-    doraImage.addEventListener("load", draw);
-    dinosaurImage.addEventListener("load", draw);
-
-    start();
-})();
+            if (value === "right")
