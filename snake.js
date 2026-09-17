@@ -19,13 +19,14 @@
     const MIN_SPEED = 88;
     const ASSET = "images/slike%20update%20stranica/";
 
-    const rewardImages = [
-        `${ASSET}crazy%201.jpeg`,
-        `${ASSET}crazy%202.jpeg`,
-        `${ASSET}crazy%203.jpeg`,
-        `${ASSET}crazy%20dora.jpeg`,
-        `${ASSET}crazy%20slika.jpeg`,
-        `${ASSET}crazy%20slika%20dora%20sova.jpeg`
+    const levelArt = [
+        { image: `${ASSET}crazy%201.jpeg`, text: "level 1 · dinosauri još nisu zabrinuti" },
+        { image: `${ASSET}crazy%202.jpeg`, text: "level 2 · situacija postaje čudna" },
+        { image: `${ASSET}crazy%203.jpeg`, text: "level 3 · mezozoik gubi kontrolu" },
+        { image: `${ASSET}crazy%20dora.jpeg`, text: "level 4 · Dora eskalira" },
+        { image: `${ASSET}crazy%20slika%20dora%20sova.jpeg`, text: "level 5 · sova zna što si napravio" },
+        { image: `${ASSET}crazy%20slika.jpeg`, text: "level 6 · ovo je već osobno" },
+        { image: `${ASSET}slika%20crazy%20kokos.jpeg`, text: "level 7+ · nema više pravila" }
     ];
 
     const doraImage = new Image();
@@ -43,7 +44,7 @@
     let paused = false;
     let timer = null;
     let touchStart = null;
-    let rewardTimer = null;
+    let shownLevel = 0;
 
     let best = 0;
     try {
@@ -60,10 +61,31 @@
         return Math.max(MIN_SPEED, START_SPEED - levelDrop - scoreDrop);
     }
 
+    function levelArtFor(level) {
+        return levelArt[Math.min(level - 1, levelArt.length - 1)];
+    }
+
+    function updateLevelArt(force = false) {
+        if (!rewardBox || !rewardImage || !rewardText) return;
+
+        const level = currentLevel();
+        if (!force && level === shownLevel) return;
+
+        shownLevel = level;
+        const art = levelArtFor(level);
+        rewardImage.src = art.image;
+        rewardText.textContent = art.text;
+        rewardBox.classList.remove("level-change");
+        void rewardBox.offsetWidth;
+        rewardBox.classList.add("level-change");
+        window.setTimeout(() => rewardBox.classList.remove("level-change"), 560);
+    }
+
     function updateHud() {
         if (scoreElement) scoreElement.textContent = String(score);
         if (bestElement) bestElement.textContent = String(best);
         if (levelElement) levelElement.textContent = String(currentLevel());
+        updateLevelArt();
     }
 
     function randomFood() {
@@ -193,22 +215,6 @@
         window.setTimeout(() => canvas.classList.remove("dino-caught"), 150);
     }
 
-    function sideReward(text) {
-        if (!rewardBox || !rewardImage || !rewardText) return;
-
-        if (rewardTimer) window.clearTimeout(rewardTimer);
-
-        rewardImage.src = rewardImages[Math.floor(Math.random() * rewardImages.length)];
-        rewardText.textContent = text;
-        rewardBox.classList.remove("show");
-        void rewardBox.offsetWidth;
-        rewardBox.classList.add("show");
-
-        rewardTimer = window.setTimeout(() => {
-            rewardBox.classList.remove("show");
-        }, 500);
-    }
-
     function lose(reason) {
         dead = true;
         stopTimer();
@@ -224,7 +230,7 @@
         dead = true;
         stopTimer();
         drawEndMessage("NEMA VIŠE DINOSAURA", "arena je puna. ovo je zabrinjavajuće.");
-        sideReward("Dora je završila mezozoik.");
+        if (rewardText) rewardText.textContent = "Dora je završila mezozoik.";
     }
 
     function tick() {
@@ -272,11 +278,6 @@
 
             food = randomFood();
             startTimer();
-
-            if (score === 5) sideReward("5 dinosaura. Dora postaje prijetnja mezozoiku.");
-            if (score === 10) sideReward("10 dinosaura. ovo više nije običan snake.");
-            if (score === 15) sideReward("15 dinosaura. dinosauri počinju paničariti.");
-            if (score > 15 && score % 7 === 0) sideReward(`${score} dinosaura. zašto još uvijek ideš?`);
         } else {
             snake.pop();
         }
@@ -299,9 +300,10 @@
         score = 0;
         dead = false;
         paused = document.hidden;
+        shownLevel = 0;
 
-        if (rewardBox) rewardBox.classList.remove("show");
         updateHud();
+        updateLevelArt(true);
         draw();
         startTimer();
     }
