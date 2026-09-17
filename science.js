@@ -8,9 +8,9 @@
         const heading = intro.querySelector("h2");
         const paragraphs = intro.querySelectorAll("p");
 
-        if (heading) heading.textContent = "fun facts i rabbit hole";
+        if (heading) heading.textContent = "fizika, svemir i ostali rabbit holeovi";
         if (paragraphs[0]) {
-            paragraphs[0].textContent = "Par stvari iz fizike koje su mi dovoljno zanimljive da završe na istoj stranici: zašto orbita nije lebdenje, što je parsec, zašto Čerenkovljevo zračenje ne krši relativnost, što Van Allenovi pojasevi stvarno znače astronautima, zašto Big Bang nije bomba koja je eksplodirala u praznom prostoru, što Schrödingerova mačka zapravo pokušava pokazati i kako se fizika kroz stoljeća nadograđivala od astronomskih opažanja do kvantne teorije.";
+            paragraphs[0].textContent = "Od orbita, parseka i elektromagnetizma do Čerenkovljeva zračenja, Van Allenovih pojaseva, Big Banga, Schrödingerove mačke i kvantne fizike. Ukratko: stvari zbog kojih jedno pitanje vrlo brzo postane deset novih.";
         }
         if (paragraphs[1]) {
             paragraphs[1].textContent = "Brojke i povijesne tvrdnje koje se mogu provjeriti imaju izvore. Gdje postoji stvarna znanstvena rasprava, to je i napisano.";
