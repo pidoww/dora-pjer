@@ -147,35 +147,109 @@ kućni LAN / OMV / Samba</pre>
                     <figcaption>Raspberry Pi 4 — baza retro konzole. Wikimedia Commons, CC0 za ovu fotografiju.</figcaption>
                 </figure>
 
-                <p>Retro konzola koristi <strong>Raspberry Pi 4</strong>, RetroPie/Raspberry Pi OS i mali <strong>5-inčni DSI ekran</strong>. Cijela ideja je bila dobiti fizički uređaj koji radi samostalno na stolu, ali može po potrebi prijeći i na TV/HDMI izlaz.</p>
+                <p>Retro konzola je mali samostalni emulacijski uređaj napravljen oko <strong>Raspberry Pi 4</strong>, RetroPie/Raspberry Pi OS-a i <strong>5-inčnog DSI ekrana</strong>. Ideja nije bila samo pokrenuti emulator na Piju, nego složiti cijeli fizički uređaj: lokalni ekran, kontroler, boot u game frontend, mogućnost TV/HDMI načina rada i vlastito 3D-printano TMNT kućište.</p>
 
                 <div class="project-facts">
                     <div><strong>compute:</strong> Raspberry Pi 4</div>
-                    <div><strong>frontend/emulation:</strong> RetroPie</div>
+                    <div><strong>OS / stack:</strong> Raspberry Pi OS + RetroPie</div>
+                    <div><strong>frontend:</strong> EmulationStation</div>
+                    <div><strong>emulation:</strong> RetroArch / libretro coreovi + pojedinačni emulatori</div>
                     <div><strong>lokalni display:</strong> 5" DSI ribbon ekran</div>
                     <div><strong>vanjski display:</strong> HDMI / TV mode</div>
+                    <div><strong>input:</strong> USB / Bluetooth gamepad</div>
                     <div><strong>kućište:</strong> vlastiti 3D print / TMNT tematika</div>
-                    <div><strong>veličina:</strong> otprilike „dvije jabuke”</div>
                 </div>
 
-                <h3>DSI vs HDMI način rada</h3>
-                <p>Jedan od konkretnih problema bio je kako zadržati mali DSI ekran, a istodobno omogućiti TV izlaz. Rješenje je bilo razmišljati o dva boot/config moda: konfiguracija optimizirana za DSI i konfiguracija za HDMI, uz jednostavne RetroPie menu skripte koje promijene config i rebootaju uređaj.</p>
+                <h3>softverski stack: frontend nije isto što i emulator</h3>
+                <p><strong>EmulationStation</strong> je sučelje kroz koje biraš sustav i igru. Ono organizira biblioteku i zatim pokreće odgovarajući emulator. <strong>RetroArch</strong> je zajednički runtime/frontend za mnoge <strong>libretro coreove</strong>; svaki core implementira emulaciju određenog sustava ili obitelji sustava. RetroPie sve to povezuje u jedan praktičan setup na Raspberry Piju.</p>
 
-                <pre class="project-diagram">gamepad
+                <pre class="project-diagram">power on
    │
    ▼
-Linux input subsystem
+Raspberry Pi OS / Linux
    │
    ▼
-RetroPie / emulator
+EmulationStation
+   │  odabir sustava + igre
+   ▼
+RetroArch / standalone emulator
    │
-   ├── DSI mode ── 5" ekran
-   └── HDMI mode ─ TV / monitor</pre>
+   ▼
+libretro core / emulirani stroj
+   │
+   ├── emulirani CPU
+   ├── memorijska mapa
+   ├── grafika / video timing
+   ├── audio čip
+   └── controller input
+        │
+        ▼
+DSI ekran ili HDMI + zvuk</pre>
 
                 <h3>što emulator zapravo radi</h3>
-                <p>ROM nije „pretvoren” u Raspberry Pi program. Emulator implementira ponašanje originalnog CPU-a, memorijskog mapiranja, grafičkog i audio hardvera dovoljno precizno da originalni binarni kod vidi okruženje slično stvarnoj konzoli. To je razlog zašto je emulacija kompromis između preciznosti, latencije i dostupne procesorske snage.</p>
+                <p>ROM nije pretvoren u ARM program za Raspberry Pi. Emulator izvršava ili prevodi instrukcije originalnog procesora i istodobno modelira ostatak stroja: memorijske adrese, registre, video sustav, audio hardver, timere i input. Igra zato „misli” da razgovara s originalnom konzolom, iako svaki taj hardverski uređaj zapravo predstavlja softverski model.</p>
+                <p>Kod jednostavnijih sustava to može biti relativno lagano. Kod kompleksnijih konzola emulator mora održavati precizne odnose između više procesora, GPU-a, zvuka i vremena izvršavanja. Zbog toga zahtjevnost ne raste samo s rezolucijom stare konzole — bitna je i složenost hardvera koji treba dovoljno vjerno oponašati.</p>
 
-                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_4_B.png" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 4 B ↗</a></p>
+                <h3>DSI vs HDMI način rada</h3>
+                <p>Jedan od praktičnih problema bio je kako imati mali ugrađeni DSI ekran za samostalno korištenje, a po potrebi prebaciti konzolu na televizor preko HDMI-ja. DSI i HDMI nisu samo dva identična konektora za isti ekran: Linux/Raspberry Pi display konfiguracija mora znati koji output koristiti, s kojom rezolucijom i kojim framebuffer/display parametrima.</p>
+                <p>Zato je smislen pristup imati dva poznata config stanja — jedno za DSI, drugo za HDMI — i jednostavnu skriptu dostupnu iz RetroPie/EmulationStation menija koja promijeni konfiguraciju te rebootom aktivira novi display način rada.</p>
+
+                <pre class="project-diagram">                 ┌── DSI MODE ── 5" ugrađeni ekran
+boot config ─────┤
+                 └── HDMI MODE ── TV / monitor
+
+menu skripta
+   │
+   ├── odabere željeni config
+   ├── spremi stanje
+   └── reboot → novi output postaje aktivan</pre>
+
+                <h3>put kontrolera: od gumba do igre</h3>
+                <p>Kad stisneš tipku na gamepadu, događaj prvo dolazi do USB/Bluetooth kontrolera i Linux input subsystema. Emulator taj input čita, mapira ga na emulirani kontroler originalne konzole i tek tada virtualni stroj registrira pritisak tipke.</p>
+                <pre class="project-diagram">prst
+ │
+ ▼
+gamepad switch
+ │
+ ▼
+USB / Bluetooth polling
+ │
+ ▼
+Linux input event
+ │
+ ▼
+RetroArch / emulator input map
+ │
+ ▼
+emulirani controller register
+ │
+ ▼
+igra reagira
+ │
+ ▼
+render frame → ekran</pre>
+
+                <h3>odakle dolazi input latency</h3>
+                <p>Latencija nije jedna brojka iz jednog izvora. Mali dijelovi vremena mogu nastati u gamepadu, USB/Bluetooth pollingu, Linux input obradi, načinu na koji emulator sinkronizira frameove, video bufferima, VSync-u i samom panelu. Zato emulator može raditi na „punih 60 FPS”, a svejedno osjećati tromije od originalnog hardvera ako pipeline ima nekoliko dodatnih frameova čekanja.</p>
+
+                <h3>zašto 5" ekran mijenja dizajn cijelog uređaja</h3>
+                <p>Ugrađeni ekran znači da konzola nije samo Pi spojen na TV. Kućište mora držati panel i ribbon kabel bez oštrih savijanja, ostaviti pristup kontrolama i portovima te osigurati da ekran, Pi i kabeli fizički stanu bez pritiska na konektore. DSI ribbon je posebno osjetljiv na lošu mehaničku putanju jer nije zamišljen da bude zgnječen između printanih dijelova.</p>
+
+                <h3>3D-printano TMNT kućište</h3>
+                <p>Kućište je dio projekta jednako kao i softver. Kod funkcionalnog FDM printa treba ostaviti toleranciju oko Raspberry Pija, konektora i ekrana; rupe iz CAD-a ne izlaze nužno identične nominalnoj mjeri nakon printa. Također treba misliti na protok zraka i temperaturu, pogotovo kada se Pi 4 nalazi u zatvorenoj plastičnoj kutiji tijekom duljeg emuliranja.</p>
+                <p>TMNT izgled je estetski dio, ali mehanički dio mora riješiti puno manje glamurozne stvari: kako otvoriti kućište, kako ne čupati DSI ribbon, gdje prolazi napajanje, može li se doći do HDMI-ja i USB-a te hoće li se kućište iskriviti oko toplijih dijelova.</p>
+
+                <h3>zašto je projekt više od „instalirao sam RetroPie”</h3>
+                <ul class="bad-list">
+                    <li><strong>softver:</strong> Linux + RetroPie + EmulationStation + emulatori/coreovi;</li>
+                    <li><strong>display:</strong> dva različita output scenarija, DSI i HDMI;</li>
+                    <li><strong>input:</strong> gamepad konfiguracija i latency pipeline;</li>
+                    <li><strong>mehanika:</strong> vlastito 3D-printano kućište, tolerancije i cable management;</li>
+                    <li><strong>termika:</strong> Pi 4 mora ostati dovoljno hlađen i unutar kućišta;</li>
+                    <li><strong>UX:</strong> uređaj treba bootati u nešto što se može koristiti kao konzola, a ne svaki put zahtijevati terminal i tipkovnicu.</li>
+                </ul>
+
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_4_B.png" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 4 B ↗</a> · <a href="https://retropie.org.uk/" target="_blank" rel="noopener noreferrer">RetroPie ↗</a> · <a href="https://www.retroarch.com/" target="_blank" rel="noopener noreferrer">RetroArch ↗</a></p>
             </div>
         </details>
 
