@@ -28,6 +28,28 @@
         theorySection.insertAdjacentElement("afterend", section);
     }
 
+    function addTeslaExample() {
+        if (document.getElementById("tesla-not-alone")) return;
+
+        const collectiveSection = document.getElementById("science-is-collective");
+        if (!collectiveSection) return;
+
+        const section = document.createElement("section");
+        section.className = "paper";
+        section.id = "tesla-not-alone";
+        section.innerHTML = `
+            <h2>Tesla je dobar primjer za ovo</h2>
+            <p>Nikola Tesla je stvarno napravio ogroman doprinos elektrotehnici. Njegov polifazni sustav izmjenične struje, rad na rotirajućem magnetskom polju i indukcijskim motorima bili su ključni za razvoj modernih AC sustava. To mu ne treba ni napuhavati ni umanjivati.</p>
+            <p>Problem nastane kad se priča pretvori u <strong>„Tesla je praktički sve izmislio, a ostali su mu samo krali ideje”</strong>. Elektromagnetizam je postojao kao cijelo istraživačko područje desetljećima prije njegovih najpoznatijih patenata. Ørsted je pokazao vezu električne struje i magnetizma, Ampère ju je matematički razvijao, Faraday je otkrio elektromagnetsku indukciju, Maxwell je električna i magnetska opažanja spojio u teorijski okvir, a Hertz je eksperimentalno pokazao elektromagnetske valove.</p>
+            <p>Ni razvoj AC motora nije priča s jednim jedinim čovjekom. Tesla je 1888. predstavio svoj polifazni sustav i dobio važne patente, ali je <strong>Galileo Ferraris neovisno radio na rotirajućem magnetskom polju i dvofaznim AC motorima</strong> te svoje rezultate javno predstavio iste godine. Smithsonian također navodi da su Westinghouseovi inženjeri dalje razradili Teslin koncept i uveli praktični dvofazni motor.</p>
+            <p>To nije argument protiv Tesle — zapravo je zanimljivije od mita. Pokazuje kako stvarna tehnologija nastaje: fizika jednog čovjeka omogući eksperiment drugome, više ljudi neovisno dođe do sličnih ideja, netko ih patentira, netko poboljša konstrukciju, a netko ih pretvori u sustav koji se može masovno koristiti.</p>
+            <div class="misconception"><strong>„Ako je još netko radio na istoj stvari, onda Tesla nije bio poseban.”</strong> Ne. Velik doprinos ne zahtijeva da prije tebe nije postojao nitko. Bitno je što si konkretno dodao, koliko je to bilo originalno i koliko je utjecalo na ono što je došlo poslije.</div>
+            <p class="deep-source"><a href="https://www.si.edu/exhibitions/nikola-tesla-inventor-and-electrical-engineer-event-exhib-3311" target="_blank" rel="noopener noreferrer">Smithsonian – Nikola Tesla ↗</a> · <a href="https://americanhistory.si.edu/collections/object/nmah_739995" target="_blank" rel="noopener noreferrer">Smithsonian – Tesla / Westinghouse AC motor ↗</a> · <a href="https://spectrum.ieee.org/may-1888-tesla-files-his-patents-for-electric-motor" target="_blank" rel="noopener noreferrer">IEEE Spectrum – Tesla i Ferraris ↗</a> · <a href="https://www.aps.org/apsnews/2001/08/faraday-electromagnetism" target="_blank" rel="noopener noreferrer">APS – Faraday i elektromagnetizam ↗</a></p>
+        `;
+
+        collectiveSection.insertAdjacentElement("afterend", section);
+    }
+
     function addChernobylDoseDetails() {
         const section = document.getElementById("radiation-risk-scale");
         if (!section || document.getElementById("chernobyl-dose-detail")) return;
@@ -82,6 +104,7 @@
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
             addScienceIsCollective();
+            addTeslaExample();
             addChernobylDoseDetails();
             loadScript("/anthro-extra.js");
         });
