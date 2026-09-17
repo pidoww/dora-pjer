@@ -18,7 +18,7 @@
     const MAX_BONKS = 40;
 
     const messages = [
-        "BONK. Schrödinger nije ovo stavio u originalni misaoni eksperiment.",
+        "BONK. Schrödinger ovo definitivno nije stavio u originalni misaoni eksperiment.",
         "Chypsi je upravo kolabirao raspoloženje, ne valnu funkciju.",
         "laboratorij je sada 12% manje akademski.",
         "mjerenje je izvršeno vrlo neprofesionalno.",
@@ -162,17 +162,17 @@
         }
 
         if (bonks === 20 && message) {
-            message.textContent = "20/40. pola puta do physics.html. ovo je postalo commitment.";
+            message.textContent = "20/40. ovo je već postalo ozbiljan nedostatak nadzora.";
             document.body.classList.add("trash-mode");
             window.setTimeout(() => document.body.classList.remove("trash-mode"), 1500);
         }
 
         if (bonks === 30 && message) {
-            message.textContent = "30/40. Chypsi ima više bonkova nego ovaj eksperiment ima akademske vrijednosti.";
+            message.textContent = "30/40. Chypsi ima više bonkova nego ovaj eksperiment akademske vrijednosti.";
         }
 
         if (bonks >= MAX_BONKS) {
-            goPhysics("40/40. dosta. idi pročitaj pravu fiziku.");
+            goPhysics("40/40. laboratorij više ne preuzima odgovornost.");
             return;
         }
 
@@ -188,15 +188,15 @@
         if (redirecting) return;
 
         schrodingerClicks += 1;
-        const hints = [
-            "hint: portret Schrödingera izgleda previše klikabilno.",
+        const comments = [
+            "Schrödinger te ignorira.",
             "Schrödinger te je primijetio.",
-            "oke, ovo očito nije samo fotografija.",
-            "još malo i završit ćeš duboko u fizici.",
-            "zadnji klik prije rupe bez dna."
+            "ovo mu se očito ne sviđa.",
+            "situacija postaje neugodna.",
+            "oke, sad je dosta."
         ];
 
-        if (physicsHint) physicsHint.textContent = hints[Math.min(schrodingerClicks, hints.length - 1)];
+        if (physicsHint) physicsHint.textContent = comments[Math.min(schrodingerClicks, comments.length - 1)];
 
         [photo, target].forEach(node => {
             node?.animate(
@@ -210,7 +210,7 @@
         });
 
         if (schrodingerClicks >= 5) {
-            goPhysics("oke. Schrödinger shortcut otključan.");
+            goPhysics("Schrödinger je napustio laboratorij.");
         }
     }
 
