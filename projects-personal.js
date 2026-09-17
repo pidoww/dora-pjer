@@ -21,6 +21,13 @@
         if (first) {
             first.textContent = "Raspberry Pi, homelab, retro konzola, visoki napon, mreže i WorldSkills. Uglavnom stvari koje sam krenuo raditi jer mi je palo na pamet ‘ovo bi bilo fora’, a onda su završile s puno više kablova i posla nego što sam planirao.";
         }
+
+        if (intro && !intro.querySelector(".project-open-hint")) {
+            const hint = document.createElement("p");
+            hint.className = "small-text project-open-hint";
+            hint.textContent = "klikni na projekt ako te zanimaju detalji.";
+            intro.appendChild(hint);
+        }
     }
 
     function personalizeProjects() {
@@ -45,7 +52,7 @@
         replaceHtml(
             "details.project-deep p",
             "Ovdje su zapravo dva odvojena rezultata koja vrijedi razlikovati. Na izlučnom natjecanju u Zadru tim <strong>Pjer Flajhar + Vito Radman</strong> osvojio je <strong>1. mjesto</strong> i izborio plasman na državno. Nekoliko mjeseci poslije na državnom WorldSkills Croatia 2026 isti je tim u disciplini Robotika osvojio <strong>2. mjesto — srebrnu medalju</strong>. Mentor je bio <strong>Marko Kovač</strong>.",
-            "Na izlučnom natjecanju u Zadru sam s <strong>Vitom Radmanom</strong> osvojio <strong>1. mjesto</strong> i plasman na državno. Nekoliko mjeseci poslije na državnom WorldSkills Croatia 2026 osvojili smo <strong>2. mjesto — srebrnu medalju</strong> u Robotici. Mentor nam je bio <strong>Marko Kovač</strong>."
+            "Na izlučnom natjecanju u Zadru sam s <strong>Vitom Radmanom</strong> osvojio <strong>1. mjesto</strong> i plasman na državno. Nekoliko mjeseci poslije sam s njim na državnom WorldSkills Croatia 2026 osvojio <strong>2. mjesto — srebrnu medalju</strong> u Robotici. Mentor mi je bio <strong>Marko Kovač</strong>."
         );
 
         replaceHtml(
