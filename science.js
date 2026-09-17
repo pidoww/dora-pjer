@@ -56,7 +56,19 @@
         }
     }
 
+    function applyVerifiedCorrections() {
+        document.querySelectorAll(".physics-table tbody tr").forEach(row => {
+            const cells = row.querySelectorAll("td");
+            if (cells.length < 2) return;
+
+            if (cells[0].textContent.trim() === "Apollo 17" && cells[1].textContent.includes("0.51")) {
+                cells[1].textContent = "≈0.55 rad";
+            }
+        });
+    }
+
     insertOzoneSection();
+    applyVerifiedCorrections();
 
     const summaryCache = new Map();
     const imageCache = new Map();
