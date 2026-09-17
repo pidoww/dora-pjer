@@ -7,6 +7,7 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="stylesheet" href="mystyle.css">
     <link rel="stylesheet" href="extras.css">
+    <link rel="stylesheet" href="deep.css">
 </head>
 <body>
     <header class="top">
@@ -14,15 +15,18 @@
         <p class="tiny-warning">oke, dovoljno si puta kliknuo Pjera</p>
         <nav>
             <a href="index.html">početna</a>
+            <a href="physics.html">fizika</a>
             <a href="snake.html">Dora vs dinosauri</a>
         </nav>
     </header>
 
+    <div class="marquee-ish"><span>★ RASPBERRY PI ★ ROBOTIKA ★ 3D PRINT ★ OPEN SOURCE ★ MREŽE ★ PREVIŠE KABLOVA ★</span></div>
+
     <main>
         <section class="paper">
             <h2>stvari koje sam stvarno radio umjesto da ostavim hardver na miru</h2>
-            <p>3D print, Raspberry Pi, mreže, Linux, robotika, elektronika i projekti koji uglavnom počnu s „ovo bi bilo fora” pa završe s previše dijelova na stolu.</p>
-            <p class="small-text">klikni naslov projekta da se otvori cijeli tehnički rabbit hole. slike se normalno mogu povećati.</p>
+            <p>Ovo nije CV i nije savršeno složen portfolio. Više je tehnička hrpa svega što je kroz vrijeme završilo na stolu: Raspberry Pi, NAS, VPN, robotika, embedded, 3D print, visoki napon, natjecanja i projekti koji uglavnom počnu s „ovo bi bilo fora”.</p>
+            <p class="small-text">klikni naslov projekta da otvoriš detalje. slike se mogu povećati i zatvaraju se samo na X.</p>
         </section>
 
         <section class="project-links-strip">
@@ -34,146 +38,200 @@
         <details class="project-deep" open>
             <summary>🏠 Homelab / Raspberry Pi 5 / NAS / VPN</summary>
             <div class="project-deep-body">
-                <p>Srce homelaba je <strong>Raspberry Pi 5 s 8 GB RAM-a</strong>. Na njemu je OpenMediaVault (OMV), koji daje web administraciju za storage, korisnike i servise, dok Samba služi kao SMB file-sharing sloj za Windows/Linux uređaje.</p>
+                <figure class="project-media">
+                    <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Raspberry_Pi_5.jpg" alt="Raspberry Pi 5, platforma korištena kao baza homelaba">
+                    <figcaption>Raspberry Pi 5 — reprezentativna fotografija hardvera. Wikimedia Commons; licenca je navedena na izvornoj file-stranici.</figcaption>
+                </figure>
+
+                <p>Srce homelaba je <strong>Raspberry Pi 5 s 8 GB RAM-a</strong>. Setup je nastao kao ozbiljniji self-hosted NAS/VPN projekt, a ne samo kao „disk spojen na Pi”. Sustav je kroz vrijeme uključio Raspberry Pi OS Lite 64-bit, OpenMediaVault 7, Samba/SMB, dva vanjska HDD-a, OpenVPN/PiVPN, DuckDNS, systemd automatizaciju, e-mail obavijesti i 3D-printano kućište/modelirano u Fusion 360.</p>
 
                 <div class="project-facts">
                     <div><strong>Pi:</strong> Raspberry Pi 5, 8 GB</div>
-                    <div><strong>NAS:</strong> OpenMediaVault + Samba</div>
-                    <div><strong>Diskovi:</strong> ~1.8 TB + ~916 GB</div>
-                    <div><strong>Shareovi:</strong> BLACK + BLUE</div>
-                    <div><strong>Remote:</strong> PiVPN / OpenVPN</div>
-                    <div><strong>Admin:</strong> OMV preko HTTPS-a unutar mreže/VPN-a</div>
+                    <div><strong>OS:</strong> Raspberry Pi OS Lite 64-bit</div>
+                    <div><strong>NAS:</strong> OpenMediaVault 7</div>
+                    <div><strong>file sharing:</strong> Samba / SMB</div>
+                    <div><strong>diskovi:</strong> oko 1.8 TB + 916 GB</div>
+                    <div><strong>shareovi:</strong> BLACK + BLUE</div>
+                    <div><strong>remote access:</strong> PiVPN / OpenVPN</div>
+                    <div><strong>DDNS:</strong> DuckDNS</div>
+                    <div><strong>VPN port:</strong> UDP 52873 u završnom setupu</div>
+                    <div><strong>automatizacija:</strong> systemd servisi/timeri + hook skripte</div>
                 </div>
 
-                <h3>kako ide promet kad nisi doma</h3>
+                <h3>što se događa kada pristupaš serveru izvana</h3>
                 <pre class="project-diagram">internet
    │
    ▼
-router / javna IP
-   │  samo VPN port forward
-   ▼
-Raspberry Pi 5 ── OpenVPN
+router / javna IP + DuckDNS ime
    │
-   ├── OMV admin (HTTPS)
-   ├── Samba / BLACK
-   └── Samba / BLUE</pre>
+   │  proslijeđen je VPN port, ne SMB/OMV prema internetu
+   ▼
+Raspberry Pi 5
+   │
+   ├── OpenVPN / PiVPN ── šifrirani tunel
+   │
+   ├── OpenMediaVault 7 ── administracija storagea
+   │
+   ├── Samba / SMB ─────── BLACK + BLUE
+   │
+   └── systemd + msmtp ─── automatizacija / obavijesti</pre>
 
-                <p>Ideja nije javno izložiti Samba share ili OMV admin sučelje. Prvo se uspostavi VPN tunel do kućne mreže, a tek onda se ponašaš kao da si lokalno na LAN-u. Time je javno izložen VPN servis, a ne svaki pojedini servis iza njega.</p>
+                <h3>zašto VPN i HTTPS rješavaju različite probleme</h3>
+                <p>VPN stvara privatnu mrežnu putanju prema kućnom LAN-u. Nakon spajanja uređaj može pristupati servisima kao da je lokalno spojen. HTTPS štiti pojedinu web sesiju — primjerice browser ↔ OMV admin. Self-signed certifikat i dalje može šifrirati promet, ali browser nema treću stranu kojoj unaprijed vjeruje da potvrdi identitet certifikata, pa zato prikazuje upozorenje.</p>
 
-                <h3>HTTPS vs VPN — nisu ista stvar</h3>
-                <p>HTTPS štiti konkretnu web vezu između browsera i OMV-a. VPN stvara šifrirani tunel za cijeli mrežni promet prema kućnoj mreži. Self-signed OMV certifikat i dalje šifrira promet, ali browser ne može sam potvrditi identitet servera preko javnog CA lanca pa zato prikazuje upozorenje. To nije isto što i „HTTPS ne radi”.</p>
+                <h3>Samba / SMB</h3>
+                <p>Samba implementira SMB protokol na Linuxu. Na jednoj strani stoje Linux filesystem, mountovi, vlasništvo i prava; na drugoj Windows/SMB klijent vidi mrežni share. To znači da „mogu pristupiti shareu” ovisi i o Samba konfiguraciji i o dozvolama stvarnog direktorija ispod nje.</p>
 
-                <h3>što je zanimljivo ispod haube</h3>
-                <p>Samba prevodi lokalni Linux storage u SMB protokol koji Windows vidi kao mrežni share. OpenVPN stvara virtualni mrežni interfejs i rutira pakete između VPN subnet-a i LAN-a. Router radi NAT prema internetu, a port forwarding propušta samo promet namijenjen VPN-u prema Raspberry Piju.</p>
+                <h3>automatizacija i obavijesti</h3>
+                <p>Projekt je imao i servisne/hook skripte koje reagiraju na događaje poput VPN spajanja/odspajanja te mogu preko msmtp/Disroot infrastrukture poslati e-mail obavijest. Time NAS nije samo storage nego mali servisni stroj s vlastitim eventovima i održavanjem.</p>
+
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_5.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 5 ↗</a> · <a href="https://www.openmediavault.org/" target="_blank" rel="noopener noreferrer">OpenMediaVault ↗</a> · <a href="https://openvpn.net/" target="_blank" rel="noopener noreferrer">OpenVPN ↗</a></p>
             </div>
         </details>
 
         <details class="project-deep">
-            <summary>🎮 Retro konzola / Raspberry Pi + 3D print</summary>
+            <summary>🎮 Retro konzola / Raspberry Pi 4 + RetroPie + 5" DSI</summary>
             <div class="project-deep-body">
-                <p>Retro konzola spaja dvije stvari koje se ovdje stalno ponavljaju: Raspberry Pi i 3D print. Pi glumi računalo za emulaciju, a kućište i mehanički dio nisu kupljeni kao gotov proizvod nego su napravljeni/printani za projekt.</p>
+                <figure class="project-media">
+                    <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Raspberry_Pi_4_B.png" alt="Raspberry Pi 4, baza retro konzole">
+                    <figcaption>Raspberry Pi 4 — baza retro konzole. Wikimedia Commons, CC0 za ovu fotografiju.</figcaption>
+                </figure>
+
+                <p>Retro konzola koristi <strong>Raspberry Pi 4</strong>, RetroPie/Raspberry Pi OS i mali <strong>5-inčni DSI ekran</strong>. Cijela ideja je bila dobiti fizički uređaj koji radi samostalno na stolu, ali može po potrebi prijeći i na TV/HDMI izlaz.</p>
 
                 <div class="project-facts">
-                    <div><strong>compute:</strong> Raspberry Pi</div>
-                    <div><strong>mehanika:</strong> vlastito 3D printano kućište</div>
-                    <div><strong>tema:</strong> TMNT / retro konzola</div>
-                    <div><strong>ulaz:</strong> gamepad → emulator</div>
-                    <div><strong>izlaz:</strong> GPU/video → display</div>
+                    <div><strong>compute:</strong> Raspberry Pi 4</div>
+                    <div><strong>frontend/emulation:</strong> RetroPie</div>
+                    <div><strong>lokalni display:</strong> 5" DSI ribbon ekran</div>
+                    <div><strong>vanjski display:</strong> HDMI / TV mode</div>
+                    <div><strong>kućište:</strong> vlastiti 3D print / TMNT tematika</div>
+                    <div><strong>veličina:</strong> otprilike „dvije jabuke”</div>
                 </div>
 
-                <h3>što se događa kad stisneš tipku</h3>
+                <h3>DSI vs HDMI način rada</h3>
+                <p>Jedan od konkretnih problema bio je kako zadržati mali DSI ekran, a istodobno omogućiti TV izlaz. Rješenje je bilo razmišljati o dva boot/config moda: konfiguracija optimizirana za DSI i konfiguracija za HDMI, uz jednostavne RetroPie menu skripte koje promijene config i rebootaju uređaj.</p>
+
                 <pre class="project-diagram">gamepad
-   │ USB / Bluetooth
+   │
    ▼
 Linux input subsystem
    │
    ▼
-emulator
-   │ emulira CPU/GPU/zvuk stare konzole
-   ▼
-Raspberry Pi GPU/audio
+RetroPie / emulator
    │
-   └── HDMI / ekran + zvuk</pre>
+   ├── DSI mode ── 5" ekran
+   └── HDMI mode ─ TV / monitor</pre>
 
-                <p>Emulator ne „pokreće stari ROM nativno”; on softverski oponaša originalni hardver dovoljno precizno da se originalni strojni kod ponaša kao da radi na konzoli za koju je napisan. Najveći kompromis je uvijek između preciznosti emulacije, latencije i računalne snage.</p>
+                <h3>što emulator zapravo radi</h3>
+                <p>ROM nije „pretvoren” u Raspberry Pi program. Emulator implementira ponašanje originalnog CPU-a, memorijskog mapiranja, grafičkog i audio hardvera dovoljno precizno da originalni binarni kod vidi okruženje slično stvarnoj konzoli. To je razlog zašto je emulacija kompromis između preciznosti, latencije i dostupne procesorske snage.</p>
+
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_4_B.png" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 4 B ↗</a></p>
             </div>
         </details>
 
         <details class="project-deep">
-            <summary>🤖 Mecanum line follower / Arduino Mega</summary>
+            <summary>🤖 Mecanum line follower / Arduino Mega / encoder feedback</summary>
             <div class="project-deep-body">
-                <p>Ovo je puno bliže pravom malom mobilnom robotu nego klasičnom „dva motora i senzor crte” projektu. Mecanum kotači omogućuju uzdužno gibanje, rotaciju i bočni strafe kombiniranjem smjerova/brzina sva četiri kotača.</p>
+                <figure class="project-media">
+                    <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Arduino_Mega2560.jpg" alt="Arduino Mega 2560, kontroler robota">
+                    <figcaption>Arduino Mega 2560 — kontroler projekta. Fotografija: Andy Dingley / Wikimedia Commons, CC BY-SA 3.0.</figcaption>
+                </figure>
+
+                <p>Robot je mecanum line follower s četiri zasebno pogonjena kotača, encoderima, IR line-sensor poljem i state machine logikom. Mecanum geometrija znači da nije ograničen na naprijed/natrag + rotaciju: pravilnim kombiniranjem brzina četiri kotača može raditi i bočni strafe.</p>
 
                 <div class="project-facts">
-                    <div><strong>MCU:</strong> Arduino Mega</div>
+                    <div><strong>kontroler:</strong> Arduino Mega</div>
                     <div><strong>motor driver:</strong> Hiwonder 4-Ch Encoder, I²C 0x34</div>
                     <div><strong>line sensor:</strong> Hiwonder 8-Ch IR, I²C 0x5D</div>
-                    <div><strong>motori:</strong> JGB37-520, 12 V, 110 RPM, 1:90, Hall encoder</div>
+                    <div><strong>motori:</strong> JGB37-520, 12 V, 110 RPM, 1:90</div>
+                    <div><strong>feedback:</strong> Hall AB encoderi</div>
                     <div><strong>kotači:</strong> mecanum</div>
                     <div><strong>display:</strong> LCD 20×4 I²C</div>
                     <div><strong>napajanje:</strong> Einhell 18 V → buck 12 V</div>
                 </div>
 
-                <h3>PID</h3>
-                <p>Line follower grešku dobiva iz rasporeda IR senzora, a PID kontroler pretvara tu grešku u korekciju gibanja. Zadnje korištene vrijednosti bile su približno <strong>Kp 0.26, Ki 0.02, Kd 0.18</strong>. P dio reagira na trenutačnu pogrešku, I dio skuplja dugotrajni offset, a D dio reagira na brzinu promjene pogreške i prigušuje preagresivno skretanje.</p>
+                <h3>vanjska i unutarnja regulacija</h3>
+                <p>Line follower radi kao hijerarhija. Vanjska petlja iz IR senzora računa položaj crte i generira korekciju smjera. Motor driver istodobno koristi encoder feedback za regulaciju brzine pojedinih motora. To je važno jer isti PWM ne znači nužno istu brzinu na četiri realna motora.</p>
+
+                <p>Zadnje korištene PID vrijednosti za line-follow korekciju bile su približno <strong>Kp = 0.26, Ki = 0.02, Kd = 0.18</strong>, uz BASE 24 i MAX 42. P dio reagira na trenutačnu pogrešku, I dio na akumulirani offset, a D dio na brzinu promjene pogreške.</p>
 
                 <h3>state machine</h3>
                 <pre class="project-diagram">FOLLOW_LINE
-   ├── TURN_L_90 / TURN_R_90
+   ├── TURN_L_90
+   ├── TURN_R_90
    ├── SEARCH_LINE
    ├── STRAFE
-   ├── FRONT_BUMP / BACK_BUMP
+   ├── FRONT_BUMP
+   ├── BACK_BUMP
    └── FULL_LINE_STOP</pre>
 
-                <p>Bitna stvar je da robot nije samo kontinuirani PID loop. Kad vidi specifične uzorke senzora ili prepreku, prelazi u drugo stanje s drukčijim pravilima. Za strafe su korišteni preload i ramp kako bi mecanum kotači stvarno ušli u bočno gibanje umjesto da robot prvo samo zakrene nos.</p>
+                <p>Za strafe su korišteni zasebni parametri, uključujući preload i ramp, jer idealna mecanum matematika ne zna za trenje, zazor, neravnomjeran pritisak kotača i inerciju stvarnog robota. Robot zato treba prijelaz, a ne samo trenutačno postaviti teorijski vektor.</p>
 
-                <p class="small-text">projekt je usput dokazao i da motor driver može biti potrošni materijal ako ga dovoljno naljutiš.</p>
+                <p class="small-text">i da: motor driver je kroz razvoj pregorio više puta. to je isto dio dokumentacije.</p>
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Arduino_Mega2560.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Arduino Mega 2560 ↗</a></p>
             </div>
         </details>
 
-        <details class="project-deep">
-            <summary>⚡ „ozonator” / HV eksperiment</summary>
+        <details class="project-deep" id="ozonator">
+            <summary>⚡ „ozonator” / 18650 + impulsni HV generator</summary>
             <div class="project-deep-body">
-                <p>Ovaj projekt koristi mali impulsni visokonaponski modul koji se prodaje pod marketinškim oznakama tipa „400 kV”. Takve brojke na jeftinim modulima ne treba uzimati kao pouzdano izmjeren izlazni napon; stvarni napon ovisi o razmaku, opterećenju, geometriji elektroda i samom modulu.</p>
+                <figure class="project-media">
+                    <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Corona_discharge_in_atmospheric_air_1.jpg" alt="Korona izboj u zraku, fenomen povezan s visokim električnim poljem">
+                    <figcaption>Korona izboj u atmosferskom zraku oko oštre elektrode — ilustracija fizikalnog fenomena, ne fotografija točno našeg modula. Wikimedia Commons, CC BY 4.0.</figcaption>
+                </figure>
+
+                <p>Projekt je koristio tipični mali modul koji se prodaje kao <strong>„DC 3–6 V → 400 kV pulse generator”</strong>. Marketinšku brojku „400 kV” ne treba tretirati kao kalibrirano mjerenje stvarnog izlaza. Takvi moduli daju visokonaponske impulse, a stvarni napon i energija ovise o topologiji modula, napajanju, opterećenju, razmaku i geometriji elektroda.</p>
 
                 <div class="project-facts">
-                    <div><strong>izvor:</strong> 18650 Li-ion</div>
-                    <div><strong>zaštita/punjenje:</strong> 1S BMS + TP4056</div>
-                    <div><strong>HV modul:</strong> DC 3–6 V → impulsni visoki napon</div>
-                    <div><strong>konektori:</strong> XT30</div>
-                    <div><strong>elektrode:</strong> eksperimentalne HV elektrode / svjećice</div>
+                    <div><strong>ćelija:</strong> XTAR INR18650, 2600 mAh, 1S Li-ion</div>
+                    <div><strong>napon ćelije:</strong> oko 3.6–3.7 V nominalno, 4.2 V puna</div>
+                    <div><strong>BMS:</strong> 1S common-port, 15 A</div>
+                    <div><strong>punjenje:</strong> USB-C TP4056, 1 A</div>
+                    <div><strong>HV modul:</strong> 3–6 V impulsni generator</div>
+                    <div><strong>LV wiring:</strong> 18 AWG</div>
+                    <div><strong>konektor:</strong> XT30</div>
                 </div>
 
-                <h3>kako električno nastaje ozon</h3>
-                <p>Vrlo jako električno polje ubrzava slobodne elektrone. U plinu ti elektroni mogu sudarima pobuditi i ionizirati molekule te, između ostalog, disocirati kisik:</p>
-                <div class="physics-formula">e⁻ + O₂ → e⁻ + O + O</div>
-                <p>Slobodni atom kisika zatim se može spojiti s molekulom O₂. Za očuvanje energije i količine gibanja tipično sudjeluje i treće tijelo M (najčešće N₂ ili O₂ iz zraka):</p>
-                <div class="physics-formula">O + O₂ + M → O₃ + M</div>
+                <h3>što impulsni HV modul radi u principu</h3>
+                <p>Niski DC napon najprije se elektronički prekida velikom frekvencijom. Promjenjiva struja može zatim pobuditi transformator s velikim omjerom namota, nakon čega ovisno o konkretnoj izvedbi slijedi visokonaponsko ispravljanje i/ili multiplikacija. Ključ je da transformator ne može povisiti savršeno konstantan DC; treba mu promjenjivi magnetski tok, pa elektronika na ulazu DC najprije pretvara u pulsirajući signal.</p>
 
-                <p>Za proizvodnju ozona često je važna <strong>korona / streamer discharge</strong> — djelomični proboj plina oko područja visokog polja. Veliki, vrući električni luk nije isto što i „više ozona”; on troši puno energije u grijanje i može dalje razgrađivati O₃. Zato sama činjenica da se vidi spektakularna iskra ne govori pouzdano koliko se ozona proizvodi.</p>
+                <h3>zašto nastaje korona i ozon</h3>
+                <p>Jako električno polje može ubrzati slobodne elektrone dovoljno da sudarima pobude, ioniziraju ili disociraju molekule plina. U zraku dio procesa može disocirati molekularni kisik:</p>
+                <a class="formula-link" href="physics.html#ozone-physics">e⁻ + O₂ → e⁻ + O + O</a>
+                <p>Slobodni O zatim može sudjelovati u tro-tjelesnoj reakciji u kojoj treća čestica M odnese višak energije:</p>
+                <a class="formula-link" href="physics.html#ozone-physics">O + O₂ + M → O₃ + M</a>
 
-                <h3>zašto vrh elektrode ima veze s poljem</h3>
-                <p>Na oštrom vodiču lokalna zakrivljenost može jako povećati površinsku gustoću naboja, pa je i lokalno električno polje veće. Zato korona često prvo kreće oko vrhova i tankih žica.</p>
+                <p>Oštar vrh elektrode koncentrira električno polje, pa se djelomični izboj može pojaviti lokalno prije nego što cijeli razmak prijeđe u veliki luk. <strong>Korona</strong> i <strong>potpuni električni luk</strong> nisu ista stvar. Luk snažno zagrijava kanal plina; više vidljive iskre ne znači automatski više korisno proizvedenog ozona.</p>
 
-                <div class="project-warning">
-                    <strong>sigurnost:</strong> ovdje su istodobno prisutni visoki napon, Li-ion ćelija i ozon. Ozon je reaktivan plin i iritans za pluća; EPA izričito upozorava da se ozonski generatori ne koriste u prostorima u kojima borave ljudi. Ovaj dio stranice objašnjava fiziku projekta, ne preporučuje uporabu ozona za „čišćenje zraka”.
-                </div>
+                <div class="project-warning"><strong>sigurnosna napomena:</strong> ovo je opis fizike i konkretnog starog projekta, ne uputa za povećavanje izlaza. Impulsni HV moduli mogu dati bolan ili opasan udar, Li-ion ćelije nose vlastiti rizik, a ozon je respiratorni iritans. EPA navodi da ozon pri koncentracijama koje su sigurne za ljude općenito nije učinkovit univerzalni „air cleaner”, a veće koncentracije mogu oštetiti pluća.</div>
 
-                <p class="source-row"><a href="https://www.epa.gov/indoor-air-quality-iaq/ozone-generators-are-sold-air-cleaners" target="_blank" rel="noopener noreferrer">EPA: Ozone Generators that are Sold as Air Cleaners ↗</a></p>
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Corona_discharge_in_atmospheric_air_1.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – corona discharge ↗</a> · <a href="https://www.epa.gov/indoor-air-quality-iaq/ozone-generators-are-sold-air-cleaners" target="_blank" rel="noopener noreferrer">EPA – Ozone Generators ↗</a></p>
             </div>
         </details>
 
         <details class="project-deep">
-            <summary>🖨 3D print / Ender 3 S1 Pro</summary>
+            <summary>🖨 3D print / Ender 3 S1 Pro / funkcionalni dijelovi</summary>
             <div class="project-deep-body">
-                <p>Printer je <strong>Ender 3 S1 Pro</strong>. Većina praktičnih komada radi se iz PLA, a bilo je i eksperimentiranja s ABS+. Osim same retro konzole, među printovima su bili NAS nosači, Hoover mount i drugi funkcionalni komadi.</p>
-                <p>Najzanimljiviji dio funkcionalnog printa nije samo oblik nego tolerancija: komad koji na ekranu izgleda savršeno može biti beskoristan ako rupa, osovina, insert ili snap-fit nisu projektirani za stvarnu širinu ekstruzije, skupljanje materijala i točnost printera.</p>
+                <figure class="project-media">
+                    <img class="project-zoom" src="https://commons.wikimedia.org/wiki/Special:Redirect/file/3D_Printing_an_Object_using_FDM_Printer.jpg" alt="FDM 3D print u tijeku">
+                    <figcaption>FDM print u tijeku — reprezentativna slika procesa, ne točno Ender 3 S1 Pro. Wikimedia Commons, CC BY-SA 4.0.</figcaption>
+                </figure>
+
+                <p>Printer je <strong>Ender 3 S1 Pro</strong>. Većina praktičnih dijelova bila je PLA, uz pokušaje s ABS+. Projekti su uključivali kućište retro konzole, NAS nosače, Hoover mount i druge funkcionalne dijelove.</p>
+
+                <h3>što FDM zapravo radi</h3>
+                <p>Fused Deposition Modeling gradi objekt sloj po sloj. Filament se mehanički gura kroz zagrijanu zonu, polimer omekša ili se rastali, mlaznica položi trag materijala i taj se trag spoji s prethodnim slojem. Rezultat zato ima anizotropiju: čvrstoća u ravnini sloja i između slojeva nije nužno ista.</p>
+
+                <h3>zašto „dimenzija u CAD-u” nije automatski „dimenzija iz printera”</h3>
+                <p>Na stvarni fit utječu širina ekstruzije, hlađenje, skupljanje polimera, tolerancije osi, first-layer squish i geometrija featurea. Zato rupa promjera 5.00 mm u CAD-u ne mora izaći kao savršeno 5.00 mm. Funkcionalni print traži dizajniranu toleranciju, a ne samo lijep model.</p>
+
+                <p class="deep-source"><a href="https://www.creality.com/blog/the-differences-of-ender-3-s1-ender-3-s1-pro-ender-3-s1-plus" target="_blank" rel="noopener noreferrer">Creality – Ender 3 S1 / S1 Pro podaci ↗</a> · <a href="https://commons.wikimedia.org/wiki/File:3D_Printing_an_Object_using_FDM_Printer.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – FDM image ↗</a></p>
             </div>
         </details>
 
         <section class="paper">
-            <h2>WorldSkills / robotika</h2>
-            <p>Na izlučnom WorldSkills natjecanju u disciplini Robotika u Zadru <strong>Pjer Flajhar i Vito Radman osvojili su 1. mjesto</strong> i time izborili državno natjecanje. Na državnom <strong>WorldSkills Croatia 2026 osvojili su 2. mjesto — srebrnu medalju</strong>, uz mentora Marka Kovača.</p>
+            <h2>WorldSkills / Robotika</h2>
+            <p>Na izlučnom WorldSkills natjecanju u disciplini Robotika u Zadru <strong>Pjer Flajhar i Vito Radman osvojili su 1. mjesto</strong> i izborili državno natjecanje. Na državnom <strong>WorldSkills Croatia 2026 osvojili su 2. mjesto — srebrnu medalju</strong>, uz mentora Marka Kovača.</p>
 
             <div class="project-grid">
                 <figure class="project-card">
@@ -195,11 +253,13 @@ Raspberry Pi GPU/audio
 
         <section class="paper center">
             <a class="ugly-button" href="index.html">← nazad na Doru</a>
+            <a class="ugly-button secondary-button" href="physics.html">fizika rabbit hole →</a>
         </section>
     </main>
 
     <footer>
         <p>PROJECT DUMP · klikneš, otvori se još teksta. odlično.</p>
+        <p class="license-note">Izvorni kod i originalni tekst stranice: GNU GPL-3.0-or-later. Vanjske fotografije i logotipi ostaju pod licencama njihovih izvora; to se posebno odnosi na Wikimedia Commons i školske fotografije. <a href="https://github.com/pidoww/dora-pjer/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">LICENSE ↗</a></p>
         <p>© 2026 Dora &amp; Pjer</p>
     </footer>
 
