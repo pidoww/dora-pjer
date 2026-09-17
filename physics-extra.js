@@ -11,16 +11,19 @@
         section.className = "paper";
         section.id = "what-theory-means";
         section.innerHTML = `
-            <h2>najbitniji detalj prije svega: „teorija” u fizici ne znači pogađanje</h2>
-            <p>U svakodnevnom govoru „imam teoriju” često znači „imam ideju”. U znanosti riječ ima puno jače značenje. <strong>Znanstvena teorija je široko objašnjenje prirodnih pojava koje povezuje velik broj opažanja, mjerenja, zakona i testiranih hipoteza te iz toga daje provjerljiva predviđanja.</strong></p>
-            <p>Zato izraz poput <em>teorija relativnosti</em>, <em>kvantna teorija</em> ili <em>teorija evolucije</em> ne znači „možda je tako”. Teorija nije ni stepenica koja jednog dana, kad skupi dovoljno bodova, postane zakon. <strong>Zakon uglavnom opisuje obrazac ili odnos; teorija objašnjava širi skup pojava i zašto se one ponašaju kako se ponašaju.</strong></p>
+            <h2>što „teorija” u fizici zapravo znači</h2>
+            <p>U običnom razgovoru „imam teoriju” često znači otprilike „imam ideju”. U znanosti to nije isto. <strong>Teorija je širok okvir koji povezuje puno mjerenja i opažanja, objašnjava ih i iz njih daje predviđanja koja se mogu provjeravati novim eksperimentima.</strong></p>
+            <p>Zato <em>teorija relativnosti</em>, <em>kvantna teorija</em> ili <em>teorija evolucije</em> nisu nazvane teorijama zato što znanstvenici još nisu sigurni. I teorija i zakon mogu biti vrlo dobro potvrđeni — samo rade različite stvari. <strong>Teorija se ne „nadogradi” u zakon kad skupi dovoljno dokaza.</strong></p>
             <div class="physics-deep-grid">
-                <article class="physics-deep-card"><h3>činjenica</h3><p>Opažanje ili rezultat koji je opetovano potvrđen. Primjer: svjetlost se u vakuumu mjeri s istom invariantnom brzinom za inercijske promatrače.</p></article>
-                <article class="physics-deep-card"><h3>hipoteza</h3><p>Konkretna testabilna ideja ili objašnjenje. Može pasti na testu, biti izmijenjena ili postati dio šire teorije.</p></article>
-                <article class="physics-deep-card"><h3>zakon</h3><p>Sažet opis pravilnosti, često matematički. Newtonov zakon gravitacije, primjerice, vrlo dobro opisuje silu u svojem području primjene.</p></article>
-                <article class="physics-deep-card"><h3>teorija</h3><p>Koherentan okvir koji povezuje mnogo činjenica, zakona i mjerenja te mora preživljavati nove testove i moći pogriješiti na način koji bi podaci mogli otkriti.</p></article>
+                <article class="physics-deep-card"><h3>činjenica</h3><p>Nešto što je opaženo ili izmjereno i pouzdano potvrđeno. Primjer je da se svjetlost u vakuumu mjeri istom brzinom za inercijske promatrače.</p></article>
+                <article class="physics-deep-card"><h3>hipoteza</h3><p>Konkretna ideja koju možemo testirati. Rezultati je mogu podržati, ograničiti ili pokazati da ne radi.</p></article>
+                <article class="physics-deep-card"><h3>model</h3><p>Pojednostavljen prikaz nekog sustava ili procesa. Model može biti matematički, računalni ili fizički i obično namjerno zanemaruje dio stvarnosti da bi određeni problem bio lakše analizirati.</p></article>
+                <article class="physics-deep-card"><h3>zakon</h3><p>Sažet opis pravilnosti u prirodi, često u obliku jednadžbe. Govori kako se veličine ponašaju u određenim uvjetima; ne mora sam dati cijelo objašnjenje zašto.</p></article>
+                <article class="physics-deep-card"><h3>teorija</h3><p>Širi sustav objašnjenja koji povezuje činjenice, modele, zakone i rezultate eksperimenata. Dobra teorija mora davati predviđanja na kojima može i pogriješiti.</p></article>
             </div>
-            <p>Ni vrlo uspješna teorija nije sveta. Ako bolji podaci pokažu problem, fizika je mijenja ili ograniči područje u kojem vrijedi. Newtonova mehanika nije „bačena u smeće” nakon Einsteina: i dalje je izvanredno dobra aproksimacija pri brzinama mnogo manjima od brzine svjetlosti i u slabim gravitacijskim poljima.</p>
+            <p>Najbitnije je da znanstvena teorija nije sveta. Ako novi podaci ozbiljno ne odgovaraju njezinim predviđanjima, teoriju treba doraditi, ograničiti joj područje primjene ili zamijeniti boljim objašnjenjem. Ali jedan čudan rezultat također nije dovoljan da se desetljeća neovisnih mjerenja samo bace — prvo se provjeravaju mjerenje, eksperiment i alternativna objašnjenja.</p>
+            <p>Dobar primjer je Newtonova mehanika. Einstein je nije učinio „netočnom u svemu”: pokazao je gdje Newtonova aproksimacija prestaje biti dovoljna. Za automobile, strojeve, mostove i većinu svakodnevne mehanike Newtonove jednadžbe i dalje rade fantastično dobro; pri velikim brzinama ili jakoj gravitaciji treba relativnost.</p>
+            <div class="misconception"><strong>„Ali to je samo teorija.”</strong> U znanosti riječ <em>teorija</em> nije umanjenica za dokaz. Pitanje nije zove li se nešto teorija, nego koliko dobro objašnjava podatke, kakva predviđanja daje i koliko je puta ta predviđanja preživjelo testiranje.</div>
             <p class="deep-source"><a href="https://www.aps.org/about/governance/statements/what-is-science" target="_blank" rel="noopener noreferrer">American Physical Society – What is Science? ↗</a> · <a href="https://www.nationalacademies.org/read/18290/chapter/14" target="_blank" rel="noopener noreferrer">National Academies – theory, law i hypothesis ↗</a></p>
         `;
 
