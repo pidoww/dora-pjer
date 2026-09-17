@@ -1,0 +1,270 @@
+/* Dora skuplja dinose — phone-specific layout */
+
+.desktop-game-help {
+    display: inline;
+}
+
+.mobile-game-help {
+    display: none;
+}
+
+/* Na računalu su tipkovnica i WASD primarne kontrole. */
+.game-page .game-controls {
+    display: none;
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+    html,
+    body.game-page {
+        overscroll-behavior-y: contain;
+    }
+
+    body.game-page {
+        min-width: 0;
+    }
+
+    .game-page .top {
+        padding: 11px 8px 9px;
+        border-bottom-width: 3px;
+    }
+
+    .game-page .top h1 {
+        font-size: clamp(25px, 8vw, 38px);
+        line-height: .95;
+        text-shadow: 2px 2px 0 #000;
+    }
+
+    .game-page .tiny-warning {
+        margin: 5px 0 8px;
+        font-size: 10px;
+    }
+
+    .game-page nav {
+        gap: 5px;
+    }
+
+    .game-page nav a {
+        padding: 5px 7px;
+        font-size: 11px;
+        box-shadow: 2px 2px 0 #111;
+    }
+
+    .game-page main {
+        width: 100%;
+        margin: 8px auto 20px;
+        padding: 0 6px;
+    }
+
+    .game-page .game-wrapper {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 8px;
+        border-width: 2px;
+        box-shadow: 4px 4px 0 #111;
+    }
+
+    .game-page .game-wrapper > h2 {
+        margin: 0 0 3px;
+        font-size: 18px;
+    }
+
+    .game-page .game-wrapper > h2 + p {
+        margin: 0 0 7px;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .game-page .game-info {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        width: 100%;
+        max-width: none;
+        margin: 0 0 6px;
+        font-size: 12px;
+    }
+
+    .game-page .game-info span {
+        padding: 4px 2px;
+        background: #fff7b6;
+        border: 1px solid #111;
+        white-space: nowrap;
+    }
+
+    .game-page .game-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .game-page .game-board-column {
+        width: 100%;
+    }
+
+    .game-page #snake {
+        width: min(94vw, 52svh, 430px);
+        max-width: 100%;
+        height: auto;
+        margin: 0 auto;
+        border-width: 3px;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .desktop-game-help {
+        display: none;
+    }
+
+    .mobile-game-help {
+        display: inline;
+    }
+
+    .game-page .game-help {
+        margin: 5px 0 2px;
+        font-size: 11px;
+        line-height: 1.2;
+        font-weight: bold;
+    }
+
+    .game-page .game-reward-rail {
+        display: flex;
+        width: min(94vw, 430px);
+        min-height: 0;
+        margin: 0 auto;
+        padding: 5px 7px;
+        gap: 7px;
+        align-items: center;
+        background: #fff7b6;
+        border: 2px dashed #111;
+        transform: none;
+        text-align: left;
+    }
+
+    .game-page .game-reward-rail > h3,
+    .game-page .game-reward-rail > .small-text {
+        display: none;
+    }
+
+    .game-page .level-decor-card {
+        display: grid;
+        grid-template-columns: 54px 1fr;
+        gap: 7px;
+        align-items: center;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        background: transparent;
+        transform: none;
+    }
+
+    .game-page .level-decor-card img {
+        width: 54px;
+        height: 42px;
+        object-fit: cover;
+        border: 1px solid #111;
+    }
+
+    .game-page .level-decor-card p {
+        margin: 0;
+        font-size: 10px;
+        line-height: 1.15;
+        font-weight: bold;
+    }
+
+    .game-page .game-controls {
+        display: grid;
+        grid-template-columns: repeat(3, 66px);
+        grid-template-rows: repeat(2, 58px);
+        justify-content: center;
+        gap: 6px;
+        margin: 7px auto 5px;
+        touch-action: manipulation;
+    }
+
+    .game-page .game-controls button {
+        width: 66px;
+        height: 58px;
+        padding: 0;
+        border: 3px solid #111;
+        border-radius: 8px;
+        background: #ffe66c;
+        box-shadow: 3px 3px 0 #111;
+        font-size: 28px;
+        line-height: 1;
+        font-weight: 900;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    .game-page .game-controls button:active {
+        transform: translate(3px, 3px);
+        box-shadow: none;
+        background: #fff39a;
+    }
+
+    .game-page .game-controls .up {
+        grid-column: 2;
+        grid-row: 1;
+    }
+
+    .game-page .game-controls .left {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .game-page .game-controls .down {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .game-page .game-controls .right {
+        grid-column: 3;
+        grid-row: 2;
+    }
+
+    .game-page .button-row {
+        margin-top: 4px !important;
+        gap: 7px;
+    }
+
+    .game-page .button-row .retro-button,
+    .game-page .button-row .ugly-button {
+        padding: 6px 10px;
+        font-size: 11px;
+        box-shadow: 2px 2px 0 #111;
+    }
+
+    .game-page footer {
+        padding: 14px 8px;
+        font-size: 10px;
+    }
+
+    .game-page footer .license-note {
+        font-size: 9px;
+    }
+}
+
+/* Vrlo niski ekrani: ploča se dodatno smanji da kontrole ostanu vidljive. */
+@media (max-width: 760px) and (max-height: 700px) {
+    .game-page #snake {
+        width: min(88vw, 42svh, 340px);
+    }
+
+    .game-page .game-controls {
+        grid-template-columns: repeat(3, 58px);
+        grid-template-rows: repeat(2, 48px);
+        gap: 4px;
+    }
+
+    .game-page .game-controls button {
+        width: 58px;
+        height: 48px;
+        font-size: 24px;
+    }
+}
