@@ -22,7 +22,7 @@
     function removeProjects() {
         document.querySelectorAll("details.project-deep").forEach(details => {
             const summary = details.querySelector("summary")?.textContent || "";
-            if (summary.includes("Mecanum line follower") || summary.includes("3D print / Ender 3 S1 Pro")) {
+            if (summary.includes("Mecanum line follower")) {
                 details.remove();
             }
         });
