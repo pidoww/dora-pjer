@@ -134,10 +134,59 @@ ukupna doza = integral dose-rate kroz vrijeme
         section.appendChild(block);
     }
 
+    function deepenManHunterSection() {
+        if (document.getElementById("man-hunter-verified-deep")) return;
+
+        const heading = [...document.querySelectorAll("h2")].find(node => node.textContent.toLowerCase().includes("problem je što izraz"));
+        const section = heading?.closest("section");
+        if (!section) return;
+
+        const block = document.createElement("div");
+        block.id = "man-hunter-verified-deep";
+        block.innerHTML = `
+            <h3>prvo razdvoji tri različita značenja izraza „Man the Hunter”</h3>
+            <p>Noviji povijesni pregled iz <em>Evolution and Human Behavior</em> (2026.) upozorava da se pod istim izrazom često pomiješaju tri različite stvari. <strong>Prvo</strong>, starija popularna priča iz ranog i srednjeg 20. stoljeća koja je ljudsku evoluciju snažno vezala uz muški lov, agresiju, rigidne spolne uloge i gotovo nepromjenjive spolne razlike. <strong>Drugo</strong>, stvarni simpozij <em>Man the Hunter</em> iz 1966. i knjiga iz 1968., gdje su antropolozi raspravljali o mnogo širem rasponu modela hunter-gatherer života. <strong>Treće</strong>, kasnija tradicija human behavioral ecology koja empirijski pita kako ekologija, rizik, povrat hrane, briga o djeci, suradnja i lokalni uvjeti mijenjaju ponašanje foragera.</p>
+            <p>Zato rečenica „Man the Hunter je pobijen” može značiti tri vrlo različite stvari. Rigidna popularna verzija sigurno je prejednostavna. Ali to ne znači da je svaki rezultat terenskog rada nastao nakon 1966. pogrešan ili da spolna podjela rada među foragerima ne postoji.</p>
+
+            <h3>što znamo o ženama koje love</h3>
+            <p>Dobro dokumentirani slučajevi ženskog lova postoje i etnografski i arheološki. Rad Anderson i sur. iz 2023. pregledao je etnografsku literaturu i među <strong>63 društva s dovoljno jasnim opisom lova</strong> prijavio ženski lov u oko <strong>79%</strong> njih. To je važan rezultat jer vrlo jasno ruši tvrdnju „žene nikad ne love”.</p>
+            <div class="misconception"><strong>Ali 79% nije sigurna univerzalna stopa za sva hunter-gatherer društva.</strong> PLOS ONE je 2024. objavio formalnu korekciju nakon pitanja o pouzdanosti i replikabilnosti dijela metodologije. Autori su dodali metodološki kontekst, a rasprava o tome kako uzorkovati i kodirati etnografske opise ostala je otvorena.</div>
+
+            <h3>druga polovica slike: podjela rada je ipak stvarna</h3>
+            <p>Komentar skupine stručnjaka za suvremene foragere iz 2024. slaže se da žene mogu i stvarno love, ali upozorava da iz toga ne slijedi da je podjela rada slaba ili nepostojeća. Njihov zaključak je da su <strong>gendered divisions of labor obilježje svih poznatih suvremenih hunter-gatherer društava</strong>, premda su uloge fleksibilne i lokalno vrlo različite. U većini dobro opisanih populacija muškarci češće sudjeluju u lovu, posebno u određenim oblicima visokorizičnog ili velikog plijena, dok žene u nekim društvima love redovito, oportunistički ili specijaliziranim metodama.</p>
+            <p>Drugim riječima, dvije tvrdnje mogu istodobno biti istinite: <strong>„žene love”</strong> i <strong>„lov je u mnogim društvima spolno strukturiran”</strong>. Problem nastaje tek kad se jedna od tih rečenica pretvori u univerzalnu karikaturu.</p>
+
+            <h3>arheologija: 9000 godina stara žena s lovačkim toolkitom</h3>
+            <p>Haas i sur. 2020. opisali su pokop mlade odrasle žene iz Wilamaya Patjxe u Andama, star oko 9000 godina, pronađen uz skup projektilnih vrhova i alata za obradu životinja. Biomolekularna analiza podržala je ženski spol, a autori su pokop interpretirali kao snažan dokaz da je barem dio žena sudjelovao u lovu na veliki plijen.</p>
+            <p>Njihova šira meta-analiza ranih američkih pokopa sugerirala je znatniju žensku participaciju, ali sami autori naglašavaju ograničenja kvalitete asocijacije alata, procjene spola i datiranja. U najstrožem smislu upravo je Wilamaya Patjxa najsigurniji odrasli ženski hunter burial u njihovu uzorku. Zato je korektno reći da dokaz ozbiljno osporava ideju „žene nisu lovile”, ali nije korektno iz jednog skupa grobova izvesti univerzalnu stopu lova za sve ljudske populacije kroz cijelu prapovijest.</p>
+
+            <h3>zašto bi ekologija i briga o djeci mijenjale podjelu rada</h3>
+            <p>Human behavioral ecology ne mora pretpostaviti jednu fiksnu ulogu za cijelu vrstu. Ako je plijen predvidljiv, lov se može kombinirati s brigom o djeci, koriste se mreže, psi, zamke ili grupni pogoni, ili je rizik lova relativno nizak, trošak ženskog sudjelovanja može biti drukčiji nego kod dugih, udaljenih i vrlo nepredvidljivih potjera za velikim plijenom. Obrnuto, trudnoća, dojenje, nošenje male djece, raspored drugih poslova i oportunitetni trošak mogu u određenim ekološkim uvjetima pojačati spolnu specijalizaciju.</p>
+            <p>To je puno bolji model od pitanja „tko je evolucijski lovac?”. Pitanje postaje: <strong>u kojim uvjetima, za koji plijen, kojom tehnologijom, uz kakav rizik i uz kakve obiteljske obveze lovi koja osoba?</strong></p>
+
+            <div class="scientist-grid">
+                <article class="scientist-card" data-wiki-title="Kristen Hawkes"><div class="scientist-photo">KH</div><div class="scientist-info"><h3>Kristen Hawkes</h3><p>Antropologinja poznata po terenskom i teorijskom radu u human behavioral ecology, uključujući Hadza i Aché te pitanja lova, dijeljenja hrane, životne povijesti i grandmother hypothesis. Njezin rad je dobar primjer modernog pristupa koji pokušava objasniti varijaciju ponašanja umjesto pretpostaviti jednu univerzalnu podjelu rada.</p><a class="scientist-wiki-link" href="#" target="_blank" rel="noopener noreferrer">Wikipedia ↗</a></div></article>
+            </div>
+
+            <h3>Sally Slocum i „Woman the Gatherer”</h3>
+            <p>Još 1975. Sally Slocum kritizirala je androcentrične pretpostavke u pričama o ljudskoj evoluciji. Njezina poanta nije bila jednostavno preimenovati „Man the Hunter” u „Woman the Gatherer”, nego pokazati kako izbor pitanja unaprijed određuje što će istraživač smatrati evolucijski važnim: ako se gleda samo lov, može se previdjeti sakupljanje, skrb, nošenje hrane, dijeljenje i drugi oblici suradnje.</p>
+
+            <div class="misconception"><strong>Mit 1: „muškarci su lovili, žene nikad nisu.”</strong><br>Ne podržavaju ga ni etnografski ni arheološki podaci. Ženski lov je stvaran i u nekim društvima važan.</div>
+            <div class="misconception"><strong>Mit 2: „nova istraživanja su dokazala da su muškarci i žene svugdje lovili jednako često.”</strong><br>Ni to nije podržano. Suvremeni foragerski podaci pokazuju stvarne spolne obrasce i specijalizaciju, a intenzitet i oblik tih razlika jako variraju.</div>
+            <div class="misconception"><strong>Mit 3: „jedan arheološki grob može nam reći univerzalnu podjelu rada cijele vrste.”</strong><br>Pokop može snažno pokazati da je pojedina žena bila povezana s lovačkom opremom i može promijeniti procjenu vjerojatnosti širih obrazaca, ali generalizacija zahtijeva veći i dobro kontroliran uzorak.</div>
+            <div class="misconception"><strong>Najpošteniji zaključak:</strong> nema dobre osnove za rigidnu priču „muški lovci su napravili čovjeka”, ali postoji dosta dokaza za fleksibilnu, ekološki uvjetovanu i često spolno strukturiranu podjelu rada. Ljudska evolucija vjerojatno nije rezultat jedne aktivnosti jednog spola, nego kombinacije lova, sakupljanja, obrade hrane, dijeljenja, skrbi, tehnologije i suradnje.</div>
+
+            <p class="deep-source"><a href="https://doi.org/10.1016/j.evolhumbehav.2026.106840" target="_blank" rel="noopener noreferrer">Evolution and Human Behavior (2026) – The Meanings and Dividends of Man the Hunter ↗</a> · <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0287101" target="_blank" rel="noopener noreferrer">PLOS ONE (2023) – women hunting ethnographic review ↗</a> · <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0309543" target="_blank" rel="noopener noreferrer">PLOS ONE (2024) – formal correction ↗</a> · <a href="https://doi.org/10.1016/j.evolhumbehav.2024.04.014" target="_blank" rel="noopener noreferrer">Evolution and Human Behavior (2024) – critique / gendered divisions of labor ↗</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7673694/" target="_blank" rel="noopener noreferrer">Science Advances / PMC – Female hunters of the early Americas ↗</a></p>
+        `;
+
+        section.appendChild(block);
+    }
+
     insertOzoneSection();
     applyVerifiedCorrections();
     deepenRadiationSection();
     deepenCosmologySection();
+    deepenManHunterSection();
 
     const summaryCache = new Map();
     const imageCache = new Map();
