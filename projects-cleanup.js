@@ -6,12 +6,15 @@
         const intro = main?.querySelector(":scope > section.paper");
         if (!intro) return;
 
+        const warning = document.querySelector("header .tiny-warning");
+        if (warning) warning.textContent = "hardver opet nije ostavljen na miru";
+
         const title = intro.querySelector("h2");
-        if (title) title.textContent = "projekti i stvari koje su završile na stolu";
+        if (title) title.textContent = "projekti koji su završili na stolu";
 
         const paragraphs = [...intro.querySelectorAll("p")];
         if (paragraphs[0]) {
-            paragraphs[0].textContent = "Raspberry Pi, homelab, retro konzola, visoki napon, mreže i WorldSkills. Uglavnom stvari koje su krenule iz ideje ‘ovo bi bilo fora’ i onda postale puno veći projekt nego što je bilo planirano.";
+            paragraphs[0].textContent = "Raspberry Pi, homelab, retro konzola, visoki napon, mreže i WorldSkills. Većina je krenula s ‘ovo bi bilo fora’ i onda završila s puno više kablova i posla nego što je bilo planirano.";
         }
         paragraphs.slice(1).forEach(p => p.remove());
 
@@ -44,8 +47,8 @@
         const block = document.createElement("div");
         block.className = "homelab-mail-dns";
         block.innerHTML = `
-            <h3>DuckDNS: isto ime čak i kad ISP promijeni javnu IP adresu</h3>
-            <p>Kućna internet veza nema nužno stalnu javnu IP adresu. Ako ISP promijeni adresu, stari bookmark ili VPN profil koji cilja direktno na IP više ne bi znao gdje je kućni router. <strong>DuckDNS</strong> rješava baš taj problem: daje DNS ime, a mali updater periodično javi DuckDNS-u koja je trenutačna javna IP adresa.</p>
+            <h3>DuckDNS: isto ime i kad ISP promijeni javnu IP adresu</h3>
+            <p>Kućna veza nema nužno stalnu javnu IP adresu. Kad je ISP promijeni, VPN profil koji cilja staru adresu više ne zna gdje je kućni router. <strong>DuckDNS</strong> daje stalno DNS ime, a updater mu povremeno javi koja je trenutačna javna IP adresa.</p>
             <pre class="project-diagram">ISP promijeni javnu IP
         │
         ▼
@@ -59,11 +62,11 @@ VPN klijent koristi isto DNS ime
         │
         ▼
 router → OpenVPN endpoint</pre>
-            <p>DuckDNS <strong>ne otvara portove</strong>, ne zaobilazi firewall i nije zamjena za VPN. On samo prevodi stabilno ime u trenutačnu IP adresu. Router i dalje odlučuje koji je promet dopušten i kamo se prosljeđuje.</p>
-            <div class="project-warning"><strong>namjerno nije javno:</strong> stvarni DuckDNS hostname, trenutačna javna IP adresa, VPN port i DuckDNS token nisu navedeni na ovoj stranici. Token je credential i ne pripada u javni GitHub repo, HTML, screenshot ili log koji se objavljuje.</div>
+            <p>DuckDNS ne otvara portove i ne zamjenjuje VPN ili firewall. Radi samo jednu stvar: stabilno ime pokazuje na trenutačnu javnu IP adresu.</p>
+            <div class="project-warning"><strong>što ne ide u javni repo:</strong> stvarni hostname, javna IP adresa, VPN port i DuckDNS token. Token je credential i nema što raditi u javnom HTML-u, screenshotu ili logu.</div>
 
             <h3>Disroot mail za serverske obavijesti</h3>
-            <p>Server koristi <strong>Disroot e-mail</strong> za slanje administrativnih obavijesti — primjerice kada skripta ili servis želi poslati event/log na mail. To je praktično jer server ne mora sam glumiti javni mail-server; autentificira se prema SMTP servisu i preda mu poruku za slanje.</p>
+            <p>Za administrativne obavijesti server koristi <strong>Disroot e-mail</strong>. Skripta ili servis složi poruku i preda je Disrootovu SMTP serveru, umjesto da Raspberry Pi pokušava sam biti javni mail-server.</p>
             <pre class="project-diagram">systemd / VPN hook / skripta
         │
         ▼
@@ -74,10 +77,10 @@ Disroot SMTP preko TLS-a
         │
         ▼
 inbox / administrativna obavijest</pre>
-            <p>Na stranici nema e-mail adrese ni credentiala. Isto vrijedi i za konfiguraciju servera: lozinka ili drugi mail credential ne bi trebao biti hardkodiran u javnom repozitoriju. Ako skripta treba credential, drži se izvan javnog koda i datoteka treba imati minimalne dozvole.</p>
+            <p>Adresa i login podaci nisu u javnom kodu. Ako skripti treba credential, drži se odvojeno od repozitorija i datoteka dobije samo dozvole koje su joj potrebne.</p>
 
-            <h3>zašto ova kombinacija ima smisla</h3>
-            <p><strong>DuckDNS</strong> rješava pronalazak kućne mreže izvana. <strong>OpenVPN</strong> rješava siguran privatni ulaz. <strong>OMV/Samba</strong> ostaju iza tog ulaza. <strong>Disroot mail</strong> ide u drugom smjeru: server može poslati obavijest van bez izlaganja dodatnog inbound servisa.</p>
+            <h3>kako se sve to spoji</h3>
+            <p><strong>DuckDNS</strong> vodi VPN klijent do kućne mreže i nakon promjene IP adrese. <strong>OpenVPN</strong> daje privatni ulaz. <strong>OMV i Samba</strong> ostaju iza njega, a <strong>Disroot mail</strong> služi da server pošalje obavijest prema van bez otvaranja još jednog dolaznog servisa.</p>
 
             <p class="deep-source"><a href="https://www.duckdns.org/why.jsp" target="_blank" rel="noopener noreferrer">DuckDNS – zašto DDNS ↗</a> · <a href="https://www.duckdns.org/spec.jsp" target="_blank" rel="noopener noreferrer">DuckDNS update API ↗</a> · <a href="https://disroot.org/" target="_blank" rel="noopener noreferrer">Disroot ↗</a></p>
         `;
