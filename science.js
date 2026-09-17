@@ -1,6 +1,22 @@
 (() => {
     "use strict";
 
+    function rewritePhysicsIntro() {
+        const intro = document.querySelector("main > .paper.deep-note");
+        if (!intro) return;
+
+        const heading = intro.querySelector("h2");
+        const paragraphs = intro.querySelectorAll("p");
+
+        if (heading) heading.textContent = "fun facts i rabbit hole";
+        if (paragraphs[0]) {
+            paragraphs[0].textContent = "Par stvari iz fizike koje su mi dovoljno zanimljive da završe na istoj stranici: zašto orbita nije lebdenje, što je parsec, zašto Čerenkovljevo zračenje ne krši relativnost, što Van Allenovi pojasevi stvarno znače astronautima, zašto Big Bang nije bomba koja je eksplodirala u praznom prostoru, što Schrödingerova mačka zapravo pokušava pokazati i kako se fizika kroz stoljeća nadograđivala od astronomskih opažanja do kvantne teorije.";
+        }
+        if (paragraphs[1]) {
+            paragraphs[1].textContent = "Brojke i povijesne tvrdnje koje se mogu provjeriti imaju izvore. Gdje postoji stvarna znanstvena rasprava, to je i napisano.";
+        }
+    }
+
     function loadScript(src, onload) {
         const script = document.createElement("script");
         script.src = src;
@@ -198,6 +214,8 @@
         const anchor = paragraphs[paragraphs.length - 1] || heading;
         anchor.insertAdjacentElement("afterend", block);
     }
+
+    rewritePhysicsIntro();
 
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
