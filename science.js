@@ -58,20 +58,67 @@
 
     insertOzoneSection();
 
-    const cache = new Map();
+    const summaryCache = new Map();
+    const imageCache = new Map();
 
     async function fetchSummary(title) {
-        if (cache.has(title)) return cache.get(title);
+        if (summaryCache.has(title)) return summaryCache.get(title);
 
         const promise = fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, "_"))}`, {
             headers: { "Accept": "application/json" }
         }).then(async response => {
-            if (!response.ok) throw new Error(`Wikipedia ${response.status}`);
+            if (!response.ok) throw new Error(`Wikipedia summary ${response.status}`);
             return response.json();
         });
 
-        cache.set(title, promise);
+        summaryCache.set(title, promise);
         return promise;
+    }
+
+    async function fetchPageImage(title) {
+        if (imageCache.has(title)) return imageCache.get(title);
+
+        const url = new URL("https://en.wikipedia.org/w/api.php");
+        url.searchParams.set("origin", "*");
+        url.searchParams.set("action", "query");
+        url.searchParams.set("format", "json");
+        url.searchParams.set("prop", "pageimages");
+        url.searchParams.set("piprop", "thumbnail|original");
+        url.searchParams.set("pithumbsize", "420");
+        url.searchParams.set("redirects", "1");
+        url.searchParams.set("titles", title);
+
+        const promise = fetch(url.toString()).then(async response => {
+            if (!response.ok) throw new Error(`Wikipedia pageimages ${response.status}`);
+            const data = await response.json();
+            const pages = Object.values(data?.query?.pages || {});
+            const page = pages[0] || {};
+            return page.thumbnail?.source || page.original?.source || "";
+        });
+
+        imageCache.set(title, promise);
+        return promise;
+    }
+
+    function initials(title) {
+        return title.split(" ").map(part => part[0] || "").join("").slice(0, 3);
+    }
+
+    function putImage(photoSlot, imageUrl, title) {
+        if (!imageUrl) {
+            photoSlot.textContent = initials(title);
+            return;
+        }
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = title;
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.addEventListener("error", () => {
+            photoSlot.textContent = initials(title);
+        }, { once: true });
+        photoSlot.replaceChildren(img);
     }
 
     async function hydrate(card) {
@@ -83,29 +130,32 @@
         const link = card.querySelector(".scientist-wiki-link");
         if (!title || !photoSlot) return;
 
+        const fallbackUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+
         try {
             const data = await fetchSummary(title);
-            const imageUrl = data.thumbnail?.source || data.originalimage?.source || "";
+            let imageUrl = data.thumbnail?.source || data.originalimage?.source || "";
 
-            if (imageUrl) {
-                const img = document.createElement("img");
-                img.src = imageUrl;
-                img.alt = title;
-                img.loading = "lazy";
-                img.referrerPolicy = "no-referrer";
-                photoSlot.replaceChildren(img);
-            } else {
-                photoSlot.textContent = title.split(" ").map(part => part[0] || "").join("").slice(0, 3);
+            if (!imageUrl) {
+                try {
+                    imageUrl = await fetchPageImage(title);
+                } catch {}
             }
 
+            putImage(photoSlot, imageUrl, title);
+
             if (link) {
-                link.href = data.content_urls?.desktop?.page || `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+                link.href = data.content_urls?.desktop?.page || fallbackUrl;
             }
         } catch {
-            photoSlot.textContent = title.split(" ").map(part => part[0] || "").join("").slice(0, 3);
-            if (link) {
-                link.href = `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, "_"))}`;
+            try {
+                const imageUrl = await fetchPageImage(title);
+                putImage(photoSlot, imageUrl, title);
+            } catch {
+                photoSlot.textContent = initials(title);
             }
+
+            if (link) link.href = fallbackUrl;
         }
     }
 
