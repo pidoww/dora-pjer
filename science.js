@@ -17,6 +17,40 @@
         }
     }
 
+    function naturalizeScienceNotes() {
+        const softLabels = ["fun fact:", "lako je ovo pobrkati:", "fora je da:"];
+        let softLabelIndex = 0;
+
+        document.querySelectorAll(".misconception strong").forEach(label => {
+            const text = label.textContent.trim();
+
+            if (text === "Česta zabuna:") {
+                label.textContent = softLabels[softLabelIndex % softLabels.length];
+                softLabelIndex += 1;
+                return;
+            }
+
+            if (text === "Mit:") {
+                label.textContent = "često se kaže:";
+                return;
+            }
+
+            if (text === "Stvarnost:") {
+                label.textContent = "ali:";
+                return;
+            }
+
+            if (text.startsWith("Mit: ")) {
+                label.textContent = text.replace(/^Mit:\s*/, "");
+                return;
+            }
+
+            if (text === "Bitna preciznost:") {
+                label.textContent = "bitno:";
+            }
+        });
+    }
+
     function loadScript(src, onload) {
         const script = document.createElement("script");
         script.src = src;
@@ -226,6 +260,7 @@
             loadScript("/anthro-extra.js", () => {
                 lockLooseScientistImageSearch();
                 repairMissingScientistImages();
+                naturalizeScienceNotes();
             });
         });
     });
