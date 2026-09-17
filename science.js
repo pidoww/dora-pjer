@@ -258,6 +258,7 @@
 
     rewritePhysicsIntro();
     renameDoraGameLink();
+    loadScript("/physics-reorg.js");
 
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
