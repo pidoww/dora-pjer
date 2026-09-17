@@ -43,11 +43,70 @@
         if (progressFill) progressFill.style.width = `${Math.min(100, (bonks / MAX_BONKS) * 100)}%`;
     }
 
+    function spawnBonkText() {
+        if (!target) return;
+
+        const text = document.createElement("div");
+        text.textContent = "BONK!";
+        text.style.position = "absolute";
+        text.style.left = `${48 + Math.random() * 30}%`;
+        text.style.top = `${8 + Math.random() * 26}%`;
+        text.style.zIndex = "20";
+        text.style.pointerEvents = "none";
+        text.style.font = "900 24px Arial, sans-serif";
+        text.style.color = "#e13232";
+        text.style.webkitTextStroke = "1px #111";
+        text.style.textShadow = "3px 3px 0 #ffe969";
+        text.style.transform = `rotate(${Math.random() * 20 - 10}deg) scale(.65)`;
+        text.style.opacity = "0";
+
+        const stage = target.closest(".chypsi-bonk-stage") || target.parentElement;
+        stage?.appendChild(text);
+
+        text.animate(
+            [
+                { opacity: 0, transform: "translateY(8px) rotate(-8deg) scale(.55)" },
+                { opacity: 1, transform: "translateY(-4px) rotate(4deg) scale(1.18)", offset: 0.32 },
+                { opacity: 1, transform: "translateY(-12px) rotate(-3deg) scale(1)", offset: 0.72 },
+                { opacity: 0, transform: "translateY(-28px) rotate(8deg) scale(.9)" }
+            ],
+            { duration: 520, easing: "ease-out" }
+        );
+
+        window.setTimeout(() => text.remove(), 560);
+    }
+
     function animateHammer() {
-        if (!hammer) return;
-        hammer.classList.remove("bonk");
-        void hammer.offsetWidth;
-        hammer.classList.add("bonk");
+        if (!hammer || !target) return;
+
+        const hammerRect = hammer.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
+
+        const hammerCx = hammerRect.left + hammerRect.width / 2;
+        const hammerCy = hammerRect.top + hammerRect.height / 2;
+        const targetCx = targetRect.left + targetRect.width * 0.36;
+        const targetCy = targetRect.top + targetRect.height * 0.38;
+
+        const dx = targetCx - hammerCx;
+        const dy = targetCy - hammerCy;
+
+        hammer.getAnimations().forEach(animation => animation.cancel());
+
+        hammer.animate(
+            [
+                { transform: "translate(0, 0) rotate(-42deg) scale(1)" },
+                { transform: `translate(${dx * -0.08}px, ${dy * -0.08}px) rotate(-65deg) scale(1.03)`, offset: 0.24 },
+                { transform: `translate(${dx * 0.54}px, ${dy * 0.48}px) rotate(38deg) scale(1.18)`, offset: 0.58 },
+                { transform: `translate(${dx * 0.22}px, ${dy * 0.16}px) rotate(9deg) scale(1.06)`, offset: 0.74 },
+                { transform: "translate(0, 0) rotate(-42deg) scale(1)" }
+            ],
+            {
+                duration: 360,
+                easing: "cubic-bezier(.18,.8,.25,1)"
+            }
+        );
+
+        spawnBonkText();
     }
 
     function hitSchrodinger() {
@@ -55,7 +114,7 @@
         target.classList.remove("hit");
         void target.offsetWidth;
         target.classList.add("hit");
-        window.setTimeout(() => target.classList.remove("hit"), 280);
+        window.setTimeout(() => target.classList.remove("hit"), 300);
     }
 
     function randomizeChypsi() {
