@@ -54,37 +54,37 @@
     const titleCodes = [
         {
             text: FMHY_MORSE,
-            label: "Morse = cijeli FMHY URL · [HASH] predstavlja # jer # nema standardni ITU Morse znak",
+            label: "otvori trag ↗",
             href: FMHY_URL
         },
         {
             text: "Qapla'!  ·  nuqneH  ·  tej",
-            label: "tlhIngan Hol: Qapla' = success · nuqneH = what do you want? · tej = scientist",
+            label: "KLI ↗",
             href: "https://www.kli.org/duolingo/express-an-action/"
         },
         {
             text: "gur synt vf abg gur frperg",
-            label: "ROT13",
+            label: "ROT13 ↗",
             href: "https://en.wikipedia.org/wiki/ROT13"
         },
         {
             text: "01100100 01101111 01110010 01100001",
-            label: "binary = dora",
+            label: "otvori trag ↗",
             href: "https://en.wikipedia.org/wiki/Binary_number"
         },
         {
             text: "63 68 79 70 73 69",
-            label: "hex",
+            label: "hex ↗",
             href: "https://en.wikipedia.org/wiki/Hexadecimal"
         },
         {
             text: "?ereh gnikool uoy era yhw",
-            label: "ovo je samo naopačke",
+            label: "hmm",
             href: "https://xkcd.com/"
         },
         {
             text: "01000100 01010110 01000100",
-            label: "stari internet problemi",
+            label: "otvori trag ↗",
             href: "https://en.wikipedia.org/wiki/DVD_screensaver"
         }
     ];
@@ -217,7 +217,7 @@
                 <button class="image-lightbox-close" type="button" aria-label="zatvori">x</button>
                 <img id="image-lightbox-image" src="" alt="povećana slika">
                 <p class="image-lightbox-caption" id="image-lightbox-caption"></p>
-                <p class="image-lightbox-hint" id="image-lightbox-hint">zatvara se samo na X</p>
+                <p class="image-lightbox-hint" id="image-lightbox-hint">X</p>
             </div>
         `;
         document.body.appendChild(lightbox);
@@ -266,13 +266,13 @@
         captionElement.textContent = caption;
 
         if (action === "chypsi") {
-            hint.textContent = "klikni Chypsija još koji put · zatvara se samo na X";
+            hint.textContent = "možda još jednom.";
         } else if (action === "projects") {
-            hint.textContent = "ova slika skriva još nešto · zatvara se samo na X";
+            hint.textContent = "hmm.";
         } else if (action === "pjer-random") {
-            hint.textContent = "klikni povećanu sliku: 50/50 projekti ili vlogovi · samo X zatvara";
+            hint.textContent = "možda još jedan klik.";
         } else {
-            hint.textContent = "zatvara se samo na X";
+            hint.textContent = "X";
         }
 
         lightbox.classList.remove("hidden");
@@ -348,7 +348,7 @@
         const link = document.createElement("a");
         link.className = "game-shortcut";
         link.href = "snake.html";
-        link.textContent = "🎮 DORA VS DINO";
+        link.textContent = "🦕 DORA SKUPLJA DINOSAURE";
         document.body.appendChild(link);
     }
 
@@ -385,20 +385,20 @@
         if (chypsiStep === 2) {
             image.src = `${ASSET}chipsi%20slika.jpeg`;
             spawnChipCan(4);
-            setLightboxText("Chypsi: ...", "sad je to baš Chypsi. možda ga nemoj opet kliknuti.");
+            setLightboxText("Chypsi: ...", "možda opet.");
             return;
         }
 
         spawnChipCan(Math.min(3 + chypsiStep, 13));
         const angerText = chypsiAnger[Math.min(chypsiStep - 1, chypsiAnger.length - 1)];
-        setLightboxText(angerText, "svaki klik ga još malo živcira · samo X zatvara");
+        setLightboxText(angerText, "hmm.");
 
         if (chypsiStep === 4) {
             image.classList.add("chypsi-angry");
         }
 
         if (chypsiStep === 6) {
-            setLightboxText("CHYPSI SE STVARNO LJUTI.", "ozbiljno. X još uvijek radi.");
+            setLightboxText("CHYPSI SE STVARNO LJUTI.", "oke možda dosta.");
         }
 
         if (chypsiStep >= 8) {
@@ -428,7 +428,7 @@
             "dobro, evo projekata."
         ];
 
-        setLightboxText(messages[Math.min(projectsStep - 2, messages.length - 1)], "samo X zatvara");
+        setLightboxText(messages[Math.min(projectsStep - 2, messages.length - 1)], "...");
 
         if (projectsStep >= 5) {
             window.setTimeout(() => {
