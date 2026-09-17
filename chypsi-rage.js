@@ -5,6 +5,13 @@
     const onChypsiPage = path.endsWith("/chipsy.html") || path.endsWith("chipsy.html");
     let rageClicks = 0;
 
+    // koliko dugo bez klika prije nego se rage pocne hladiti, i koliko brzo pada
+    const RAGE_IDLE_MS = 2500;
+    const RAGE_DECAY_MS = 120;
+
+    let idleTimer = null;
+    let decayTimer = null;
+
     function isChypsiImage(image) {
         if (!(image instanceof HTMLImageElement)) return false;
 
@@ -52,7 +59,42 @@
             : "";
     }
 
+    function refreshRage() {
+        document.querySelectorAll("img").forEach(image => {
+            if (isChypsiImage(image)) applyRage(image);
+        });
+
+        const lightboxImage = document.getElementById("image-lightbox-image");
+        if (lightboxImage && isChypsiImage(lightboxImage)) applyRage(lightboxImage);
+    }
+
+    function stopTimers() {
+        window.clearTimeout(idleTimer);
+        window.clearInterval(decayTimer);
+        idleTimer = null;
+        decayTimer = null;
+    }
+
+    function startCooldown() {
+        stopTimers();
+        if (rageClicks <= 0) return;
+
+        idleTimer = window.setTimeout(() => {
+            decayTimer = window.setInterval(() => {
+                rageClicks -= 1;
+
+                if (rageClicks <= 0) {
+                    resetRage();
+                    return;
+                }
+
+                refreshRage();
+            }, RAGE_DECAY_MS);
+        }, RAGE_IDLE_MS);
+    }
+
     function resetRage() {
+        stopTimers();
         rageClicks = 0;
         document.querySelectorAll("img").forEach(image => {
             if (isChypsiImage(image)) clearRage(image);
@@ -79,6 +121,7 @@
 
         rageClicks = Math.min(rageClicks + 1, 30);
         applyRage(image);
+        startCooldown();
 
         window.setTimeout(() => {
             const lightboxImage = document.getElementById("image-lightbox-image");
@@ -96,6 +139,10 @@
         });
         observer.observe(lightbox, { attributes: true, attributeFilter: ["class"] });
     };
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) resetRage();
+    });
 
     const bodyObserver = new MutationObserver(watchLightbox);
     bodyObserver.observe(document.body, { childList: true, subtree: true });
