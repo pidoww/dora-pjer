@@ -19,6 +19,14 @@
         if (marquee) marquee.textContent = "★ RASPBERRY PI ★ HOMELAB ★ RETRO ★ OPEN SOURCE ★ MREŽE ★ HV ★ PREVIŠE KABLOVA ★";
     }
 
+    function renameDoraGameLink() {
+        document.querySelectorAll('a[href$="snake.html"]').forEach(link => {
+            if (link.textContent.trim() === "Dora vs dinosauri") {
+                link.textContent = "Dora skuplja dinose";
+            }
+        });
+    }
+
     function removeProjects() {
         document.querySelectorAll("details.project-deep").forEach(details => {
             const summary = details.querySelector("summary")?.textContent || "";
@@ -80,6 +88,7 @@ inbox / administrativna obavijest</pre>
     }
 
     cleanProjectIntro();
+    renameDoraGameLink();
     addHomelabMailAndDns();
     removeProjects();
 })();
