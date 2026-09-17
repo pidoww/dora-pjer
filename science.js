@@ -182,11 +182,70 @@ ukupna doza = integral dose-rate kroz vrijeme
         section.appendChild(block);
     }
 
+    function installPhysicsNavigation() {
+        const main = document.querySelector("main");
+        if (!main || document.getElementById("physics-quick-nav")) return;
+
+        const sectionTitles = [...main.querySelectorAll(".deep-section-title")];
+        const slugify = text => text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "");
+
+        sectionTitles.forEach((title, index) => {
+            if (!title.id) title.id = `physics-${slugify(title.textContent) || index + 1}`;
+        });
+
+        const intro = main.querySelector(".deep-note");
+        const nav = document.createElement("section");
+        nav.id = "physics-quick-nav";
+        nav.className = "paper";
+        nav.innerHTML = `
+            <h2>brza navigacija</h2>
+            <p class="small-text">stranica je postala dovoljno duga da više nema smisla glumiti da scrollanje do kraja nije projekt samo za sebe.</p>
+            <div class="button-row" style="justify-content:flex-start;">
+                ${sectionTitles.map(title => `<a class="ugly-button secondary-button" href="#${title.id}">${title.textContent.replace(/^\d+\.\s*/, "")}</a>`).join("")}
+                <a class="ugly-button secondary-button" href="#ozone-physics">OZON / HV</a>
+            </div>
+        `;
+        if (intro?.nextSibling) main.insertBefore(nav, intro.nextSibling);
+        else main.prepend(nav);
+
+        const glossary = document.createElement("section");
+        glossary.id = "physics-glossary";
+        glossary.className = "paper";
+        glossary.innerHTML = `
+            <h2>kratice i jedinice koje se stalno pojavljuju</h2>
+            <div class="project-facts">
+                <div><strong>AU</strong><br>astronomska jedinica; približno srednja udaljenost Zemlja–Sunce, oko 149,6 milijuna km</div>
+                <div><strong>pc</strong><br>parsek; geometrijska jedinica udaljenosti definirana paralaksom; ≈ 3,26 svjetlosnih godina</div>
+                <div><strong>CMB</strong><br>Cosmic Microwave Background — kozmička mikrovalna pozadina, reliktna toplinska radijacija ranog svemira</div>
+                <div><strong>BBN</strong><br>Big Bang nucleosynthesis — nukleosinteza lakih jezgri u vrlo ranom vrućem svemiru</div>
+                <div><strong>FLRW</strong><br>Friedmann–Lemaître–Robertson–Walker — klasa homogenih i izotropnih kozmoloških prostor-vremena</div>
+                <div><strong>GCR</strong><br>Galactic Cosmic Rays — visokoenergetske kozmičke čestice izvan Sunčeva sustava</div>
+                <div><strong>SEP</strong><br>Solar Energetic Particles — energetske čestice povezane sa Sunčevom aktivnošću</div>
+                <div><strong>Bq</strong><br>becquerel; aktivnost izvora, 1 raspad u sekundi</div>
+                <div><strong>Gy</strong><br>gray; apsorbirana doza, 1 J/kg</div>
+                <div><strong>Sv</strong><br>sievert; radiološka doza ponderirana prema biološkom učinku, ovisno o konkretnoj dozimetrijskoj veličini</div>
+                <div><strong>rad</strong><br>stara jedinica apsorbirane doze; 1 rad = 0,01 Gy</div>
+                <div><strong>rem</strong><br>stara jedinica ekvivalentne doze; 100 rem = 1 Sv</div>
+            </div>
+            <p class="small-text">glossary objašnjava oznake; detaljno značenje i ograničenja ostaju u odgovarajućim sekcijama iznad.</p>
+        `;
+
+        const finalCenter = [...main.querySelectorAll("section.center")].pop();
+        if (finalCenter) main.insertBefore(glossary, finalCenter);
+        else main.appendChild(glossary);
+    }
+
     insertOzoneSection();
     applyVerifiedCorrections();
     deepenRadiationSection();
     deepenCosmologySection();
     deepenManHunterSection();
+    installPhysicsNavigation();
 
     const summaryCache = new Map();
     const imageCache = new Map();
