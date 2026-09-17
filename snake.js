@@ -13,10 +13,13 @@
     const rewardImage = document.getElementById("side-reward-image");
     const rewardText = document.getElementById("side-reward-text");
 
+    const MOBILE_MODE = window.matchMedia("(max-width: 760px), (pointer: coarse)").matches;
+    document.body.classList.toggle("mobile-game-mode", MOBILE_MODE);
+
     const GRID = 8;
     const SIZE = canvas.width / GRID;
-    const START_SPEED = 205;
-    const MIN_SPEED = 88;
+    const START_SPEED = MOBILE_MODE ? 265 : 205;
+    const MIN_SPEED = MOBILE_MODE ? 135 : 88;
     const ASSET = "images/slike%20update%20stranica/";
 
     const levelArt = [
@@ -56,8 +59,8 @@
     }
 
     function currentSpeed() {
-        const levelDrop = (currentLevel() - 1) * 13;
-        const scoreDrop = score * 3;
+        const levelDrop = (currentLevel() - 1) * (MOBILE_MODE ? 7 : 13);
+        const scoreDrop = score * (MOBILE_MODE ? 1.5 : 3);
         return Math.max(MIN_SPEED, START_SPEED - levelDrop - scoreDrop);
     }
 
@@ -219,10 +222,11 @@
         dead = true;
         stopTimer();
 
+        const restartText = MOBILE_MODE ? "stisni OPET ispod" : "Enter za opet";
         if (reason === "self") {
-            drawEndMessage("DORA JE UGRIZLA SAMU SEBE", `uhvaćeni dinosauri: ${score} · Enter za opet`);
+            drawEndMessage("DORA JE UGRIZLA SAMU SEBE", `uhvaćeni dinosauri: ${score} · ${restartText}`);
         } else {
-            drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score} · Enter za opet`);
+            drawEndMessage("DORA JE UDARILA U ZID", `uhvaćeni dinosauri: ${score} · ${restartText}`);
         }
     }
 
@@ -366,6 +370,10 @@
         event.preventDefault();
     }, { passive: false });
 
+    canvas.addEventListener("touchmove", event => {
+        event.preventDefault();
+    }, { passive: false });
+
     canvas.addEventListener("touchend", event => {
         if (!touchStart) return;
 
@@ -374,7 +382,8 @@
         const dy = touch.clientY - touchStart.y;
         touchStart = null;
 
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
+        const swipeThreshold = MOBILE_MODE ? 12 : 18;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < swipeThreshold) return;
 
         if (Math.abs(dx) > Math.abs(dy)) {
             changeDirection(dx > 0 ? 1 : -1, 0);
@@ -384,6 +393,10 @@
 
         event.preventDefault();
     }, { passive: false });
+
+    canvas.addEventListener("touchcancel", () => {
+        touchStart = null;
+    });
 
     document.addEventListener("visibilitychange", () => {
         paused = document.hidden;
