@@ -13,7 +13,21 @@
     const onProjectsPage = path.endsWith("/projects.html") || path.endsWith("projects.html");
 
     const FMHY_URL = "https://www.reddit.com/r/FREEMEDIAHECKYEAH/wiki/video/#wiki_.25B7_p-stream_forks";
-    const FMHY_MORSE = ".... - - .--. ... ---... -..-. -..-. .-- .-- .-- .-.-.- .-. . -.. -.. .. - .-.-.- -.-. --- -- -..-. .-. -..-. ..-. .-. . . -- . -.. .. .- .... . -.-. -.- -.-- . .- .... -..-. .-- .. -.- .. -..-. ...- .. -.. . --- -..-. # .-- .. -.- .. ..--.- .-.-.- ..--- ..... -... --... ..--.- .--. -....- ... - .-. . .- -- ..--.- ..-. --- .-. -.- ...";
+
+    const MORSE = {
+        a: ".-", b: "-...", c: "-.-.", d: "-..", e: ".", f: "..-.", g: "--.", h: "....", i: "..", j: ".---", k: "-.-", l: ".-..", m: "--", n: "-.", o: "---", p: ".--.", q: "--.-", r: ".-.", s: "...", t: "-", u: "..-", v: "...-", w: ".--", x: "-..-", y: "-.--", z: "--..",
+        0: "-----", 1: ".----", 2: "..---", 3: "...--", 4: "....-", 5: ".....", 6: "-....", 7: "--...", 8: "---..", 9: "----.",
+        ".": ".-.-.-", ",": "--..--", "?": "..--..", "'": ".----.", "!": "-.-.--", "/": "-..-.", "(": "-.--.", ")": "-.--.-", "&": ".-...", ":": "---...", ";": "-.-.-.", "=": "-...-", "+": ".-.-.", "-": "-....-", "_": "..--.-", "\"": ".-..-.", "$": "...-..-", "@": ".--.-."
+    };
+
+    function encodeMorse(text) {
+        return [...text].map(char => {
+            if (char === "#") return "[HASH]";
+            return MORSE[char.toLowerCase()] || `[${char}]`;
+        }).join(" ");
+    }
+
+    const FMHY_MORSE = encodeMorse(FMHY_URL);
 
     const crazyImages = [
         `${ASSET}crazy%201.jpeg`,
@@ -40,7 +54,7 @@
     const titleCodes = [
         {
             text: FMHY_MORSE,
-            label: "Morse URL → FMHY video megathread (# ostaje literalno jer nema standardni međunarodni Morse znak)",
+            label: "Morse = cijeli FMHY URL · [HASH] predstavlja # jer # nema standardni ITU Morse znak",
             href: FMHY_URL
         },
         {
@@ -520,6 +534,16 @@
         }, 4200);
     }
 
+    function ensureLicenseNote() {
+        const footer = document.querySelector("footer");
+        if (!footer || footer.querySelector(".license-note")) return;
+
+        const p = document.createElement("p");
+        p.className = "license-note";
+        p.innerHTML = 'Izvorni kod i originalni tekst: <a href="https://github.com/pidoww/dora-pjer/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GNU GPL-3.0-or-later</a>. Vanjske fotografije, video i drugi mediji zadržavaju licence/prava svojih izvora.';
+        footer.appendChild(p);
+    }
+
     const title = document.getElementById("secret-title");
     title?.addEventListener("click", () => {
         titleClicks += 1;
@@ -694,6 +718,7 @@
     });
 
     ensureGameShortcut();
+    ensureLicenseNote();
 
     if ((onIndex || onYoutubePage) && Math.random() < SHINY_CHANCE) {
         document.body.classList.add("shiny-event");
