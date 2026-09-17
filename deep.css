@@ -1,0 +1,494 @@
+/* dodatni stil za duboke stranice; namjerno ostaje malo old-web / trashy */
+
+.deep-section-title {
+    display: table;
+    margin: 54px auto 22px;
+    padding: 9px 14px;
+    background: #111;
+    color: #fff;
+    border: 3px solid #ffe96d;
+    box-shadow: 6px 6px 0 #111;
+    transform: rotate(-.7deg);
+}
+
+.deep-note {
+    border-left: 7px solid #d64040;
+}
+
+.deep-source {
+    margin-top: 10px;
+    font-size: 12px;
+    opacity: .76;
+}
+
+.deep-source a {
+    font-weight: bold;
+}
+
+.license-note {
+    font-size: 11px;
+    opacity: .72;
+    line-height: 1.45;
+}
+
+.license-note a {
+    color: inherit;
+}
+
+/* scientist cards */
+.scientist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 22px;
+    margin-top: 22px;
+}
+
+.scientist-card {
+    display: grid;
+    grid-template-columns: 105px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 12px;
+    background: #fbf6dd;
+    border: 3px solid #111;
+    box-shadow: 6px 6px 0 #111;
+}
+
+.scientist-card:nth-child(odd) {
+    transform: rotate(-.5deg);
+}
+
+.scientist-card:nth-child(even) {
+    transform: rotate(.55deg);
+}
+
+.scientist-photo {
+    width: 105px;
+    min-height: 128px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #111;
+    color: #ffe96d;
+    border: 2px solid #111;
+    font: bold 22px monospace;
+}
+
+.scientist-photo img {
+    width: 100%;
+    height: 128px;
+    object-fit: cover;
+    display: block;
+}
+
+.scientist-info h3 {
+    margin: 0 0 7px;
+    font-size: 18px;
+}
+
+.scientist-info p {
+    margin: 5px 0;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.scientist-wiki-link {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+/* physics layout */
+.physics-deep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 22px;
+    margin-top: 20px;
+}
+
+.physics-deep-card {
+    padding: 15px;
+    background: #f9f4df;
+    border: 3px solid #111;
+    box-shadow: 7px 7px 0 #111;
+}
+
+.physics-deep-card:nth-child(2n) {
+    transform: rotate(.55deg);
+}
+
+.physics-deep-card:nth-child(2n+1) {
+    transform: rotate(-.35deg);
+}
+
+.physics-deep-card h3 {
+    margin-top: 0;
+}
+
+.physics-equation,
+.formula-link {
+    display: table;
+    max-width: 100%;
+    margin: 13px auto;
+    padding: 9px 13px;
+    overflow-wrap: anywhere;
+    background: #111;
+    color: #75ff82;
+    border: 2px solid #75ff82;
+    box-shadow: 4px 4px 0 #75ff82;
+    font: bold 17px monospace;
+    text-decoration: none;
+    transform: rotate(-.6deg);
+}
+
+.formula-link:hover {
+    transform: translate(2px,2px) rotate(.4deg);
+    box-shadow: 2px 2px 0 #75ff82;
+}
+
+.misconception {
+    margin: 17px 0;
+    padding: 13px 15px;
+    background: #fff7b0;
+    border: 2px dashed #111;
+}
+
+.misconception strong:first-child {
+    color: #9e1d1d;
+}
+
+.physics-table-wrap {
+    overflow-x: auto;
+    margin: 18px 0;
+    border: 3px solid #111;
+    box-shadow: 6px 6px 0 #111;
+}
+
+.physics-table {
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    background: #fffdf2;
+    font-size: 13px;
+}
+
+.physics-table th,
+.physics-table td {
+    padding: 9px 10px;
+    border: 1px solid #777;
+    vertical-align: top;
+    text-align: left;
+}
+
+.physics-table th {
+    background: #111;
+    color: #fff;
+}
+
+.physics-table tr:nth-child(even) td {
+    background: #f1edd8;
+}
+
+.radiation-scale {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+}
+
+.radiation-unit {
+    padding: 10px;
+    background: #f7f0d0;
+    border: 2px solid #111;
+}
+
+.radiation-unit b {
+    display: block;
+    font-size: 19px;
+    margin-bottom: 5px;
+}
+
+/* projects */
+.project-links-strip {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 28px 0;
+}
+
+.project-deep {
+    width: min(100%, 980px);
+    margin: 28px auto;
+    background: rgba(255,253,240,.96);
+    border: 3px solid #111;
+    box-shadow: 8px 8px 0 rgba(0,0,0,.45);
+}
+
+.project-deep:nth-of-type(even) {
+    transform: rotate(.25deg);
+}
+
+.project-deep:nth-of-type(odd) {
+    transform: rotate(-.2deg);
+}
+
+.project-deep > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 15px 18px;
+    background: #111;
+    color: #fff;
+    font-weight: bold;
+    font-size: 19px;
+}
+
+.project-deep > summary::-webkit-details-marker {
+    display: none;
+}
+
+.project-deep > summary::before {
+    content: "+ ";
+    color: #ffe96d;
+}
+
+.project-deep[open] > summary::before {
+    content: "− ";
+}
+
+.project-deep-body {
+    padding: 18px;
+    line-height: 1.55;
+}
+
+.project-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 9px;
+    margin: 14px 0 18px;
+}
+
+.project-facts > div {
+    padding: 8px 10px;
+    background: #f2edcf;
+    border: 2px solid #111;
+}
+
+.project-diagram {
+    overflow-x: auto;
+    padding: 14px;
+    background: #111;
+    color: #73ff81;
+    border: 3px solid #73ff81;
+    font: 13px/1.35 monospace;
+    white-space: pre;
+}
+
+.project-warning {
+    margin-top: 16px;
+    padding: 12px;
+    background: #ffd4d4;
+    border: 3px dashed #9b1111;
+}
+
+.project-media {
+    margin: 14px auto 18px;
+    width: min(620px, 100%);
+    padding: 9px;
+    background: #f8f4df;
+    border: 3px solid #111;
+    box-shadow: 6px 6px 0 #111;
+}
+
+.project-media img {
+    width: 100%;
+    max-height: 370px;
+    object-fit: contain;
+    display: block;
+    background: #eee;
+    cursor: zoom-in;
+}
+
+.project-media figcaption {
+    margin-top: 8px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* Chypsi bonk laboratorij */
+.chypsi-bonk-stage {
+    position: relative;
+    min-height: 360px;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 100px minmax(180px, 1fr);
+    align-items: center;
+    gap: 18px;
+    padding: 25px 22px;
+    margin: 28px auto;
+    width: min(900px, 95%);
+    background: repeating-linear-gradient(45deg,#f7f0c9 0 20px,#efe4ae 20px 40px);
+    border: 5px solid #111;
+    box-shadow: 10px 10px 0 #111;
+    overflow: hidden;
+}
+
+.chypsi-combatant,
+.schrodinger-combatant {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+
+.chypsi-combatant img,
+.schrodinger-combatant img {
+    display: block;
+    width: min(260px, 100%);
+    max-height: 285px;
+    object-fit: contain;
+    margin: auto;
+    background: #fff;
+    border: 4px solid #111;
+    box-shadow: 6px 6px 0 rgba(0,0,0,.4);
+}
+
+.chypsi-combatant img {
+    cursor: pointer;
+}
+
+.combat-label {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background: #111;
+    color: #fff;
+    font-weight: bold;
+}
+
+.bonk-hammer {
+    position: relative;
+    z-index: 4;
+    font-size: 78px;
+    transform-origin: 50% 90%;
+    transform: rotate(-42deg) translateX(-5px);
+    filter: drop-shadow(5px 6px 0 rgba(0,0,0,.25));
+    pointer-events: none;
+}
+
+.bonk-hammer.bonk {
+    animation: betterBonk .24s cubic-bezier(.2,.8,.3,1);
+}
+
+.schrodinger-combatant.hit img {
+    animation: schrodingerHit .25s linear;
+}
+
+@keyframes betterBonk {
+    0% { transform: rotate(-42deg) translateX(-5px); }
+    45% { transform: rotate(40deg) translate(18px, 20px) scale(1.08); }
+    100% { transform: rotate(-42deg) translateX(-5px); }
+}
+
+@keyframes schrodingerHit {
+    0% { transform: translateX(0) rotate(0); }
+    25% { transform: translateX(14px) rotate(4deg); }
+    55% { transform: translateX(-8px) rotate(-3deg); }
+    100% { transform: translateX(0) rotate(0); }
+}
+
+.bonk-progress {
+    width: min(520px, 95%);
+    height: 20px;
+    margin: 12px auto;
+    background: #ddd;
+    border: 3px solid #111;
+    overflow: hidden;
+}
+
+.bonk-progress > div {
+    height: 100%;
+    width: 0;
+    background: #e04c34;
+    transition: width .16s linear;
+}
+
+/* moving marquee letters */
+.marquee-ish.marquee-chaos span b {
+    display: inline-block;
+    position: relative;
+    animation: letterChaos .55s ease-in-out infinite alternate;
+    animation-delay: calc(var(--letter) * -31ms);
+    color: hsl(calc(var(--letter) * 29deg), 85%, 55%);
+    text-shadow: 1px 1px #111;
+}
+
+@keyframes letterChaos {
+    from { transform: translateY(-3px) rotate(-4deg) scale(.95); }
+    to { transform: translateY(6px) rotate(6deg) scale(1.08); }
+}
+
+/* persistent game level image */
+.level-decor-card {
+    margin-top: 10px;
+    padding: 7px;
+    background: #fff;
+    border: 3px solid #111;
+    box-shadow: 5px 5px 0 #111;
+    transform: rotate(-1.5deg);
+}
+
+.level-decor-card img {
+    width: 100%;
+    max-height: 220px;
+    display: block;
+    object-fit: contain;
+}
+
+.level-decor-card p {
+    margin: 7px 2px 2px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.level-decor-card.level-change {
+    animation: levelFlash .52s ease;
+}
+
+@keyframes levelFlash {
+    0% { transform: rotate(-5deg) scale(.78); opacity: .3; }
+    35% { transform: rotate(3deg) scale(1.08); opacity: 1; }
+    100% { transform: rotate(-1.5deg) scale(1); opacity: 1; }
+}
+
+@media (max-width: 760px) {
+    .scientist-card {
+        grid-template-columns: 86px 1fr;
+    }
+
+    .scientist-photo {
+        width: 86px;
+        min-height: 105px;
+    }
+
+    .scientist-photo img {
+        height: 105px;
+    }
+
+    .chypsi-bonk-stage {
+        grid-template-columns: 1fr 60px 1fr;
+        min-height: 270px;
+        gap: 7px;
+        padding: 15px 8px;
+    }
+
+    .bonk-hammer {
+        font-size: 48px;
+    }
+
+    .chypsi-combatant img,
+    .schrodinger-combatant img {
+        max-height: 185px;
+    }
+
+    .physics-table {
+        font-size: 12px;
+    }
+}
