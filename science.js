@@ -50,6 +50,104 @@
         collectiveSection.insertAdjacentElement("afterend", section);
     }
 
+    function lockLooseScientistImageSearch() {
+        document.querySelectorAll(".scientist-card[data-wiki-title]").forEach(card => {
+            card.dataset.extraImageChecked = "1";
+        });
+    }
+
+    const scientistPortraitCache = new Map();
+
+    async function wikidataPortrait(title) {
+        if (scientistPortraitCache.has(title)) return scientistPortraitCache.get(title);
+
+        const request = (async () => {
+            const searchUrl = new URL("https://www.wikidata.org/w/api.php");
+            searchUrl.searchParams.set("origin", "*");
+            searchUrl.searchParams.set("action", "wbsearchentities");
+            searchUrl.searchParams.set("format", "json");
+            searchUrl.searchParams.set("language", "en");
+            searchUrl.searchParams.set("limit", "8");
+            searchUrl.searchParams.set("search", title);
+
+            const searchResponse = await fetch(searchUrl.toString());
+            if (!searchResponse.ok) return "";
+            const searchData = await searchResponse.json();
+            const exact = (searchData.search || []).find(item =>
+                (item.label || "").localeCompare(title, undefined, { sensitivity: "base" }) === 0
+            );
+            if (!exact?.id) return "";
+
+            const entityUrl = new URL("https://www.wikidata.org/w/api.php");
+            entityUrl.searchParams.set("origin", "*");
+            entityUrl.searchParams.set("action", "wbgetentities");
+            entityUrl.searchParams.set("format", "json");
+            entityUrl.searchParams.set("props", "claims");
+            entityUrl.searchParams.set("ids", exact.id);
+
+            const entityResponse = await fetch(entityUrl.toString());
+            if (!entityResponse.ok) return "";
+            const entityData = await entityResponse.json();
+            const filename = entityData.entities?.[exact.id]?.claims?.P18?.[0]?.mainsnak?.datavalue?.value;
+            if (!filename) return "";
+
+            const commonsUrl = new URL("https://commons.wikimedia.org/w/api.php");
+            commonsUrl.searchParams.set("origin", "*");
+            commonsUrl.searchParams.set("action", "query");
+            commonsUrl.searchParams.set("format", "json");
+            commonsUrl.searchParams.set("prop", "imageinfo");
+            commonsUrl.searchParams.set("iiprop", "url");
+            commonsUrl.searchParams.set("iiurlwidth", "420");
+            commonsUrl.searchParams.set("titles", `File:${filename}`);
+
+            const commonsResponse = await fetch(commonsUrl.toString());
+            if (!commonsResponse.ok) return "";
+            const commonsData = await commonsResponse.json();
+            const page = Object.values(commonsData.query?.pages || {})[0];
+            return page?.imageinfo?.[0]?.thumburl || page?.imageinfo?.[0]?.url || "";
+        })().catch(() => "");
+
+        scientistPortraitCache.set(title, request);
+        return request;
+    }
+
+    function repairMissingScientistImages() {
+        const cards = [...document.querySelectorAll(".scientist-card[data-wiki-title]")];
+        cards.forEach(card => { card.dataset.extraImageChecked = "1"; });
+
+        setTimeout(() => {
+            cards.forEach(async card => {
+                const slot = card.querySelector(".scientist-photo");
+                if (!slot || slot.querySelector("img")) return;
+
+                const title = (card.dataset.wikiTitle || "").trim();
+                if (!title) {
+                    slot.hidden = true;
+                    return;
+                }
+
+                const imageUrl = await wikidataPortrait(title);
+                if (!imageUrl) {
+                    slot.hidden = true;
+                    return;
+                }
+
+                const img = document.createElement("img");
+                img.alt = title;
+                img.loading = "lazy";
+                img.referrerPolicy = "no-referrer";
+                img.addEventListener("load", () => {
+                    slot.hidden = false;
+                    slot.replaceChildren(img);
+                }, { once: true });
+                img.addEventListener("error", () => {
+                    slot.hidden = true;
+                }, { once: true });
+                img.src = imageUrl;
+            });
+        }, 1400);
+    }
+
     function addChernobylDoseDetails() {
         const section = document.getElementById("radiation-risk-scale");
         if (!section || document.getElementById("chernobyl-dose-detail")) return;
@@ -103,10 +201,14 @@
 
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
+            lockLooseScientistImageSearch();
             addScienceIsCollective();
             addTeslaExample();
             addChernobylDoseDetails();
-            loadScript("/anthro-extra.js");
+            loadScript("/anthro-extra.js", () => {
+                lockLooseScientistImageSearch();
+                repairMissingScientistImages();
+            });
         });
     });
 })();
