@@ -157,20 +157,20 @@
             ctx.clip();
 
             const ratio = image.naturalWidth / image.naturalHeight;
-            let sx = 0;
-            let sy = 0;
-            let sw = image.naturalWidth;
-            let sh = image.naturalHeight;
+            let dw = size;
+            let dh = size;
 
+            // Sačuvaj proporcije — cijela slika stane u kvadrat (bez rezanja)
             if (ratio > 1) {
-                sw = image.naturalHeight;
-                sx = (image.naturalWidth - sw) / 2;
+                dh = size / ratio;
             } else {
-                sh = image.naturalWidth;
-                sy = (image.naturalHeight - sh) / 2;
+                dw = size * ratio;
             }
 
-            ctx.drawImage(image, sx, sy, sw, sh, px, py, size, size);
+            const dx = px + (size - dw) / 2;
+            const dy = py + (size - dh) / 2;
+
+            ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, dx, dy, dw, dh);
             ctx.restore();
             return;
         }
@@ -188,7 +188,7 @@
                 part.x,
                 part.y,
                 index === 0 ? "#d44f34" : "#e58c6d",
-                index === 0 ? 1 : 4
+                index === 0 ? 2 : 4
             );
 
             if (index === 0) {
@@ -199,7 +199,7 @@
         });
 
         if (food) {
-            drawSquareImage(currentDinosaurImage, food.x, food.y, "#4c9b43", 1);
+            drawSquareImage(currentDinosaurImage, food.x, food.y, "#4c9b43", 2);
         }
     }
 
