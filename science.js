@@ -8,6 +8,26 @@
         document.head.appendChild(script);
     }
 
+    function addScienceIsCollective() {
+        if (document.getElementById("science-is-collective")) return;
+
+        const theorySection = document.getElementById("what-theory-means");
+        if (!theorySection) return;
+
+        const section = document.createElement("section");
+        section.className = "paper";
+        section.id = "science-is-collective";
+        section.innerHTML = `
+            <h2>jedno ime uz otkriće nije cijela priča</h2>
+            <p>U udžbenicima je praktično napisati jedno prezime uz zakon, jednadžbu ili otkriće, ali stvarna znanost skoro nikad ne izgleda kao priča u kojoj se jedan genij probudi i sam izmisli cijelo područje. Netko napravi ranije mjerenje, netko smisli bolji eksperiment, netko razvije matematiku koja to može opisati, a onda drugi ljudi godinama provjeravaju gdje ideja radi i gdje puca.</p>
+            <p>Zato je bolje gledati znanost kao <strong>lanac nadogradnji</strong>. Čak i kad jedno ime ostane najpoznatije, iza rezultata obično stoje tuđi radovi, instrumenti, podaci, kritike i ponovljeni eksperimenti. Dobra ideja ne postaje prihvaćena zato što ju je rekao poznati znanstvenik, nego zato što je drugi ljudi mogu provjeriti i dobiti rezultate koji drže vodu.</p>
+            <p>To isto znači da je normalno da se zasluge dijele, da se ista ideja pojavi kod više ljudi približno u isto vrijeme i da kasniji rad popravi raniji. To nije znak da je netko automatski "ukrao" ideju; često je samo znak da se puno ljudi bavilo istim problemom i gradilo na već postojećem znanju.</p>
+            <p class="deep-source"><a href="https://www.nationalacademies.org/read/25303/chapter/5" target="_blank" rel="noopener noreferrer">National Academies – Science Is a Communal Enterprise ↗</a> · <a href="https://www.aps.org/about/governance/statements/what-is-science" target="_blank" rel="noopener noreferrer">American Physical Society – What is Science? ↗</a></p>
+        `;
+
+        theorySection.insertAdjacentElement("afterend", section);
+    }
+
     function addChernobylDoseDetails() {
         const section = document.getElementById("radiation-risk-scale");
         if (!section || document.getElementById("chernobyl-dose-detail")) return;
@@ -61,6 +81,7 @@
 
     loadScript("/science-core.js", () => {
         loadScript("/physics-extra.js", () => {
+            addScienceIsCollective();
             addChernobylDoseDetails();
             loadScript("/anthro-extra.js");
         });
