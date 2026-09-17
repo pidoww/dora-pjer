@@ -43,49 +43,99 @@
                     <figcaption>Raspberry Pi 5 — reprezentativna fotografija hardvera. Wikimedia Commons; licenca je navedena na izvornoj file-stranici.</figcaption>
                 </figure>
 
-                <p>Srce homelaba je <strong>Raspberry Pi 5 s 8 GB RAM-a</strong>. Setup je nastao kao ozbiljniji self-hosted NAS/VPN projekt, a ne samo kao „disk spojen na Pi”. Sustav je kroz vrijeme uključio Raspberry Pi OS Lite 64-bit, OpenMediaVault 7, Samba/SMB, dva vanjska HDD-a, OpenVPN/PiVPN, DuckDNS, systemd automatizaciju, e-mail obavijesti i 3D-printano kućište/modelirano u Fusion 360.</p>
+                <p>Srce homelaba je <strong>Raspberry Pi 5 s 8 GB RAM-a</strong>. Projekt je krenuo kao kućni NAS, ali se s vremenom pretvorio u mali self-hosted server: storage, SMB file sharing, udaljeni pristup preko VPN-a, HTTPS administracija, automatizacija i nadzor događaja.</p>
 
                 <div class="project-facts">
-                    <div><strong>Pi:</strong> Raspberry Pi 5, 8 GB</div>
-                    <div><strong>OS:</strong> Raspberry Pi OS Lite 64-bit</div>
-                    <div><strong>NAS:</strong> OpenMediaVault 7</div>
+                    <div><strong>platforma:</strong> Raspberry Pi 5, 8 GB</div>
+                    <div><strong>NAS sloj:</strong> OpenMediaVault</div>
                     <div><strong>file sharing:</strong> Samba / SMB</div>
                     <div><strong>diskovi:</strong> oko 1.8 TB + 916 GB</div>
                     <div><strong>shareovi:</strong> BLACK + BLUE</div>
                     <div><strong>remote access:</strong> PiVPN / OpenVPN</div>
-                    <div><strong>DDNS:</strong> DuckDNS</div>
-                    <div><strong>VPN port:</strong> UDP 52873 u završnom setupu</div>
-                    <div><strong>automatizacija:</strong> systemd servisi/timeri + hook skripte</div>
+                    <div><strong>VPN transport:</strong> custom UDP port</div>
+                    <div><strong>admin:</strong> OMV web UI preko HTTPS-a</div>
+                    <div><strong>automatizacija:</strong> systemd + hook skripte</div>
+                    <div><strong>obavijesti:</strong> SMTP / e-mail event logovi</div>
                 </div>
 
-                <h3>što se događa kada pristupaš serveru izvana</h3>
+                <h3>arhitektura: što je javno, a što ostaje iza VPN-a</h3>
                 <pre class="project-diagram">internet
    │
    ▼
-router / javna IP + DuckDNS ime
+router / javna IP
    │
-   │  proslijeđen je VPN port, ne SMB/OMV prema internetu
+   │  NAT + port-forward samo za VPN servis
    ▼
 Raspberry Pi 5
    │
-   ├── OpenVPN / PiVPN ── šifrirani tunel
+   ├── OpenVPN / PiVPN
+   │      │
+   │      └── šifrirani tunel prema kućnom LAN-u
    │
-   ├── OpenMediaVault 7 ── administracija storagea
+   ├── OpenMediaVault web admin ── nije direktno izložen internetu
+   ├── Samba / SMB shareovi ────── nisu direktno izloženi internetu
+   ├── disk 1 ── BLACK
+   ├── disk 2 ── BLUE
+   └── systemd / hookovi / SMTP obavijesti</pre>
+
+                <p>Bitna odluka u dizajnu je da se <strong>SMB i OMV admin ne objavljuju izravno na internetu</strong>. Izvana je dostupan VPN endpoint; nakon uspješne VPN autentikacije klijent dobiva put prema privatnoj mreži i tek tada pristupa serveru kao lokalnom uređaju. Time se broj javno izloženih servisa smanjuje na minimum.</p>
+
+                <h3>NAT i port forwarding</h3>
+                <p>Kućni uređaji koriste privatne IP adrese koje internet sam po sebi ne routa. Router radi NAT — Network Address Translation — i prema internetu predstavlja cijelu lokalnu mrežu jednom javnom adresom. Dolazni paket s interneta zato ne zna automatski kojem lokalnom uređaju pripada.</p>
+                <p>Port forwarding dodaje eksplicitno pravilo: promet za odabrani VPN UDP port prosljeđuje se Raspberry Piju. To pravilo ne znači da je cijeli Pi „otvoren internetu”; javno je dostupan samo servis koji sluša na proslijeđenom portu.</p>
+
+                <h3>što OpenVPN zapravo radi</h3>
+                <p>OpenVPN između klijenta i Raspberry Pija uspostavlja autentificirani i šifrirani tunel. Operacijski sustav dobije virtualni mrežni interfejs, a IP paketi namijenjeni kućnoj mreži ulaze u taj virtualni interfejs, kriptiraju se, šalju kroz internet i na VPN serveru ponovno izlaze kao normalan mrežni promet.</p>
+                <pre class="project-diagram">laptop / mobitel
    │
-   ├── Samba / SMB ─────── BLACK + BLUE
+   │  privatni IP paket: "želim 192.168.x.x"
+   ▼
+virtualni VPN interfejs
    │
-   └── systemd + msmtp ─── automatizacija / obavijesti</pre>
+   │  enkripcija + autentikacija
+   ▼
+internet
+   │
+   ▼
+OpenVPN na Raspberry Piju
+   │
+   │  dekripcija
+   ▼
+kućni LAN / OMV / Samba</pre>
 
-                <h3>zašto VPN i HTTPS rješavaju različite probleme</h3>
-                <p>VPN stvara privatnu mrežnu putanju prema kućnom LAN-u. Nakon spajanja uređaj može pristupati servisima kao da je lokalno spojen. HTTPS štiti pojedinu web sesiju — primjerice browser ↔ OMV admin. Self-signed certifikat i dalje može šifrirati promet, ali browser nema treću stranu kojoj unaprijed vjeruje da potvrdi identitet certifikata, pa zato prikazuje upozorenje.</p>
+                <p>To je važna razlika u odnosu na običan web login: VPN ne štiti samo jednu stranicu nego stvara privatni mrežni put kroz koji mogu prolaziti različiti protokoli.</p>
 
-                <h3>Samba / SMB</h3>
-                <p>Samba implementira SMB protokol na Linuxu. Na jednoj strani stoje Linux filesystem, mountovi, vlasništvo i prava; na drugoj Windows/SMB klijent vidi mrežni share. To znači da „mogu pristupiti shareu” ovisi i o Samba konfiguraciji i o dozvolama stvarnog direktorija ispod nje.</p>
+                <h3>OpenMediaVault: upravljački sloj, ne filesystem sam po sebi</h3>
+                <p>OpenMediaVault daje web sučelje za administraciju Linux storagea: diskove, mountove, korisnike, shared foldere, dozvole i servise. Pod njim i dalje postoje normalni Linux filesystemi i Linux permission model. OMV zato nije „poseban tip diska”; on organizira i konfigurira postojeće Linux storage komponente.</p>
 
-                <h3>automatizacija i obavijesti</h3>
-                <p>Projekt je imao i servisne/hook skripte koje reagiraju na događaje poput VPN spajanja/odspajanja te mogu preko msmtp/Disroot infrastrukture poslati e-mail obavijest. Time NAS nije samo storage nego mali servisni stroj s vlastitim eventovima i održavanjem.</p>
+                <h3>Samba / SMB: kako Windows vidi Linux disk kao mrežni share</h3>
+                <p>Samba implementira SMB protokol na Linuxu. Kada Windows otvori mrežni share, on ne čita ext4 ili drugi Linux filesystem izravno. Windows šalje SMB zahtjeve serveru, Samba ih prevodi u filesystem operacije na Linuxu, a zatim rezultat vraća klijentu kroz mrežu.</p>
+                <p>Zbog toga postoje najmanje dva sloja dozvola: <strong>Samba pravila</strong> i <strong>stvarne Linux dozvole</strong> nad direktorijem. Ako jedan sloj dopušta pristup, a drugi ga blokira, korisnik svejedno neće moći otvoriti podatke.</p>
 
-                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_5.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 5 ↗</a> · <a href="https://www.openmediavault.org/" target="_blank" rel="noopener noreferrer">OpenMediaVault ↗</a> · <a href="https://openvpn.net/" target="_blank" rel="noopener noreferrer">OpenVPN ↗</a></p>
+                <h3>HTTPS na OMV-u i zašto browser može reći „nije sigurno” iako je promet šifriran</h3>
+                <p>HTTPS daje TLS enkripciju između browsera i OMV web servera. Kod self-signed certifikata enkripcija može biti potpuno stvarna, ali browser nema javni Certificate Authority kojem vjeruje i koji jamči da je taj certifikat stvarno izdao baš tvoj server.</p>
+                <p>Zato upozorenje browsera u tom slučaju najčešće znači <strong>„identitet certifikata nije potvrđen kroz moj trust store”</strong>, a ne automatski <strong>„promet ide plaintextom”</strong>. Ako certifikat ručno vjeruješ na svom uređaju ili koristiš vlastiti lokalni CA, warning se može ukloniti bez izlaganja admin sučelja javnom internetu.</p>
+
+                <h3>zašto VPN + HTTPS zajedno imaju smisla</h3>
+                <p>VPN i HTTPS nisu duplikat iste zaštite. VPN kontrolira <strong>tko uopće može doći do privatnog servisa i kojim mrežnim putem</strong>; HTTPS štiti <strong>konkretnu web sesiju</strong> i potvrđuje identitet servera kada je certifikat pravilno trusted. Obrambeni slojevi se zato nadopunjuju.</p>
+
+                <h3>heartbeat sustava: systemd, hookovi i obavijesti</h3>
+                <p>Na serveru se mogu vezati systemd servisi/timeri i OpenVPN hook skripte uz određene događaje: start/stop servisa, VPN connect/disconnect, periodične provjere ili druge administrativne događaje. Skripta zatim može zapisati event u log ili poslati e-mail kroz SMTP relay.</p>
+                <p>To daje jednostavan audit trail bez potrebe da stalno ručno gledaš server: ako se dogodi događaj koji si odlučio pratiti, server sam ostavlja trag ili šalje obavijest.</p>
+
+                <h3>security model ovog setupa</h3>
+                <ul class="bad-list">
+                    <li><strong>minimalno izlaganje:</strong> javno je potreban samo VPN endpoint; SMB i OMV ostaju privatni.</li>
+                    <li><strong>enkripcija u tranzitu:</strong> udaljeni promet ide kroz VPN, a OMV web UI dodatno koristi HTTPS.</li>
+                    <li><strong>autentikacija:</strong> pristup VPN-u i pristup shareovima nisu ista vjerodajnica ni isti sloj.</li>
+                    <li><strong>least privilege:</strong> share korisnik treba samo prava koja stvarno koristi, ne nepotrebni admin pristup.</li>
+                    <li><strong>patching:</strong> sigurnost ovisi i o redovnom ažuriranju OS-a, OpenVPN-a, OMV-a i ostalih servisa.</li>
+                    <li><strong>backup:</strong> RAID, više diskova ili NAS sami po sebi nisu backup; važni podaci trebaju odvojenu kopiju.</li>
+                </ul>
+
+                <p class="small-text">homelab nije „siguran zato što je Raspberry Pi”. siguran je samo onoliko koliko su dobri mrežni dizajn, konfiguracija, credentiali, updateovi i backup strategija.</p>
+
+                <p class="deep-source"><a href="https://commons.wikimedia.org/wiki/File:Raspberry_Pi_5.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons – Raspberry Pi 5 ↗</a> · <a href="https://www.openmediavault.org/" target="_blank" rel="noopener noreferrer">OpenMediaVault ↗</a> · <a href="https://www.samba.org/" target="_blank" rel="noopener noreferrer">Samba ↗</a> · <a href="https://openvpn.net/" target="_blank" rel="noopener noreferrer">OpenVPN ↗</a></p>
             </div>
         </details>
 
