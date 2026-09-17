@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="mystyle.css">
     <link rel="stylesheet" href="extras.css">
     <link rel="stylesheet" href="deep.css">
+    <link rel="stylesheet" href="snake-mobile.css">
 </head>
 <body class="game-page">
     <header class="top">
@@ -34,7 +35,10 @@
             <div class="game-layout">
                 <div class="game-board-column">
                     <canvas id="snake" width="560" height="560" aria-label="Dora skuplja dinosaure igra"></canvas>
-                    <p class="game-help">strelice / WASD · na mobitelu tipke ili swipe po ploči · Enter za restart nakon game overa</p>
+                    <p class="game-help">
+                        <span class="desktop-game-help">strelice / WASD · Enter za restart nakon game overa</span>
+                        <span class="mobile-game-help">swipe po ploči ili koristi tipke ispod</span>
+                    </p>
                 </div>
 
                 <aside class="game-reward-rail" aria-live="polite">
@@ -47,11 +51,11 @@
                 </aside>
             </div>
 
-            <div class="game-controls" aria-label="kontrole">
-                <button class="up" data-dir="up" type="button">↑</button>
-                <button class="left" data-dir="left" type="button">←</button>
-                <button class="down" data-dir="down" type="button">↓</button>
-                <button class="right" data-dir="right" type="button">→</button>
+            <div class="game-controls" aria-label="kontrole za mobitel">
+                <button class="up" data-dir="up" type="button" aria-label="gore">↑</button>
+                <button class="left" data-dir="left" type="button" aria-label="lijevo">←</button>
+                <button class="down" data-dir="down" type="button" aria-label="dolje">↓</button>
+                <button class="right" data-dir="right" type="button" aria-label="desno">→</button>
             </div>
 
             <div class="button-row" style="justify-content:center;">
